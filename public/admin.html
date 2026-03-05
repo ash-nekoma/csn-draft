@@ -253,6 +253,10 @@
                         <div style="grid-column: span 4; display: flex; gap: 20px;">
                             <button class="btn-primary" style="flex:1; font-size: 1.1rem; border-color:var(--text-main); color:white;" onclick="openModal('global-update-modal')"><i class="fas fa-bullhorn"></i> SEND GLOBAL UPDATE</button>
                             <button class="btn-primary" style="flex:1; font-size: 1.1rem; border-color: var(--credits); color: var(--credits);" onclick="openModal('direct-gift-modal')"><i class="fas fa-gift"></i> DIRECT GIFT CREDITS</button>
+                            
+                            <button class="btn-primary" style="flex:1; font-size: 1.1rem; border-color: var(--danger); color: var(--danger); background: rgba(255, 51, 102, 0.1);" onclick="forceResetPvp()">
+                                <i class="fas fa-skull"></i> FORCE RESET PVP
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -697,6 +701,15 @@
             document.getElementById('confirm-msg').innerText = message;
             document.getElementById('confirm-action-btn').style.display = 'none'; 
             openModal('snt-confirm-modal');
+        }
+
+        // NEW: FORCE RESET PVP ARENA FUNCTION
+        function forceResetPvp() {
+            showSNTConfirm(
+                "RESET PVP ARENA", 
+                "Are you sure you want to forcefully reset the PVP Arena? This will kick any seated players, refund their escrowed TC, and clear the board.", 
+                () => { socket.emit('adminAction', { type: 'forceResetArena' }); }
+            );
         }
 
         // LIGHTBOX TRIGGER
