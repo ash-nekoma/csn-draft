@@ -81,16 +81,27 @@ async function deductBet(user, betAmount) {
     return { success: true, fromPlayable, fromMain };
 }
 
+
+
 // ==========================================
-// MONGODB SETUP
+// MONGODB SETUP & AUTO-HEAL
 // ==========================================
 const MONGO_URI = process.env.MONGO_URL || 'mongodb://localhost:27017/stickntrade';
 mongoose.connect(MONGO_URI)
     .then(async () => {
         console.log('✅ Connected to MongoDB Database');
+        
+        try {
+            const db = mongoose.connection.db;
+            const badJoinDates = await db.collection('users').find({ "joinDate.$date": { $exists: true } }).toArray();
+            for (let u of badJoinDates) { await db.collection('users').updateOne({ _id: u._id }, { $set: { joinDate: new Date(u.joinDate.$date) } }); }
+            const badDaily = await db.collection('users').find({ "dailyReward.lastClaim.$date": { $exists: true } }).toArray();
+            for (let u of badDaily) { await db.collection('users').updateOne({ _id: u._id }, { $set: { "dailyReward.lastClaim": new Date(u.dailyReward.lastClaim.$date) } }); }
+        } catch (healErr) { console.error("Auto-heal skipped.", healErr); }
+
         const adminExists = await User.findOne({ username: 'admin' });
         if (!adminExists) {
-            await new User({ username: 'admin', password: 'Kenm44ashley', role: 'Admin', credits: 10000, playableCredits: 0 }).save();
+            await new User({ username: 'admin', password: process.env.ADMIN_PASS || 'Kenm44ashley', role: 'Admin', credits: 10000, playableCredits: 0 }).save();
             console.log('🛡️ Default Admin Account Created');
         }
     })
@@ -105,6 +116,7 @@ const userSchema = new mongoose.Schema({
     playableCredits: { type: Number, default: 0 }, 
     status: { type: String, default: 'Offline' },
     ipAddress: { type: String, default: 'Unknown' },
+    streak: { type: Number, default: 0 }, // NEW: Streak Tracking
     joinDate: { type: Date, default: Date.now },
     dailyReward: { lastClaim: { type: Date, default: null }, streak: { type: Number, default: 0 } }
 });
@@ -136,7 +148,7 @@ const AdminLog = mongoose.model('AdminLog', adminLogSchema);
 // ENGINE & STATS
 // ==========================================
 let rooms = { baccarat: 0, perya: 0, dt: 0, sicbo: 0, duel: 0 };
-let sharedTables = { time: 15, status: 'BETTING', bets: [] };
+let sharedTables = { time: 10, status: 'BETTING', bets: [] }; // UPDATED: 10-Second Loop
 let connectedUsers = {}; 
 
 let globalResults = { baccarat: [], perya: [], dt: [], sicbo: [], d20: [], coinflip: [], blackjack: [] }; 
@@ -193,16 +205,15 @@ function getBJScore(hand) {
 // DUEL ARENA ENGINE
 // ==========================================
 let arena = {
-    p1: null, p2: null, // { uid, username, socketId }
+    p1: null, p2: null, 
     target: 1, p1Score: 0, p2Score: 0,
-    game: 'dice', turn: 1, state: 'WAITING', // WAITING, PLAYING, ENDED
-    tempData: {}, bets: [] // { userId, username, betOn: 1|2, amount, fromPlayable, fromMain }
+    game: 'dice', turn: 1, state: 'WAITING',
+    tempData: {}, bets: []
 };
 
 function syncArena() { io.to('duel').emit('arenaSync', arena); }
 
 async function resetArenaFull() {
-    // Refund active bets if reset forcefully before match finishes
     if(arena.bets.length > 0) {
         for (let b of arena.bets) { await User.findByIdAndUpdate(b.userId, { $inc: { playableCredits: b.fromPlayable, credits: b.fromMain } }); }
     }
@@ -236,7 +247,7 @@ process.on('SIGTERM', gracefulShutdown);
 process.on('SIGINT', gracefulShutdown);
 
 // ==========================================
-// SHARED TABLES LOOP
+// SHARED TABLES LOOP (10-Second Fast Action)
 // ==========================================
 setInterval(() => {
     if (sharedTables.status === 'BETTING') {
@@ -320,15 +331,31 @@ setInterval(() => {
 
                 let roomNames = { 'perya': 'Color Game', 'dt': 'Dragon Tiger', 'sicbo': 'Sic Bo', 'baccarat': 'Baccarat' };
 
-                // ATOMIC $inc OPERATOR
+                // ATOMIC UPDATE & STREAK LOGIC
                 Object.keys(playerStats).forEach(async (userId) => {
                     let st = playerStats[userId];
-                    if (st.amountWon > 0) {
-                        await User.findByIdAndUpdate(userId, { $inc: { credits: formatTC(st.amountWon) } });
-                    }
+                    let isWin = st.amountWon > st.amountBet;
                     let net = formatTC(st.amountWon - st.amountBet);
+                    
+                    let updateData = { $inc: {} };
+                    if (st.amountWon > 0) updateData.$inc.credits = formatTC(st.amountWon);
+                    if (isWin) updateData.$inc.streak = 1; else updateData.$set = { streak: 0 };
+                    
+                    await User.findByIdAndUpdate(userId, updateData);
+
+                    // BIG WIN TOAST
+                    if (st.amountWon >= 5000) {
+                        io.emit('silentNotification', { id: Date.now(), title: '🎉 MASSIVE WIN!', msg: `${st.username} just won ${formatTC(st.amountWon)} TC on ${roomNames[st.room]}!`, date: new Date() });
+                    }
+
                     if (net !== 0) {
                         await new CreditLog({ username: st.username, action: 'GAME', amount: net, details: roomNames[st.room] }).save();
+                    }
+
+                    let updatedUser = await User.findById(userId);
+                    let targetSocketId = connectedUsers[updatedUser.username];
+                    if (targetSocketId) {
+                        io.to(targetSocketId).emit('balanceUpdateData', { credits: updatedUser.credits, playable: updatedUser.playableCredits });
                     }
                 });
 
@@ -342,12 +369,12 @@ setInterval(() => {
             }, 500);
 
             setTimeout(() => {
-                sharedTables.time = 15;
+                sharedTables.time = 10; // RESET TO 10 SECONDS
                 sharedTables.status = 'BETTING';
                 sharedTables.bets = [];
                 io.emit('newRound'); 
                 pushAdminData();
-            }, 9000); 
+            }, 7500); 
         }
     }
 }, 1000);
@@ -368,10 +395,7 @@ async function pushAdminData(targetSocket = null) {
         const adminLogs = await AdminLog.find().sort({ date: -1 }).limit(100);
 
         let payload = { 
-            users, 
-            transactions: txs, 
-            giftBatches: gcs, 
-            adminLogs,
+            users, transactions: txs, giftBatches: gcs, adminLogs,
             stats: { economy: totalEconomy, approvedDeposits: formatTC(approvedDeposits), limit: 2000000, houseProfit: houseProfit24h } 
         };
 
@@ -380,6 +404,8 @@ async function pushAdminData(targetSocket = null) {
         
     } catch(e) { console.error(e); }
 }
+
+
 
 // ==========================================
 // CLIENT SOCKET COMMUNICATION
@@ -391,6 +417,7 @@ io.on('connection', (socket) => {
     socket.isSharedBetting = false;
     socket.isCashier = false;
     socket.isAuth = false;
+    socket.lastBetTime = 0; // ANTI-CHEAT INITIALIZATION
 
     socket.on('requestBalanceRefresh', async () => {
         if(socket.user) {
@@ -425,6 +452,11 @@ io.on('connection', (socket) => {
 
     // --- SOLO GAMES ENGINE ---
     socket.on('playSolo', async (data) => {
+        // ANTI-CHEAT 150MS COOLDOWN
+        const now = Date.now();
+        if (now - socket.lastBetTime < 150) return;
+        socket.lastBetTime = now;
+
         if (!socket.user || socket.isBetting || !checkRateLimit(socket.id)) return;
         socket.isBetting = true;
 
@@ -489,9 +521,7 @@ io.on('connection', (socket) => {
                 if (win) { payout = formatTC(data.bet * multiplier); gameStats.d20.Win++; } 
                 else { gameStats.d20.Lose++; }
                 
-                if (payout > 0) {
-                    await User.findByIdAndUpdate(socket.user._id, { $inc: { credits: payout } });
-                }
+                if (payout > 0) { await User.findByIdAndUpdate(socket.user._id, { $inc: { credits: payout } }); }
                 await new CreditLog({ username: user.username, action: 'GAME', amount: formatTC(payout - data.bet), details: `D20` }).save();
                 
                 let updatedUser = await User.findById(socket.user._id);
@@ -507,9 +537,7 @@ io.on('connection', (socket) => {
                 gameStats.coinflip[result]++;
                 if (data.choice === result) payout = formatTC(data.bet * 1.95);
                 
-                if (payout > 0) {
-                    await User.findByIdAndUpdate(socket.user._id, { $inc: { credits: payout } });
-                }
+                if (payout > 0) { await User.findByIdAndUpdate(socket.user._id, { $inc: { credits: payout } }); }
                 await new CreditLog({ username: user.username, action: 'GAME', amount: formatTC(payout - data.bet), details: `Coin Flip` }).save();
                 
                 let updatedUser = await User.findById(socket.user._id);
@@ -623,10 +651,14 @@ io.on('connection', (socket) => {
         socket.join(room); socket.currentRoom = room; rooms[room]++; 
         io.emit('playerCount', rooms); 
         
-        // Push current Arena state if joining Duel
         if(room === 'duel') {
             socket.emit('arenaSync', arena);
         }
+    });
+
+    socket.on('getRoomPlayers', async (room) => {
+        const players = await User.find({ status: 'Active' });
+        socket.emit('roomPlayersData', players.map(p => ({ username: p.username, streak: p.streak || 0 })));
     });
     
     socket.on('leaveRoom', (room) => { 
@@ -635,14 +667,21 @@ io.on('connection', (socket) => {
         io.emit('playerCount', rooms); 
     });
     
-    socket.on('sendChat', (data) => { 
+    socket.on('sendChat', async (data) => { 
         if (socket.user && socket.currentRoom) { 
             let safeText = sanitizeHTML(data.msg);
-            io.to(socket.currentRoom).emit('chatMessage', { user: socket.user.username, text: safeText, sys: false }); 
+            const user = await User.findById(socket.user._id);
+            const streakIcon = (user && user.streak >= 3) ? '🔥 ' : '';
+            io.to(socket.currentRoom).emit('chatMessage', { user: streakIcon + socket.user.username, text: safeText, sys: false }); 
         } 
     });
     
     socket.on('placeSharedBet', async (data) => {
+        // ANTI-CHEAT 150MS COOLDOWN
+        const now = Date.now();
+        if (now - socket.lastBetTime < 150) return;
+        socket.lastBetTime = now;
+
         if (!socket.user || sharedTables.status !== 'BETTING') return;
         if (socket.isSharedBetting) return;
         socket.isSharedBetting = true;
@@ -731,7 +770,6 @@ io.on('connection', (socket) => {
     socket.on('arenaTakeSeat', (playerIndex) => {
         if(!socket.user || arena.state !== 'WAITING') return;
 
-        // Prevent taking both seats
         if(arena.p1 && arena.p1.uid === socket.user._id.toString()) return;
         if(arena.p2 && arena.p2.uid === socket.user._id.toString()) return;
 
@@ -744,7 +782,6 @@ io.on('connection', (socket) => {
 
         if(arena.p1 && arena.p2) {
             arena.state = 'PLAYING';
-            // Setup initial game states
             if(arena.game === 'ttt') arena.tempData.bd = Array(9).fill(null);
             if(arena.game === 'hl') arena.tempData.curr = getSecureRNG(1,13);
 
@@ -754,7 +791,6 @@ io.on('connection', (socket) => {
     });
 
     socket.on('arenaSetParams', (data) => {
-        // Only allow changes if waiting
         if(arena.state !== 'WAITING') return;
         if(data.game) arena.game = data.game;
         if(data.target) arena.target = parseInt(data.target);
@@ -773,12 +809,7 @@ io.on('connection', (socket) => {
         await User.findByIdAndUpdate(socket.user._id, { $inc: { playableCredits: -deduction.fromPlayable, credits: -deduction.fromMain }});
         
         arena.bets.push({ 
-            userId: user._id, 
-            username: user.username, 
-            betOn: data.playerIndex, 
-            amount: amt, 
-            fromPlayable: deduction.fromPlayable, 
-            fromMain: deduction.fromMain 
+            userId: user._id, username: user.username, betOn: data.playerIndex, amount: amt, fromPlayable: deduction.fromPlayable, fromMain: deduction.fromMain 
         });
         
         let updatedUser = await User.findById(socket.user._id);
@@ -797,9 +828,7 @@ io.on('connection', (socket) => {
             io.to('duel').emit('arenaAnim', { event: 'matchOver', winner: matchWinner });
             setTimeout(resetArenaFull, 5000);
         } else {
-            // Next round
-            arena.tempData = {};
-            arena.turn = 1;
+            arena.tempData = {}; arena.turn = 1;
             if(arena.game === 'ttt') arena.tempData.bd = Array(9).fill(null);
             if(arena.game === 'hl') arena.tempData.curr = getSecureRNG(1,13);
             io.to('duel').emit('arenaAnim', { event: 'roundReset' });
@@ -812,11 +841,9 @@ io.on('connection', (socket) => {
         
         let isP1 = arena.p1 && arena.p1.uid === socket.user._id.toString();
         let isP2 = arena.p2 && arena.p2.uid === socket.user._id.toString();
-        if(!isP1 && !isP2) return; // Spectators cannot play
+        if(!isP1 && !isP2) return; 
 
         let pNum = isP1 ? 1 : 2;
-
-        // Verify turn (except for RPS which is simultaneous locking)
         if(arena.game !== 'rps' && arena.turn !== pNum) return;
 
         if (arena.game === 'dice') {
@@ -825,48 +852,34 @@ io.on('connection', (socket) => {
             io.to('duel').emit('arenaAnim', { event: 'diceRoll', player: pNum, roll: roll });
             
             if(pNum === 1) {
-                arena.tempData.p1Roll = total;
-                arena.turn = 2;
+                arena.tempData.p1Roll = total; arena.turn = 2;
                 setTimeout(syncArena, 2000);
             } else {
-                let p1 = arena.tempData.p1Roll;
-                let p2 = total;
+                let p1 = arena.tempData.p1Roll; let p2 = total;
                 setTimeout(() => {
-                    if(p1 > p2) awardArenaPoint(1);
-                    else if(p2 > p1) awardArenaPoint(2);
-                    else {
-                        // Draw
-                        arena.tempData = {}; arena.turn = 1;
-                        setTimeout(syncArena, 1500);
-                    }
+                    if(p1 > p2) awardArenaPoint(1); else if(p2 > p1) awardArenaPoint(2);
+                    else { arena.tempData = {}; arena.turn = 1; setTimeout(syncArena, 1500); }
                 }, 2000);
             }
         } 
         else if (arena.game === 'coin') {
-            // P1/P2 calls, flip happens
             let isHeads = Math.random() < 0.5;
             let res = isHeads ? 'H' : 'T';
             io.to('duel').emit('arenaAnim', { event: 'coinFlip', player: pNum, call: data.choice, result: res });
             setTimeout(() => {
                 if(data.choice === res) awardArenaPoint(pNum);
-                else {
-                    arena.turn = pNum === 1 ? 2 : 1;
-                    setTimeout(syncArena, 1500);
-                }
+                else { arena.turn = pNum === 1 ? 2 : 1; setTimeout(syncArena, 1500); }
             }, 3000);
         }
         else if (arena.game === 'hl') {
             let next = getSecureRNG(1,13);
-            while(next === arena.tempData.curr) next = getSecureRNG(1,13); // No ties
+            while(next === arena.tempData.curr) next = getSecureRNG(1,13); 
             let win = (next > arena.tempData.curr && data.choice === 'high') || (next < arena.tempData.curr && data.choice === 'low');
             arena.tempData.curr = next;
             io.to('duel').emit('arenaAnim', { event: 'hlDraw', player: pNum, nextCard: next, win: win });
             setTimeout(() => {
                 if(win) awardArenaPoint(pNum);
-                else {
-                    arena.turn = pNum === 1 ? 2 : 1;
-                    setTimeout(syncArena, 1500);
-                }
+                else { arena.turn = pNum === 1 ? 2 : 1; setTimeout(syncArena, 1500); }
             }, 2000);
         }
         else if (arena.game === 'roulette') {
@@ -875,16 +888,12 @@ io.on('connection', (socket) => {
             io.to('duel').emit('arenaAnim', { event: 'rouletteSpin', player: pNum, result: res });
             setTimeout(() => {
                 if(data.choice === res) awardArenaPoint(pNum);
-                else {
-                    arena.turn = pNum === 1 ? 2 : 1;
-                    setTimeout(syncArena, 1500);
-                }
+                else { arena.turn = pNum === 1 ? 2 : 1; setTimeout(syncArena, 1500); }
             }, 3500);
         }
         else if (arena.game === 'rps') {
             if(pNum === 1) {
-                arena.tempData.p1 = data.choice;
-                arena.turn = 2; // For UI to show P2 turn
+                arena.tempData.p1 = data.choice; arena.turn = 2; 
                 io.to('duel').emit('arenaAnim', { event: 'rpsLock', player: 1 });
                 setTimeout(syncArena, 1000);
             } else {
@@ -893,43 +902,30 @@ io.on('connection', (socket) => {
                 setTimeout(() => {
                     let p1 = arena.tempData.p1; let p2 = arena.tempData.p2;
                     let w = 0;
-                    if(p1 !== p2) {
-                        if((p1==='R'&&p2==='S')||(p1==='P'&&p2==='R')||(p1==='S'&&p2==='P')) w = 1;
-                        else w = 2;
-                    }
+                    if(p1 !== p2) { if((p1==='R'&&p2==='S')||(p1==='P'&&p2==='R')||(p1==='S'&&p2==='P')) w = 1; else w = 2; }
                     io.to('duel').emit('arenaAnim', { event: 'rpsSolve', p1: p1, p2: p2, winner: w });
                     setTimeout(() => {
-                        if(w) awardArenaPoint(w);
-                        else { arena.tempData = {}; arena.turn = 1; setTimeout(syncArena, 1500); }
+                        if(w) awardArenaPoint(w); else { arena.tempData = {}; arena.turn = 1; setTimeout(syncArena, 1500); }
                     }, 2500);
                 }, 1000);
             }
         }
         else if (arena.game === 'ttt') {
-            let bd = arena.tempData.bd;
-            let idx = data.index;
+            let bd = arena.tempData.bd; let idx = data.index;
             if(bd[idx] !== null) return;
-            let s = pNum === 1 ? 'X' : 'O';
-            bd[idx] = s;
+            let s = pNum === 1 ? 'X' : 'O'; bd[idx] = s;
             io.to('duel').emit('arenaAnim', { event: 'tttMove', index: idx, symbol: s });
             
             const w = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
             let won = w.some(c => bd[c[0]]===s && bd[c[1]]===s && bd[c[2]]===s);
             
-            if(won) {
-                setTimeout(() => awardArenaPoint(pNum), 1000);
-            } else if(!bd.includes(null)) {
-                // Draw
+            if(won) { setTimeout(() => awardArenaPoint(pNum), 1000); } 
+            else if(!bd.includes(null)) {
                 setTimeout(() => {
-                    arena.tempData.bd = Array(9).fill(null);
-                    arena.turn = 1;
-                    io.to('duel').emit('arenaAnim', { event: 'tttDraw' });
-                    setTimeout(syncArena, 1500);
+                    arena.tempData.bd = Array(9).fill(null); arena.turn = 1;
+                    io.to('duel').emit('arenaAnim', { event: 'tttDraw' }); setTimeout(syncArena, 1500);
                 }, 1000);
-            } else {
-                arena.turn = pNum === 1 ? 2 : 1;
-                setTimeout(syncArena, 500);
-            }
+            } else { arena.turn = pNum === 1 ? 2 : 1; setTimeout(syncArena, 500); }
         }
     });
 
@@ -1297,7 +1293,8 @@ io.on('connection', (socket) => {
     });
 
     socket.on('getGlobalResults', (game) => {
-        socket.emit('globalResultsData', { game: game, results: globalResults[game] || [], stats: gameStats[game] || { total: 0 } });
+        let statsData = gameStats[game] || { total: 0 };
+        socket.emit('globalResultsData', { game: game, results: globalResults[game] || [], stats: statsData });
     });
 
     socket.on('disconnect', async () => {
@@ -1307,14 +1304,11 @@ io.on('connection', (socket) => {
             await User.findByIdAndUpdate(socket.user._id, { status: 'Offline' }); 
             delete connectedUsers[socket.user.username];
 
-            // Free Arena Seat if user disconnects
             if(arena.p1 && arena.p1.uid === socket.user._id.toString()) {
-                arena.p1 = null;
-                resetArenaFull();
+                arena.p1 = null; resetArenaFull();
             }
             if(arena.p2 && arena.p2.uid === socket.user._id.toString()) {
-                arena.p2 = null;
-                resetArenaFull();
+                arena.p2 = null; resetArenaFull();
             }
         }
         if(socket.currentRoom && rooms[socket.currentRoom] > 0) {
