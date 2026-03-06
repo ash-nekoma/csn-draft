@@ -85,6 +85,7 @@
         /* BENTO BOX GRID DASHBOARD & HOVER GLOW FIX */
         .bento-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; width: 100%; }
         .bento-item { background: rgba(0, 15, 35, 0.6); border: 1px solid var(--glass-border); padding: 30px; border-radius: 12px; display: flex; align-items: center; gap: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.7); backdrop-filter: blur(5px); transition: all 0.3s ease; cursor: pointer; }
+        /* 360-DEGREE FULL PANEL GLOW */
         .bento-item:hover { transform: translateY(-5px); border-color: var(--ps-glow); box-shadow: 0 0 25px rgba(0,162,255,0.3), inset 0 0 15px rgba(0, 162, 255, 0.15); }
         
         .bento-span-2 { grid-column: span 2; }
@@ -153,6 +154,10 @@
         .confirm-btn-container { display: flex; gap: 15px; margin-top: 25px; }
         .confirm-btn-container button { flex: 1; padding: 15px; font-size: 1.1rem; }
         .modal-error-text { color: var(--danger); font-size: 0.9rem; font-weight: bold; text-align: center; margin-bottom: 15px; min-height: 20px; }
+
+        /* LIGHTBOX UX */
+        #lightbox-modal { z-index: 10000000; cursor: zoom-out; }
+        .lightbox-img { max-width: 90vw; max-height: 90vh; border-radius: 8px; box-shadow: 0 15px 50px rgba(0,0,0,0.9); cursor: default; border: 2px solid var(--glass-border); }
 
         /* LIVE TOAST NOTIFICATIONS */
         #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999999; display: flex; flex-direction: column; gap: 10px; pointer-events: none;}
@@ -253,7 +258,6 @@
                         <div style="grid-column: span 4; display: flex; gap: 20px;">
                             <button class="btn-primary" style="flex:1; font-size: 1.1rem; border-color:var(--text-main); color:white;" onclick="openModal('global-update-modal')"><i class="fas fa-bullhorn"></i> SEND GLOBAL UPDATE</button>
                             <button class="btn-primary" style="flex:1; font-size: 1.1rem; border-color: var(--credits); color: var(--credits);" onclick="openModal('direct-gift-modal')"><i class="fas fa-gift"></i> DIRECT GIFT CREDITS</button>
-                            
                             <button class="btn-primary" style="flex:1; font-size: 1.1rem; border-color: var(--danger); color: var(--danger); background: rgba(255, 51, 102, 0.1);" onclick="forceResetPvp()">
                                 <i class="fas fa-skull"></i> FORCE RESET PVP
                             </button>
@@ -1096,14 +1100,50 @@
             });
         }
 
+        // ==========================================
+        // AGGRESSIVE ANTI-SNOOP & ANTI-CHEAT LOCKDOWN
+        // ==========================================
+        
+        // 1. Disable Right-Click (Context Menu) completely
         document.addEventListener('contextmenu', event => event.preventDefault());
-        document.onkeydown = function(e) {
-            if(e.keyCode === 123) return false; 
-            if(e.ctrlKey && e.shiftKey && e.keyCode === 'I'.charCodeAt(0)) return false; 
-            if(e.ctrlKey && e.shiftKey && e.keyCode === 'C'.charCodeAt(0)) return false; 
-            if(e.ctrlKey && e.shiftKey && e.keyCode === 'J'.charCodeAt(0)) return false; 
-            if(e.ctrlKey && e.keyCode === 'U'.charCodeAt(0)) return false; 
+
+        // 2. Disable Dragging (Prevents dragging images or text to desktop)
+        document.ondragstart = function(e) { e.preventDefault(); return false; };
+
+        // 3. Disable Text Selection (Prevents highlighting code or text)
+        document.onselectstart = function(e) {
+            if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+                e.preventDefault(); return false; 
+            }
         };
+
+        // 4. Aggressive Keyboard Shortcut Blocker (Windows & Mac)
+        document.onkeydown = function(e) {
+            // Block F12 (DevTools)
+            if(e.keyCode === 123) { e.preventDefault(); return false; }
+            
+            // Block Ctrl+Shift+I / Cmd+Option+I (Inspect DevTools)
+            if((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'I' || e.key === 'i')) { e.preventDefault(); return false; }
+            if((e.ctrlKey || e.metaKey) && e.altKey && (e.key === 'I' || e.key === 'i')) { e.preventDefault(); return false; }
+            
+            // Block Ctrl+Shift+C / Cmd+Option+C (Inspect Element)
+            if((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'C' || e.key === 'c')) { e.preventDefault(); return false; }
+            if((e.ctrlKey || e.metaKey) && e.altKey && (e.key === 'C' || e.key === 'c')) { e.preventDefault(); return false; }
+            
+            // Block Ctrl+Shift+J / Cmd+Option+J (Console)
+            if((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'J' || e.key === 'j')) { e.preventDefault(); return false; }
+            if((e.ctrlKey || e.metaKey) && e.altKey && (e.key === 'J' || e.key === 'j')) { e.preventDefault(); return false; }
+            
+            // Block Ctrl+U / Cmd+Option+U (View Source)
+            if((e.ctrlKey || e.metaKey) && (e.key === 'U' || e.key === 'u')) { e.preventDefault(); return false; }
+            
+            // Block Ctrl+S / Cmd+S (Save Webpage)
+            if((e.ctrlKey || e.metaKey) && (e.key === 'S' || e.key === 's')) { e.preventDefault(); return false; }
+            
+            // Block Ctrl+P / Cmd+P (Print Webpage)
+            if((e.ctrlKey || e.metaKey) && (e.key === 'P' || e.key === 'p')) { e.preventDefault(); return false; }
+        };
+
     </script>
 </body>
 </html>
