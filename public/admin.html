@@ -54,89 +54,42 @@
 
         /* ================= AUTHENTICATION ================= */
         #auth-container { 
-            position: fixed; 
-            top: 0; 
-            left: 0; 
-            width: 100vw; 
-            height: 100vh; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            z-index: 999999; 
-            background: #00050d; 
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
+            display: flex; justify-content: center; align-items: center; 
+            z-index: 999999; background: #00050d; 
         }
         
         .auth-box { 
-            width: 420px; 
-            background: var(--glass-bg); 
-            padding: 3rem; 
-            border-radius: 16px; 
-            border: 1px solid var(--glass-border); 
-            text-align: center; 
-            box-shadow: 0 15px 50px rgba(0,0,0,0.8); 
-            position: relative; 
-            z-index: 10; 
+            width: 420px; background: var(--glass-bg); padding: 3rem; 
+            border-radius: 16px; border: 1px solid var(--glass-border); 
+            text-align: center; box-shadow: 0 15px 50px rgba(0,0,0,0.8); 
+            position: relative; z-index: 10; 
         }
         
-        .auth-title { 
-            font-size: 2.2rem; 
-            font-weight: 900; 
-            color: white; 
-            margin-bottom: 5px; 
-            text-transform: uppercase; 
-            letter-spacing: 2px;
-        }
-        
-        .auth-sub { 
-            color: var(--danger); 
-            font-weight: 800; 
-            font-size: 1rem; 
-            letter-spacing: 3px; 
-            text-transform: uppercase; 
-            margin-bottom: 30px; 
-        }
+        .auth-title { font-size: 2.2rem; font-weight: 900; color: white; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 2px; }
+        .auth-sub { color: var(--danger); font-weight: 800; font-size: 1rem; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 30px; }
         
         .input-group { margin-bottom: 15px; text-align: left; width: 100%; }
         .input-group label { display: block; color: var(--text-muted); font-size: 0.85rem; font-weight: 800; margin-bottom: 8px; text-transform: uppercase; }
         
         .input-control { 
-            width: 100%; 
-            padding: 15px; 
-            background: rgba(0,0,0,0.5); 
-            border: 1px solid var(--glass-border); 
-            color: white; 
-            border-radius: 8px; 
-            font-size: 1.1rem; 
-            font-weight: 600; 
-            transition: 0.2s; 
-            pointer-events: auto; 
-            cursor: text; 
+            width: 100%; padding: 15px; background: rgba(0,0,0,0.5); 
+            border: 1px solid var(--glass-border); color: white; border-radius: 8px; 
+            font-size: 1.1rem; font-weight: 600; transition: 0.2s; pointer-events: auto; cursor: text; 
         }
         .input-control:focus { border-color: var(--ps-glow); background: rgba(0,0,0,0.7); box-shadow: 0 0 15px rgba(0,162,255,0.2); }
         
         select.input-control, .filter-bar select {
             appearance: none;
             background-image: url('data:image/svg+xml;utf8,<svg fill="white" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
-            background-repeat: no-repeat;
-            background-position: right 12px center;
-            padding-right: 40px !important;
-            cursor: pointer;
+            background-repeat: no-repeat; background-position: right 12px center;
+            padding-right: 40px !important; cursor: pointer;
         }
 
         .btn-primary { 
-            background: rgba(0, 162, 255, 0.15); 
-            color: var(--ps-glow); 
-            border: 1px solid var(--ps-glow); 
-            padding: 15px; 
-            width: 100%; 
-            border-radius: 8px; 
-            font-size: 1.1rem; 
-            font-weight: 900; 
-            cursor: pointer; 
-            transition: all 0.3s ease; 
-            text-transform: uppercase; 
-            letter-spacing: 1px; 
-            pointer-events: auto; 
+            background: rgba(0, 162, 255, 0.15); color: var(--ps-glow); border: 1px solid var(--ps-glow); 
+            padding: 15px; width: 100%; border-radius: 8px; font-size: 1.1rem; font-weight: 900; 
+            cursor: pointer; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 1px; pointer-events: auto; 
         }
         .btn-primary:hover { background: var(--ps-glow); color: black; transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0, 162, 255, 0.4); }
         
@@ -164,43 +117,23 @@
         .topbar h1 { font-weight: 900; font-size: 2rem; text-transform: uppercase; letter-spacing: 1px; margin: 0; }
         
         .content-area { padding: 40px; flex: 1; width: 100%; display: flex; flex-direction: column; overflow: hidden; }
-        .tab-view { flex: 1; display: flex; flex-direction: column; overflow: hidden;}
+        .tab-view { flex: 1; display: flex; flex-direction: column; overflow: hidden; overflow-y: auto; padding-right: 10px;}
 
         /* ================= BENTO BOX GRID DASHBOARD ================= */
         .bento-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; width: 100%; }
         .bento-item { 
-            background: rgba(0, 15, 35, 0.6); 
-            border: 1px solid var(--glass-border); 
-            padding: 30px; 
-            border-radius: 12px; 
-            display: flex; 
-            align-items: center; 
-            gap: 25px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.7); 
-            backdrop-filter: blur(5px); 
-            transition: all 0.3s ease; 
-            cursor: pointer; 
+            background: rgba(0, 15, 35, 0.6); border: 1px solid var(--glass-border); 
+            padding: 30px; border-radius: 12px; display: flex; align-items: center; gap: 25px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.7); backdrop-filter: blur(5px); transition: all 0.3s ease; cursor: pointer; 
         }
-        .bento-item:hover { 
-            transform: translateY(-5px); 
-            border-color: var(--ps-glow); 
-            box-shadow: 0 0 25px rgba(0,162,255,0.3), inset 0 0 15px rgba(0, 162, 255, 0.15); 
-        }
+        .bento-item:hover { transform: translateY(-5px); border-color: var(--ps-glow); box-shadow: 0 0 25px rgba(0,162,255,0.3), inset 0 0 15px rgba(0, 162, 255, 0.15); }
         
         .bento-span-2 { grid-column: span 2; }
         .bento-span-row-2 { grid-row: span 2; flex-direction: column; align-items: flex-start; justify-content: center; }
         
         .stat-icon { 
-            width: 70px; 
-            height: 70px; 
-            border-radius: 12px; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            font-size: 2.2rem; 
-            background: rgba(255,255,255,0.05); 
-            box-shadow: inset 0 0 15px rgba(255,255,255,0.02); 
-            flex-shrink:0;
+            width: 70px; height: 70px; border-radius: 12px; display: flex; justify-content: center; align-items: center; 
+            font-size: 2.2rem; background: rgba(255,255,255,0.05); box-shadow: inset 0 0 15px rgba(255,255,255,0.02); flex-shrink:0;
         }
         .stat-info h3 { color: var(--text-muted); font-size: 0.95rem; text-transform: uppercase; font-weight: 800; margin-bottom: 5px; letter-spacing: 1px;}
         .stat-info .value { font-size: 2.5rem; font-weight: 900; color: white; line-height: 1; }
@@ -209,27 +142,17 @@
 
         /* ================= DATA TABLES & PANELS ================= */
         .panel { 
-            background: var(--glass-bg); 
-            border: 1px solid var(--glass-border); 
-            border-radius: 12px; 
-            overflow: hidden; 
-            display: flex; 
-            flex-direction: column; 
-            flex: 1; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            background: var(--glass-bg); border: 1px solid var(--glass-border); 
+            border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; 
+            flex: 1; box-shadow: 0 10px 30px rgba(0,0,0,0.5); min-height: 400px;
         }
         .panel-header { 
-            padding: 20px 30px; 
-            border-bottom: 1px solid var(--glass-border); 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            background: rgba(0,0,0,0.5); 
-            flex-shrink: 0;
+            padding: 20px 30px; border-bottom: 1px solid var(--glass-border); display: flex; 
+            justify-content: space-between; align-items: center; background: rgba(0,0,0,0.5); flex-shrink: 0;
         }
         .panel-header h3 { font-weight: 900; font-size: 1.3rem; text-transform: uppercase; margin: 0; letter-spacing: 1px;}
         
-        .table-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .table-wrapper { flex: 1; display: flex; flex-direction: column; overflow: auto; }
         table { width: 100%; border-collapse: collapse; text-align: left; }
         th, td { padding: 12px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); }
         thead { background: #000a1f; position: sticky; top: 0; z-index: 10; }
@@ -351,6 +274,7 @@
                 <div class="nav-item" onclick="switchTab('users')"><i class="fas fa-users"></i> Player Database</div>
                 <div class="nav-item" onclick="switchTab('cashier')"><i class="fas fa-money-bill-transfer"></i> Cashier Logs</div>
                 <div class="nav-item" onclick="switchTab('promos')"><i class="fas fa-gift"></i> Gift Codes</div>
+                <div class="nav-item" onclick="switchTab('dealer')"><i class="fas fa-gamepad"></i> Live Game Stats</div>
                 <div class="nav-item" onclick="switchTab('audit')"><i class="fas fa-eye"></i> Audit Logs</div>
             </div>
             <div class="logout-btn" onclick="confirmLogout()">
@@ -417,7 +341,7 @@
                         <div class="panel-header"><h3>Player Database Hierarchy</h3></div>
                         <div class="filter-bar">
                             <i class="fas fa-search" style="color:var(--text-muted)"></i>
-                            <input type="text" id="filter-search" placeholder="Search by username..." style="flex:1;" onkeyup="pgUsers=1; renderUsers()">
+                            <input type="text" id="filter-search" placeholder="Search by username or IP..." style="flex:1;" onkeyup="pgUsers=1; renderUsers()">
                             <select id="filter-role" onchange="pgUsers=1; renderUsers()">
                                 <option value="All">All Roles</option>
                                 <option value="Player">Player</option>
@@ -432,6 +356,7 @@
                             <select id="filter-sort" onchange="pgUsers=1; renderUsers()">
                                 <option value="desc">Credits: High to Low</option>
                                 <option value="asc">Credits: Low to High</option>
+                                <option value="streak">Highest Streak</option>
                             </select>
                         </div>
                         <div class="table-wrapper">
@@ -440,6 +365,8 @@
                                     <tr>
                                         <th class="center-col">JOINED</th>
                                         <th class="center-col">USERNAME</th>
+                                        <th class="center-col">IP ADDRESS</th>
+                                        <th class="center-col">STREAK</th>
                                         <th class="center-col">CREDITS (TC)</th>
                                         <th class="center-col">ROLE</th>
                                         <th class="center-col">STATUS</th>
@@ -532,6 +459,15 @@
                         </div>
                         <div class="pagination" id="pag-promos"></div>
                     </div>
+                </div>
+
+                <div id="view-dealer" class="tab-view hidden">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                        <h2 style="font-weight:900; text-transform:uppercase; color:white;">Live Game Statistics</h2>
+                        <button class="btn-sm btn-edit" onclick="refreshDealerStats()" style="padding: 10px 20px;"><i class="fas fa-sync"></i> Fetch Latest Server Math</button>
+                    </div>
+                    <div class="bento-grid" id="dealer-stats-grid">
+                        </div>
                 </div>
 
                 <div id="view-audit" class="tab-view hidden">
@@ -814,8 +750,10 @@
             document.querySelectorAll('.tab-view').forEach(el => el.classList.add('hidden'));
             document.getElementById('view-' + tabId).classList.remove('hidden');
 
-            const titles = { 'dashboard': 'Dashboard Overview', 'users': 'Player Database', 'cashier': 'Cashier Logs', 'promos': 'Gift Codes', 'audit': 'Audit Logs' };
+            const titles = { 'dashboard': 'Dashboard Overview', 'users': 'Player Database', 'cashier': 'Cashier Logs', 'promos': 'Gift Codes', 'dealer': 'Live Game Statistics', 'audit': 'Audit Logs' };
             document.getElementById('page-title').innerText = titles[tabId];
+
+            if(tabId === 'dealer') { refreshDealerStats(); }
         }
 
         function openModal(id) { 
@@ -842,7 +780,6 @@
             openModal('snt-confirm-modal');
         }
 
-        // LIGHTBOX TRIGGER
         function openLightbox(url) {
             document.getElementById('lightbox-img').src = url;
             openModal('lightbox-modal');
@@ -859,12 +796,10 @@
             document.getElementById('stat-deposits').innerText = data.stats.approvedDeposits.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1});
             document.getElementById('stat-limit').innerText = data.stats.limit.toLocaleString();
             
-            // House Profit Styling
             let hp = document.getElementById('stat-profit');
             hp.innerText = data.stats.houseProfit.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1});
             hp.style.color = data.stats.houseProfit >= 0 ? "var(--success)" : "var(--danger)";
             
-            // Audio Sonar Logic
             let currentPending = gTxs.filter(t => t.status === 'Pending').length;
             document.getElementById('stat-pending').innerText = currentPending;
             if(currentPending > lastPendingCount) { playSonarPing(); }
@@ -873,6 +808,7 @@
             renderUsers(); renderTransactions(); renderPromos(); renderAuditLogs();
         });
 
+        // ================= PLAYER DATABASE ================= //
         function renderUsers() {
             const tbody = document.getElementById('users-tbody'); tbody.innerHTML = '';
             let sTerm = document.getElementById('filter-search').value.toLowerCase();
@@ -880,28 +816,34 @@
             let sFilt = document.getElementById('filter-status').value;
             let sortDir = document.getElementById('filter-sort').value;
 
-            // IP Tracking for Smurfs
+            // IP Tracking for Smurfs (Highlight IP matches)
             let ipCounts = {};
             gUsers.forEach(u => { if(u.ipAddress && u.ipAddress !== 'Unknown') { ipCounts[u.ipAddress] = (ipCounts[u.ipAddress] || 0) + 1; } });
 
             let filtered = gUsers.filter(u => {
-                if (sTerm && !u.username.toLowerCase().includes(sTerm)) return false;
+                let matchName = u.username.toLowerCase().includes(sTerm);
+                let matchIp = (u.ipAddress || '').toLowerCase().includes(sTerm);
+                if (sTerm && !matchName && !matchIp) return false;
                 if (rFilt !== 'All' && u.role !== rFilt) return false;
                 if (sFilt !== 'All' && u.status !== sFilt) return false;
                 return true;
             });
 
             filtered.sort((a, b) => {
-                const statusOrder = { 'Active': 1, 'Offline': 2, 'Banned': 3 };
-                if (statusOrder[a.status] !== statusOrder[b.status]) return statusOrder[a.status] - statusOrder[b.status];
-                let aBal = (a.credits || 0) + (a.playableCredits || 0); let bBal = (b.credits || 0) + (b.playableCredits || 0);
-                return sortDir === 'desc' ? bBal - aBal : aBal - bBal;
+                if (sortDir === 'streak') {
+                    return (b.streak || 0) - (a.streak || 0);
+                } else {
+                    const statusOrder = { 'Active': 1, 'Offline': 2, 'Banned': 3 };
+                    if (statusOrder[a.status] !== statusOrder[b.status]) return statusOrder[a.status] - statusOrder[b.status];
+                    let aBal = (a.credits || 0) + (a.playableCredits || 0); let bBal = (b.credits || 0) + (b.playableCredits || 0);
+                    return sortDir === 'desc' ? bBal - aBal : aBal - bBal;
+                }
             });
 
             let paginated = filtered.slice((pgUsers - 1) * limit, pgUsers * limit);
             renderPagination(filtered.length, pgUsers, 'pag-users', 'pgUsers');
 
-            if(paginated.length === 0) { tbody.innerHTML = `<tr><td colspan="6" class="center-col" style="color:var(--text-muted); font-style:italic; padding:30px;">No players found.</td></tr>`; return; }
+            if(paginated.length === 0) { tbody.innerHTML = `<tr><td colspan="8" class="center-col" style="color:var(--text-muted); font-style:italic; padding:30px;">No players found.</td></tr>`; return; }
 
             paginated.forEach(u => {
                 let statClass = u.status === 'Active' ? 'active' : (u.status === 'Banned' ? 'banned' : 'offline');
@@ -912,11 +854,17 @@
                 let displayCredits = `<div style="font-weight: 800; color: var(--credits);">${(u.credits || 0).toLocaleString(undefined, {minimumFractionDigits:1, maximumFractionDigits:1})}</div><div style="font-size: 0.8rem; color: var(--ps-glow);">+ ${(u.playableCredits || 0).toLocaleString(undefined, {minimumFractionDigits:1, maximumFractionDigits:1})} P</div>`;
                 
                 let smurfWarning = (u.ipAddress && u.ipAddress !== 'Unknown' && ipCounts[u.ipAddress] > 1) ? `<i class="fas fa-exclamation-triangle" style="color:var(--danger); margin-left:8px;" title="Multiple accounts detected on this IP!"></i>` : '';
+                let ipDisplay = u.ipAddress && u.ipAddress !== 'Unknown' ? u.ipAddress : '<span style="color:var(--text-muted); font-size:0.8rem;">Unknown</span>';
+                
+                let currentStreak = u.streak || 0;
+                let streakBadge = currentStreak >= 3 ? `<span style="color:#ff4500; font-weight:900;">${currentStreak} 🔥</span>` : `<span style="color:var(--text-muted);">${currentStreak}</span>`;
 
                 tbody.innerHTML += `
                     <tr class="clickable-row" onclick="viewPlayerLogs('${u.username}')">
                         <td class="center-col" style="color:var(--text-muted);">${new Date(u.joinDate).toLocaleDateString()}</td>
                         <td class="center-col"><div style="font-weight:900; font-size:1.1rem; color: white; display:flex; align-items:center; justify-content:center;">${u.username} ${smurfWarning}</div></td>
+                        <td class="center-col" style="font-family:monospace; font-size:0.9rem; color:var(--ps-glow);">${ipDisplay}</td>
+                        <td class="center-col">${streakBadge}</td>
                         <td class="center-col">${displayCredits}</td>
                         <td class="center-col">${u.role}</td>
                         <td class="center-col"><span class="badge ${statClass}">${u.status}</span></td>
@@ -927,6 +875,60 @@
             });
         }
 
+        // ================= LIVE DEALER TAB ================= //
+        const gameDisplayNames = {
+            'baccarat': 'Baccarat', 'dt': 'Dragon Tiger', 'sicbo': 'Sic Bo', 
+            'perya': 'Color Game', 'coinflip': 'Coin Flip', 'd20': 'D20 Roll', 'blackjack': 'Blackjack'
+        };
+
+        function refreshDealerStats() {
+            document.getElementById('dealer-stats-grid').innerHTML = ''; // clear
+            Object.keys(gameDisplayNames).forEach(gameCode => {
+                socket.emit('getGlobalResults', gameCode);
+            });
+        }
+
+        socket.on('globalResultsData', data => {
+            const grid = document.getElementById('dealer-stats-grid');
+            let divId = `dealer-card-${data.game}`;
+            let existingDiv = document.getElementById(divId);
+            if(!existingDiv) {
+                existingDiv = document.createElement('div');
+                existingDiv.id = divId;
+                existingDiv.className = 'bento-item';
+                existingDiv.style.flexDirection = 'column';
+                existingDiv.style.alignItems = 'stretch';
+                existingDiv.style.justifyContent = 'flex-start';
+                grid.appendChild(existingDiv);
+            }
+
+            let stats = data.stats || { total: 0 };
+            let htmlInner = `
+                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--glass-border); padding-bottom:10px; margin-bottom:15px;">
+                    <h3 style="margin:0; font-weight:900; color:white; text-transform:uppercase; letter-spacing:1px;"><i class="fas fa-dice"></i> ${gameDisplayNames[data.game]}</h3>
+                    <span class="badge" style="background:rgba(0,162,255,0.1); color:var(--ps-glow); border-color:var(--ps-glow);">Rounds: ${stats.total || 0}</span>
+                </div>
+                <div style="display:flex; flex-direction:column; gap:8px;">
+            `;
+
+            // Generate specific stat rows depending on the game
+            Object.keys(stats).forEach(key => {
+                if(key !== 'total') {
+                    let perc = stats.total > 0 ? ((stats[key] / stats.total) * 100).toFixed(1) : "0.0";
+                    htmlInner += `
+                        <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.9rem; font-weight:800; color:var(--text-muted);">
+                            <span style="text-transform:uppercase;">${key}</span>
+                            <span style="color:white;">${perc}% <span style="font-weight:400; opacity:0.5;">(${stats[key]})</span></span>
+                        </div>
+                    `;
+                }
+            });
+
+            htmlInner += `</div>`;
+            existingDiv.innerHTML = htmlInner;
+        });
+
+        // ================= AUDIT LOGS ================= //
         function renderAuditLogs() {
             const tbody = document.getElementById('audit-tbody'); tbody.innerHTML = '';
             let paginated = gAdminLogs.slice((pgAudit - 1) * limit, pgAudit * limit);
@@ -946,6 +948,7 @@
             });
         }
 
+        // ================= TRANSACTIONS & PROMOS (As Before) ================= //
         function viewPlayerLogs(username) {
             currentLogUsername = username;
             document.getElementById('pl-title').innerText = `${username} LOGS`;
@@ -1007,7 +1010,6 @@
             if(hType !== 'All') histories = histories.filter(t => t.type === hType);
             if(hStat !== 'All') histories = histories.filter(t => t.status === hStat);
 
-            // Time sorting
             pendings.sort((a,b) => pSort === 'newest' ? new Date(b.date) - new Date(a.date) : new Date(a.date) - new Date(b.date));
             histories.sort((a,b) => hSort === 'newest' ? new Date(b.date) - new Date(a.date) : new Date(a.date) - new Date(b.date));
 
@@ -1043,25 +1045,6 @@
                         <td class="center-col"><span class="badge ${statClass}">${t.status}</span></td>
                     </tr>`;
             });
-        }
-
-        function openInspector(id, type, amount, username, proofRef) {
-            document.getElementById('inspector-type').innerText = type.toUpperCase();
-            document.getElementById('inspector-amt').innerText = amount.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1}) + " TC";
-            document.getElementById('inspector-user').innerText = username;
-            
-            const proofContainer = document.getElementById('inspector-proof-container');
-            if (type === 'Deposit') {
-                // LIGHTBOX INTEGRATION
-                proofContainer.innerHTML = `<img src="${proofRef}" style="max-width:100%; max-height:200px; border-radius:8px; cursor:zoom-in;" alt="Proof of Payment" onclick="openLightbox('${proofRef}')" onerror="this.src='https://via.placeholder.com/400x200/111/fff?text=Image+Not+Found'">`;
-            } else {
-                proofContainer.innerHTML = `<div style="font-size: 1.2rem; color: var(--text-main); text-align: center; padding: 20px;">Payout Details Provided:<br><span style="color: var(--credits); font-family: monospace;">${proofRef}</span></div>`;
-            }
-
-            document.getElementById('btn-approve-tx').onclick = () => { socket.emit('adminAction', { type: 'resolveTx', id: id, status: 'Approved' }); closeModal('inspector-modal'); };
-            document.getElementById('btn-reject-tx').onclick = () => { socket.emit('adminAction', { type: 'resolveTx', id: id, status: 'Rejected' }); closeModal('inspector-modal'); };
-
-            openModal('inspector-modal');
         }
 
         function renderPromos() {
