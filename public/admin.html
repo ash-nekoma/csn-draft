@@ -13,16 +13,37 @@
     <script src="/socket.io/socket.io.js"></script>
 
     <style>
+        /* ================= CSS VARIABLES & RESET ================= */
         :root { 
-            --ps-bg: #000814; --ps-blue: #00439c; --ps-glow: #00a2ff; 
-            --glass-bg: rgba(0, 15, 35, 0.85); --glass-border: rgba(255, 255, 255, 0.15); 
-            --danger: #ff3366; --success: #00e676; --credits: #ffb400; --playable: #b366ff;
-            --text-main: #f8fafc; --text-muted: #8c9eb5; 
+            --ps-bg: #000814; 
+            --ps-blue: #00439c; 
+            --ps-glow: #00a2ff; 
+            --glass-bg: rgba(0, 15, 35, 0.85); 
+            --glass-border: rgba(255, 255, 255, 0.15); 
+            --danger: #ff3366; 
+            --success: #00e676; 
+            --credits: #ffb400; 
+            --playable: #b366ff;
+            --text-main: #f8fafc; 
+            --text-muted: #8c9eb5; 
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; outline: none; }
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            font-family: 'Outfit', sans-serif; 
+            outline: none; 
+        }
         
-        body { background: linear-gradient(135deg, #000a1f 0%, #00122e 100%); color: var(--text-main); min-height: 100vh; width: 100vw; display: flex; overflow: hidden; }
+        body { 
+            background: linear-gradient(135deg, #000a1f 0%, #00122e 100%); 
+            color: var(--text-main); 
+            min-height: 100vh; 
+            width: 100vw; 
+            display: flex; 
+            overflow: hidden; 
+        }
 
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: transparent; }
@@ -31,27 +52,97 @@
 
         .hidden { display: none !important; opacity: 0; pointer-events: none; }
 
-        /* AUTHENTICATION */
-        #auth-container { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; z-index: 999999; background: #00050d; }
-        .auth-box { width: 420px; background: var(--glass-bg); padding: 3rem; border-radius: 16px; border: 1px solid var(--glass-border); text-align: center; box-shadow: 0 15px 50px rgba(0,0,0,0.8); position: relative; z-index: 10; }
-        .auth-title { font-size: 2.2rem; font-weight: 900; color: white; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 2px;}
-        .auth-sub { color: var(--danger); font-weight: 800; font-size: 1rem; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 30px; }
+        /* ================= AUTHENTICATION ================= */
+        #auth-container { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100vw; 
+            height: 100vh; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            z-index: 999999; 
+            background: #00050d; 
+        }
+        
+        .auth-box { 
+            width: 420px; 
+            background: var(--glass-bg); 
+            padding: 3rem; 
+            border-radius: 16px; 
+            border: 1px solid var(--glass-border); 
+            text-align: center; 
+            box-shadow: 0 15px 50px rgba(0,0,0,0.8); 
+            position: relative; 
+            z-index: 10; 
+        }
+        
+        .auth-title { 
+            font-size: 2.2rem; 
+            font-weight: 900; 
+            color: white; 
+            margin-bottom: 5px; 
+            text-transform: uppercase; 
+            letter-spacing: 2px;
+        }
+        
+        .auth-sub { 
+            color: var(--danger); 
+            font-weight: 800; 
+            font-size: 1rem; 
+            letter-spacing: 3px; 
+            text-transform: uppercase; 
+            margin-bottom: 30px; 
+        }
         
         .input-group { margin-bottom: 15px; text-align: left; width: 100%; }
         .input-group label { display: block; color: var(--text-muted); font-size: 0.85rem; font-weight: 800; margin-bottom: 8px; text-transform: uppercase; }
-        .input-control { width: 100%; padding: 15px; background: rgba(0,0,0,0.5); border: 1px solid var(--glass-border); color: white; border-radius: 8px; font-size: 1.1rem; font-weight: 600; transition: 0.2s; pointer-events: auto; cursor: text; }
+        
+        .input-control { 
+            width: 100%; 
+            padding: 15px; 
+            background: rgba(0,0,0,0.5); 
+            border: 1px solid var(--glass-border); 
+            color: white; 
+            border-radius: 8px; 
+            font-size: 1.1rem; 
+            font-weight: 600; 
+            transition: 0.2s; 
+            pointer-events: auto; 
+            cursor: text; 
+        }
         .input-control:focus { border-color: var(--ps-glow); background: rgba(0,0,0,0.7); box-shadow: 0 0 15px rgba(0,162,255,0.2); }
         
         select.input-control, .filter-bar select {
             appearance: none;
             background-image: url('data:image/svg+xml;utf8,<svg fill="white" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
-            background-repeat: no-repeat; background-position: right 12px center; padding-right: 40px !important; cursor: pointer;
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 40px !important;
+            cursor: pointer;
         }
 
-        .btn-primary { background: rgba(0, 162, 255, 0.15); color: var(--ps-glow); border: 1px solid var(--ps-glow); padding: 15px; width: 100%; border-radius: 8px; font-size: 1.1rem; font-weight: 900; cursor: pointer; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 1px; pointer-events: auto; }
+        .btn-primary { 
+            background: rgba(0, 162, 255, 0.15); 
+            color: var(--ps-glow); 
+            border: 1px solid var(--ps-glow); 
+            padding: 15px; 
+            width: 100%; 
+            border-radius: 8px; 
+            font-size: 1.1rem; 
+            font-weight: 900; 
+            cursor: pointer; 
+            transition: all 0.3s ease; 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+            pointer-events: auto; 
+        }
         .btn-primary:hover { background: var(--ps-glow); color: black; transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0, 162, 255, 0.4); }
+        
         .auth-msg { font-size: 0.95rem; font-weight: 800; min-height: 20px; margin-bottom: 15px; text-align: center; color: var(--danger); }
 
+        /* ================= DASHBOARD LAYOUT ================= */
         #admin-app { display: none; width: 100%; height: 100vh; position: relative; z-index: 1;}
         
         .sidebar { width: 280px; background: rgba(0, 5, 15, 0.95); border-right: 1px solid var(--glass-border); display: flex; flex-direction: column; flex-shrink: 0;}
@@ -75,21 +166,67 @@
         .content-area { padding: 40px; flex: 1; width: 100%; display: flex; flex-direction: column; overflow: hidden; }
         .tab-view { flex: 1; display: flex; flex-direction: column; overflow: hidden;}
 
+        /* ================= BENTO BOX GRID DASHBOARD ================= */
         .bento-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; width: 100%; }
-        .bento-item { background: rgba(0, 15, 35, 0.6); border: 1px solid var(--glass-border); padding: 30px; border-radius: 12px; display: flex; align-items: center; gap: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.7); backdrop-filter: blur(5px); transition: all 0.3s ease; cursor: pointer; }
-        .bento-item:hover { transform: translateY(-5px); border-color: var(--ps-glow); box-shadow: 0 0 25px rgba(0,162,255,0.3), inset 0 0 15px rgba(0, 162, 255, 0.15); }
+        .bento-item { 
+            background: rgba(0, 15, 35, 0.6); 
+            border: 1px solid var(--glass-border); 
+            padding: 30px; 
+            border-radius: 12px; 
+            display: flex; 
+            align-items: center; 
+            gap: 25px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.7); 
+            backdrop-filter: blur(5px); 
+            transition: all 0.3s ease; 
+            cursor: pointer; 
+        }
+        .bento-item:hover { 
+            transform: translateY(-5px); 
+            border-color: var(--ps-glow); 
+            box-shadow: 0 0 25px rgba(0,162,255,0.3), inset 0 0 15px rgba(0, 162, 255, 0.15); 
+        }
         
         .bento-span-2 { grid-column: span 2; }
         .bento-span-row-2 { grid-row: span 2; flex-direction: column; align-items: flex-start; justify-content: center; }
         
-        .stat-icon { width: 70px; height: 70px; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 2.2rem; background: rgba(255,255,255,0.05); box-shadow: inset 0 0 15px rgba(255,255,255,0.02); flex-shrink:0;}
+        .stat-icon { 
+            width: 70px; 
+            height: 70px; 
+            border-radius: 12px; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            font-size: 2.2rem; 
+            background: rgba(255,255,255,0.05); 
+            box-shadow: inset 0 0 15px rgba(255,255,255,0.02); 
+            flex-shrink:0;
+        }
         .stat-info h3 { color: var(--text-muted); font-size: 0.95rem; text-transform: uppercase; font-weight: 800; margin-bottom: 5px; letter-spacing: 1px;}
         .stat-info .value { font-size: 2.5rem; font-weight: 900; color: white; line-height: 1; }
         .glow-neon { text-shadow: 0 0 15px var(--ps-glow); color: var(--ps-glow); }
         .glow-success { text-shadow: 0 0 15px var(--success); color: var(--success); }
 
-        .panel { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; flex: 1; box-shadow: 0 10px 30px rgba(0,0,0,0.5);}
-        .panel-header { padding: 20px 30px; border-bottom: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.5); flex-shrink: 0;}
+        /* ================= DATA TABLES & PANELS ================= */
+        .panel { 
+            background: var(--glass-bg); 
+            border: 1px solid var(--glass-border); 
+            border-radius: 12px; 
+            overflow: hidden; 
+            display: flex; 
+            flex-direction: column; 
+            flex: 1; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .panel-header { 
+            padding: 20px 30px; 
+            border-bottom: 1px solid var(--glass-border); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            background: rgba(0,0,0,0.5); 
+            flex-shrink: 0;
+        }
         .panel-header h3 { font-weight: 900; font-size: 1.3rem; text-transform: uppercase; margin: 0; letter-spacing: 1px;}
         
         .table-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
@@ -99,8 +236,16 @@
         thead th { color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; border-bottom: 1px solid var(--glass-border); padding: 15px 20px;}
         td { font-weight: 600; font-size: 1rem; color: white; }
 
-        .pagination { display: flex; justify-content: space-between; align-items: center; padding: 15px 25px; border-top: 1px solid var(--glass-border); background: rgba(0,0,0,0.5); flex-shrink: 0; }
-        .pagination button { background: rgba(255,255,255,0.1); border: none; color: white; padding: 8px 15px; border-radius: 6px; font-weight:800; cursor: pointer; transition: 0.2s; text-transform: uppercase; }
+        .pagination { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 15px 25px; border-top: 1px solid var(--glass-border); 
+            background: rgba(0,0,0,0.5); flex-shrink: 0; 
+        }
+        .pagination button { 
+            background: rgba(255,255,255,0.1); border: none; color: white; 
+            padding: 8px 15px; border-radius: 6px; font-weight:800; 
+            cursor: pointer; transition: 0.2s; text-transform: uppercase; 
+        }
         .pagination button:hover:not(:disabled) { background: var(--ps-glow); color: black; }
         .pagination button:disabled { opacity: 0.5; cursor: not-allowed; }
 
@@ -124,36 +269,59 @@
         .clickable-row { cursor: pointer; transition: background-color 0.2s ease; border-left: 3px solid transparent; }
         .clickable-row:hover { background-color: rgba(0, 162, 255, 0.15); border-left: 3px solid var(--ps-glow); }
 
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 100000; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(10px); }
-        .modal-content { background: var(--glass-bg); width: 450px; padding: 40px 30px 30px; border-radius: 12px; border: 1px solid var(--glass-border); position: relative; box-shadow: 0 25px 80px rgba(0,0,0,0.9); pointer-events: auto; display: flex; flex-direction: column;}
+        /* ================= MODALS & FORMS ================= */
+        .modal-overlay { 
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
+            background: rgba(0,0,0,0.85); z-index: 100000; display: flex; 
+            justify-content: center; align-items: center; backdrop-filter: blur(10px); 
+        }
+        .modal-content { 
+            background: var(--glass-bg); width: 450px; padding: 40px 30px 30px; 
+            border-radius: 12px; border: 1px solid var(--glass-border); 
+            position: relative; box-shadow: 0 25px 80px rgba(0,0,0,0.9); 
+            pointer-events: auto; display: flex; flex-direction: column;
+        }
         .modal-content.wide { width: 700px; max-width: 95vw; max-height: 90vh;}
-        .modal-close { position: absolute; top: 20px; right: 20px; font-size: 1.8rem; color: var(--text-muted); cursor: pointer; background: none; border: none; transition: 0.2s; outline: none; z-index: 10;}
+        
+        .modal-close { 
+            position: absolute; top: 20px; right: 20px; font-size: 1.8rem; 
+            color: var(--text-muted); cursor: pointer; background: none; 
+            border: none; transition: 0.2s; outline: none; z-index: 10;
+        }
         .modal-close:hover { color: var(--danger); transform: scale(1.1); }
-        .modal-title { font-size: 1.8rem; font-weight: 900; text-transform: uppercase; margin-bottom: 25px; border-bottom: 1px solid var(--glass-border); padding: 15px; text-align: center; flex-shrink:0;}
+        
+        .modal-title { 
+            font-size: 1.8rem; font-weight: 900; text-transform: uppercase; 
+            margin-bottom: 25px; border-bottom: 1px solid var(--glass-border); 
+            padding-bottom: 15px; text-align: center; flex-shrink:0;
+        }
 
-        .filter-bar { display: flex; gap: 15px; background: rgba(0,0,0,0.4); padding: 15px 30px; border-bottom: 1px solid var(--glass-border); align-items: center; flex-shrink: 0;}
-        .filter-bar input, .filter-bar select { padding: 10px 15px; background: rgba(0,0,0,0.6); border: 1px solid var(--glass-border); color: white; border-radius: 6px; font-size: 0.95rem; font-weight: 600; outline: none; }
+        .filter-bar { 
+            display: flex; gap: 15px; background: rgba(0,0,0,0.4); 
+            padding: 15px 30px; border-bottom: 1px solid var(--glass-border); 
+            align-items: center; flex-shrink: 0;
+        }
+        .filter-bar input, .filter-bar select { 
+            padding: 10px 15px; background: rgba(0,0,0,0.6); 
+            border: 1px solid var(--glass-border); color: white; 
+            border-radius: 6px; font-size: 0.95rem; font-weight: 600; outline: none; 
+        }
         .filter-bar input:focus, .filter-bar select:focus { border-color: var(--ps-glow); }
         
         .confirm-btn-container { display: flex; gap: 15px; margin-top: 25px; }
         .confirm-btn-container button { flex: 1; padding: 15px; font-size: 1.1rem; }
-        .modal-error-text { color: var(--danger); font-size: 0.9rem; font-weight: bold; text-align: center; margin-bottom: 15px; min-height: 20px; }
+        
+        .modal-error-text { 
+            color: var(--danger); font-size: 0.9rem; font-weight: bold; 
+            text-align: center; margin-bottom: 15px; min-height: 20px; 
+        }
 
         #lightbox-modal { z-index: 10000000; cursor: zoom-out; }
         .lightbox-img { max-width: 90vw; max-height: 90vh; border-radius: 8px; box-shadow: 0 15px 50px rgba(0,0,0,0.9); cursor: default; border: 2px solid var(--glass-border); }
 
-        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999999; display: flex; flex-direction: column; gap: 10px; pointer-events: none;}
-        .toast { background: rgba(0,0,0,0.9); border-left: 4px solid var(--ps-glow); color: white; padding: 15px 25px; border-radius: 8px; font-weight: 800; text-transform: uppercase; font-size: 0.9rem; box-shadow: 0 10px 30px rgba(0,0,0,0.5); animation: toastIn 0.3s forwards, toastOut 0.3s forwards 3s; pointer-events: auto;}
-        .toast.success { border-left-color: var(--success); color: var(--success); }
-        .toast.error { border-left-color: var(--danger); color: var(--danger); }
-        @keyframes toastIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        @keyframes toastOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
-
     </style>
 </head>
 <body>
-
-    <div id="toast-container"></div>
 
     <div id="auth-container">
         <div class="auth-box">
@@ -240,9 +408,6 @@
                         <div style="grid-column: span 4; display: flex; gap: 20px;">
                             <button class="btn-primary" style="flex:1; font-size: 1.1rem; border-color:var(--text-main); color:white;" onclick="openModal('global-update-modal')"><i class="fas fa-bullhorn"></i> SEND GLOBAL UPDATE</button>
                             <button class="btn-primary" style="flex:1; font-size: 1.1rem; border-color: var(--credits); color: var(--credits);" onclick="openModal('direct-gift-modal')"><i class="fas fa-gift"></i> DIRECT GIFT CREDITS</button>
-                            <button class="btn-primary" style="flex:1; font-size: 1.1rem; border-color: var(--danger); color: var(--danger); background: rgba(255, 51, 102, 0.1);" onclick="forceResetPvp()">
-                                <i class="fas fa-skull"></i> FORCE RESET PVP
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -393,53 +558,8 @@
         </div>
     </div>
 
-    <div id="edit-user-modal" class="modal-overlay hidden">
-        <div class="modal-content">
-            <button class="modal-close" onclick="closeModal('edit-user-modal')"><i class="fas fa-times"></i></button>
-            <h3 class="modal-title">Edit Player</h3>
-            <div id="edit-user-err" class="modal-error-text"></div>
-            <input type="hidden" id="edit-u-id">
-            
-            <div class="input-group">
-                <label>Username (Read Only)</label>
-                <input type="text" id="edit-u-name" class="input-control" disabled style="opacity: 0.5;">
-            </div>
-            <div class="input-group">
-                <label>Main Balance (Withdrawable TC)</label>
-                <input type="number" id="edit-u-credits" class="input-control" step="0.1">
-            </div>
-            <div class="input-group">
-                <label>Playable Bonus (TC)</label>
-                <input type="number" id="edit-u-playable" class="input-control" step="0.1">
-            </div>
-            <div class="input-group" style="margin-bottom: 25px;">
-                <label>Account Role</label>
-                <select id="edit-u-role" class="input-control">
-                    <option value="Player">Player</option>
-                    <option value="Admin">Admin</option>
-                </select>
-            </div>
-            <button class="btn-primary" onclick="saveUserEdit()">SAVE CHANGES</button>
-        </div>
-    </div>
-
-    <div id="player-logs-modal" class="modal-overlay hidden">
-        <div class="modal-content wide">
-            <button class="modal-close" onclick="closeModal('player-logs-modal')"><i class="fas fa-times"></i></button>
-            <h3 class="modal-title" id="pl-title">PLAYER LOGS</h3>
-            <div style="text-align:right; margin-bottom:15px;">
-                <button class="btn-sm btn-reject" onclick="clearPlayerLogs()" style="display:inline-flex; font-size: 1rem; padding: 10px 20px;"><i class="fas fa-trash"></i> Clear Logs</button>
-            </div>
-            <div class="table-wrapper" style="max-height: 400px;">
-                <table>
-                    <thead>
-                        <tr><th class="center-col">Date</th><th class="center-col">Action</th><th class="center-col">Amount</th><th class="center-col">Details</th></tr>
-                    </thead>
-                    <tbody id="pl-tbody"></tbody>
-                </table>
-            </div>
-            <div class="pagination" id="pag-pl"></div>
-        </div>
+    <div id="lightbox-modal" class="modal-overlay hidden" onclick="closeModal('lightbox-modal')">
+        <img id="lightbox-img" class="lightbox-img" src="" alt="Proof Receipt" onclick="event.stopPropagation();">
     </div>
 
     <div id="snt-confirm-modal" class="modal-overlay hidden">
@@ -496,6 +616,86 @@
         </div>
     </div>
 
+    <div id="inspector-modal" class="modal-overlay hidden">
+        <div class="modal-content" style="width: 500px; border-top: 4px solid var(--ps-glow);">
+            <button class="modal-close" onclick="closeModal('inspector-modal')"><i class="fas fa-times"></i></button>
+            <h3 class="modal-title" style="border: none; margin-bottom: 5px;">REQUEST INSPECTOR</h3>
+            
+            <div style="background: rgba(0,0,0,0.5); padding: 20px; border-radius: 8px; border: 1px solid var(--glass-border); margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <span style="color: var(--text-muted); font-weight: 800;">TYPE:</span>
+                    <span id="inspector-type" style="font-weight: 900; color: white;">DEPOSIT</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <span style="color: var(--text-muted); font-weight: 800;">USER:</span>
+                    <span id="inspector-user" style="font-weight: 900; color: white;"></span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <span style="color: var(--text-muted); font-weight: 800;">AMOUNT:</span>
+                    <span id="inspector-amt" style="font-weight: 900; color: var(--credits); font-size: 1.2rem;">0 TC</span>
+                </div>
+                <div style="display: flex; flex-direction: column; margin-top: 20px; padding-top: 15px; border-top: 1px dashed rgba(255,255,255,0.2);">
+                    <span style="color: var(--text-muted); font-weight: 800; margin-bottom: 5px;">DETAILS PROVIDED:</span>
+                    <span id="inspector-proof-container" style="font-family: monospace; color: var(--ps-glow); word-break: break-all; font-size: 1.1rem; text-align: center; padding: 10px; background: rgba(0,0,0,0.4); border-radius: 6px;"></span>
+                </div>
+            </div>
+
+            <div class="confirm-btn-container">
+                <button class="btn-primary" style="background: rgba(255, 51, 102, 0.15); color: var(--danger); border-color: var(--danger);" id="btn-reject-tx">REJECT</button>
+                <button class="btn-primary" style="background: rgba(0, 230, 118, 0.15); color: var(--success); border-color: var(--success);" id="btn-approve-tx">APPROVE</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="edit-user-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('edit-user-modal')"><i class="fas fa-times"></i></button>
+            <h3 class="modal-title">Edit Player</h3>
+            <div id="edit-user-err" class="modal-error-text"></div>
+            <input type="hidden" id="edit-u-id">
+            
+            <div class="input-group">
+                <label>Username (Read Only)</label>
+                <input type="text" id="edit-u-name" class="input-control" disabled style="opacity: 0.5;">
+            </div>
+            <div class="input-group">
+                <label>Main Balance (Withdrawable TC)</label>
+                <input type="number" id="edit-u-credits" class="input-control" step="0.1">
+            </div>
+            <div class="input-group">
+                <label>Playable Bonus (TC)</label>
+                <input type="number" id="edit-u-playable" class="input-control" step="0.1">
+            </div>
+            <div class="input-group" style="margin-bottom: 25px;">
+                <label>Account Role</label>
+                <select id="edit-u-role" class="input-control">
+                    <option value="Player">Player</option>
+                    <option value="Admin">Admin</option>
+                </select>
+            </div>
+            <button class="btn-primary" onclick="saveUserEdit()">SAVE CHANGES</button>
+        </div>
+    </div>
+
+    <div id="player-logs-modal" class="modal-overlay hidden">
+        <div class="modal-content wide">
+            <button class="modal-close" onclick="closeModal('player-logs-modal')"><i class="fas fa-times"></i></button>
+            <h3 class="modal-title" id="pl-title">PLAYER LOGS</h3>
+            <div style="text-align:right; margin-bottom:15px;">
+                <button class="btn-sm btn-reject" onclick="clearPlayerLogs()" style="display:inline-flex; font-size: 1rem; padding: 10px 20px;"><i class="fas fa-trash"></i> Clear Logs</button>
+            </div>
+            <div class="table-wrapper" style="max-height: 400px;">
+                <table>
+                    <thead>
+                        <tr><th class="center-col">Date</th><th class="center-col">Action</th><th class="center-col">Amount</th><th class="center-col">Details</th></tr>
+                    </thead>
+                    <tbody id="pl-tbody"></tbody>
+                </table>
+            </div>
+            <div class="pagination" id="pag-pl"></div>
+        </div>
+    </div>
+
     <div id="create-promo-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <button class="modal-close" onclick="closeModal('create-promo-modal')"><i class="fas fa-times"></i></button>
@@ -539,43 +739,10 @@
         </div>
     </div>
 
-    <div id="inspector-modal" class="modal-overlay hidden">
-        <div class="modal-content" style="width: 500px; border-top: 4px solid var(--ps-glow);">
-            <button class="modal-close" onclick="closeModal('inspector-modal')"><i class="fas fa-times"></i></button>
-            <h3 class="modal-title" style="border: none; margin-bottom: 5px;">REQUEST INSPECTOR</h3>
-            
-            <div style="background: rgba(0,0,0,0.5); padding: 20px; border-radius: 8px; border: 1px solid var(--glass-border); margin-bottom: 20px;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                    <span style="color: var(--text-muted); font-weight: 800;">TYPE:</span>
-                    <span id="inspector-type" style="font-weight: 900; color: white;">DEPOSIT</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                    <span style="color: var(--text-muted); font-weight: 800;">USER:</span>
-                    <span id="inspector-user" style="font-weight: 900; color: white;"></span>
-                </div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                    <span style="color: var(--text-muted); font-weight: 800;">AMOUNT:</span>
-                    <span id="inspector-amt" style="font-weight: 900; color: var(--credits); font-size: 1.2rem;">0 TC</span>
-                </div>
-                <div style="display: flex; flex-direction: column; margin-top: 20px; padding-top: 15px; border-top: 1px dashed rgba(255,255,255,0.2);">
-                    <span style="color: var(--text-muted); font-weight: 800; margin-bottom: 5px;">DETAILS PROVIDED:</span>
-                    <span id="inspector-proof-container" style="font-family: monospace; color: var(--ps-glow); word-break: break-all; font-size: 1.1rem; text-align: center; padding: 10px; background: rgba(0,0,0,0.4); border-radius: 6px;"></span>
-                </div>
-            </div>
-
-            <div class="confirm-btn-container">
-                <button class="btn-primary" style="background: rgba(255, 51, 102, 0.15); color: var(--danger); border-color: var(--danger);" id="btn-reject-tx">REJECT</button>
-                <button class="btn-primary" style="background: rgba(0, 230, 118, 0.15); color: var(--success); border-color: var(--success);" id="btn-approve-tx">APPROVE</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="lightbox-modal" class="modal-overlay hidden" onclick="closeModal('lightbox-modal')">
-        <img id="lightbox-img" class="lightbox-img" src="" alt="Proof Receipt" onclick="event.stopPropagation();">
-    </div>
-
     <script>
         const socket = io();
+        
+        // AUDIO CONTEXT FOR CASHIER SONAR PING
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         let lastPendingCount = 0;
 
@@ -590,23 +757,6 @@
             o.start(); o.stop(audioCtx.currentTime + 0.5);
         }
 
-        function showToast(msg, type = 'success') {
-            const container = document.getElementById('toast-container');
-            const t = document.createElement('div');
-            t.className = `toast ${type}`;
-            t.innerHTML = msg;
-            container.appendChild(t);
-            setTimeout(() => { if(t.parentElement) t.remove(); }, 3500);
-        }
-
-        socket.on('adminSuccess', msg => showToast(msg, 'success'));
-        socket.on('adminError', msg => showToast(msg, 'error'));
-        
-        socket.on('forceLogout', () => {
-            localStorage.removeItem('snt_session_token');
-            window.location.reload();
-        });
-
         let gUsers = []; let pgUsers = 1;
         let gTxs = []; let pgPend = 1; let pgHist = 1;
         let gPromos = []; let pgPromos = 1;
@@ -617,14 +767,6 @@
         let activeBatchCodes = []; let pgVB = 1;
         let currentLogUsername = '';
         const limit = 10;
-
-        window.onload = () => {
-            let savedToken = localStorage.getItem('snt_session_token');
-            if (savedToken) {
-                document.getElementById('auth-msg').innerText = "Resuming session...";
-                socket.emit('reconnectSession', savedToken);
-            }
-        };
 
         function renderPagination(totalItems, currentPage, elementId, updateVarStr) {
             const totalPages = Math.max(1, Math.ceil(totalItems / limit));
@@ -656,21 +798,12 @@
         });
 
         socket.on('adminLoginSuccess', data => {
-            if(data.sessionToken) localStorage.setItem('snt_session_token', data.sessionToken);
             document.getElementById('auth-container').style.display = 'none';
             document.getElementById('admin-app').style.display = 'flex';
         });
 
-        socket.on('sessionExpired', () => {
-            localStorage.removeItem('snt_session_token');
-            document.getElementById('auth-msg').innerText = "Session expired. Please login again.";
-        });
-
         function confirmLogout() {
-            showSNTConfirm("DISCONNECT TERMINAL", "Are you sure you want to leave the Master Admin dashboard?", () => { 
-                localStorage.removeItem('snt_session_token');
-                window.location.href = '/'; 
-            });
+            showSNTConfirm("DISCONNECT TERMINAL", "Are you sure you want to leave the Master Admin dashboard?", () => { window.location.href = '/'; });
         }
 
         function switchTab(tabId) {
@@ -709,14 +842,7 @@
             openModal('snt-confirm-modal');
         }
 
-        function forceResetPvp() {
-            showSNTConfirm(
-                "RESET PVP ARENA", 
-                "Are you sure you want to forcefully reset the PVP Arena? This will kick any seated players, refund their escrowed TC, and clear the board.", 
-                () => { socket.emit('adminAction', { type: 'forceResetArena' }); }
-            );
-        }
-
+        // LIGHTBOX TRIGGER
         function openLightbox(url) {
             document.getElementById('lightbox-img').src = url;
             openModal('lightbox-modal');
@@ -733,22 +859,18 @@
             document.getElementById('stat-deposits').innerText = data.stats.approvedDeposits.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1});
             document.getElementById('stat-limit').innerText = data.stats.limit.toLocaleString();
             
+            // House Profit Styling
             let hp = document.getElementById('stat-profit');
             hp.innerText = data.stats.houseProfit.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1});
             hp.style.color = data.stats.houseProfit >= 0 ? "var(--success)" : "var(--danger)";
             
+            // Audio Sonar Logic
             let currentPending = gTxs.filter(t => t.status === 'Pending').length;
             document.getElementById('stat-pending').innerText = currentPending;
             if(currentPending > lastPendingCount) { playSonarPing(); }
             lastPendingCount = currentPending;
 
             renderUsers(); renderTransactions(); renderPromos(); renderAuditLogs();
-            
-            let d = document.getElementById('tool-target-user');
-            let v = d.value;
-            d.innerHTML = `<option value="all_registered">All Registered Users</option><option value="all_active">All Currently Online</option>`;
-            gUsers.forEach(u => d.innerHTML += `<option value="${u.username}">Specific: ${u.username}</option>`);
-            if(d.querySelector(`option[value="${v}"]`)) d.value = v;
         });
 
         function renderUsers() {
@@ -758,6 +880,7 @@
             let sFilt = document.getElementById('filter-status').value;
             let sortDir = document.getElementById('filter-sort').value;
 
+            // IP Tracking for Smurfs
             let ipCounts = {};
             gUsers.forEach(u => { if(u.ipAddress && u.ipAddress !== 'Unknown') { ipCounts[u.ipAddress] = (ipCounts[u.ipAddress] || 0) + 1; } });
 
@@ -786,9 +909,8 @@
                     ? `<button class="btn-sm btn-approve" onclick="event.stopPropagation(); actionUser('unban', '${u._id}', '${u.username}')"><i class="fas fa-unlock"></i> Unban</button>`
                     : `<button class="btn-sm btn-reject" onclick="event.stopPropagation(); actionUser('ban', '${u._id}', '${u.username}')"><i class="fas fa-ban"></i> Ban</button>`;
 
-                let kickBtn = u.status === 'Active' ? `<button class="btn-sm" style="background:var(--text-muted); color:white;" onclick="event.stopPropagation(); actionUser('kick', '${u._id}', '${u.username}')"><i class="fas fa-user-times"></i> Kick</button>` : '';
-
                 let displayCredits = `<div style="font-weight: 800; color: var(--credits);">${(u.credits || 0).toLocaleString(undefined, {minimumFractionDigits:1, maximumFractionDigits:1})}</div><div style="font-size: 0.8rem; color: var(--ps-glow);">+ ${(u.playableCredits || 0).toLocaleString(undefined, {minimumFractionDigits:1, maximumFractionDigits:1})} P</div>`;
+                
                 let smurfWarning = (u.ipAddress && u.ipAddress !== 'Unknown' && ipCounts[u.ipAddress] > 1) ? `<i class="fas fa-exclamation-triangle" style="color:var(--danger); margin-left:8px;" title="Multiple accounts detected on this IP!"></i>` : '';
 
                 tbody.innerHTML += `
@@ -799,7 +921,7 @@
                         <td class="center-col">${u.role}</td>
                         <td class="center-col"><span class="badge ${statClass}">${u.status}</span></td>
                         <td class="center-col" onclick="event.stopPropagation();">
-                            <div class="action-btns"><button class="btn-sm btn-edit" onclick="openEditUser('${u._id}')"><i class="fas fa-pen"></i> Edit</button>${kickBtn}${actionBtn}</div>
+                            <div class="action-btns"><button class="btn-sm btn-edit" onclick="openEditUser('${u._id}')"><i class="fas fa-pen"></i> Edit</button>${actionBtn}</div>
                         </td>
                     </tr>`;
             });
@@ -885,6 +1007,7 @@
             if(hType !== 'All') histories = histories.filter(t => t.type === hType);
             if(hStat !== 'All') histories = histories.filter(t => t.status === hStat);
 
+            // Time sorting
             pendings.sort((a,b) => pSort === 'newest' ? new Date(b.date) - new Date(a.date) : new Date(a.date) - new Date(b.date));
             histories.sort((a,b) => hSort === 'newest' ? new Date(b.date) - new Date(a.date) : new Date(a.date) - new Date(b.date));
 
@@ -929,6 +1052,7 @@
             
             const proofContainer = document.getElementById('inspector-proof-container');
             if (type === 'Deposit') {
+                // LIGHTBOX INTEGRATION
                 proofContainer.innerHTML = `<img src="${proofRef}" style="max-width:100%; max-height:200px; border-radius:8px; cursor:zoom-in;" alt="Proof of Payment" onclick="openLightbox('${proofRef}')" onerror="this.src='https://via.placeholder.com/400x200/111/fff?text=Image+Not+Found'">`;
             } else {
                 proofContainer.innerHTML = `<div style="font-size: 1.2rem; color: var(--text-main); text-align: center; padding: 20px;">Payout Details Provided:<br><span style="color: var(--credits); font-family: monospace;">${proofRef}</span></div>`;
@@ -1020,8 +1144,8 @@
         }
 
         function actionUser(type, id, username) {
-            let actionText = type.toUpperCase();
-            showSNTConfirm("MODIFY ACCOUNT", `Are you sure you want to ${actionText} ${username}?`, () => { socket.emit('adminAction', { type: type, id: id }); });
+            let msg = type === 'ban' ? `Are you sure you want to BAN ${username}?` : `Are you sure you want to UNBAN ${username}?`;
+            showSNTConfirm("MODIFY ACCOUNT", msg, () => { socket.emit('adminAction', { type: type, id: id }); });
         }
 
         function openEditUser(id) {
@@ -1095,29 +1219,14 @@
             });
         }
 
-        // ==========================================
-        // AGGRESSIVE ANTI-SNOOP & ANTI-CHEAT LOCKDOWN
-        // ==========================================
-        
         document.addEventListener('contextmenu', event => event.preventDefault());
-        document.ondragstart = function(e) { e.preventDefault(); return false; };
-        document.onselectstart = function(e) {
-            if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') { e.preventDefault(); return false; }
-        };
-
         document.onkeydown = function(e) {
-            if(e.keyCode === 123) { e.preventDefault(); return false; }
-            if((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'I' || e.key === 'i')) { e.preventDefault(); return false; }
-            if((e.ctrlKey || e.metaKey) && e.altKey && (e.key === 'I' || e.key === 'i')) { e.preventDefault(); return false; }
-            if((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'C' || e.key === 'c')) { e.preventDefault(); return false; }
-            if((e.ctrlKey || e.metaKey) && e.altKey && (e.key === 'C' || e.key === 'c')) { e.preventDefault(); return false; }
-            if((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'J' || e.key === 'j')) { e.preventDefault(); return false; }
-            if((e.ctrlKey || e.metaKey) && e.altKey && (e.key === 'J' || e.key === 'j')) { e.preventDefault(); return false; }
-            if((e.ctrlKey || e.metaKey) && (e.key === 'U' || e.key === 'u')) { e.preventDefault(); return false; }
-            if((e.ctrlKey || e.metaKey) && (e.key === 'S' || e.key === 's')) { e.preventDefault(); return false; }
-            if((e.ctrlKey || e.metaKey) && (e.key === 'P' || e.key === 'p')) { e.preventDefault(); return false; }
+            if(e.keyCode === 123) return false; 
+            if(e.ctrlKey && e.shiftKey && e.keyCode === 'I'.charCodeAt(0)) return false; 
+            if(e.ctrlKey && e.shiftKey && e.keyCode === 'C'.charCodeAt(0)) return false; 
+            if(e.ctrlKey && e.shiftKey && e.keyCode === 'J'.charCodeAt(0)) return false; 
+            if(e.ctrlKey && e.keyCode === 'U'.charCodeAt(0)) return false; 
         };
-
     </script>
 </body>
 </html>
