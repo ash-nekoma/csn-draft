@@ -4,23 +4,21 @@ const http = require('http');
 const { Server } = require('socket.io');
 const mongoose = require('mongoose');
 const path = require('path');
-const crypto = require('crypto'); // Used for secure session tokens
+const crypto = require('crypto');
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
 
 // ==========================================
-// CACHE-BUSTER & RAILWAY ROUTING
+// CACHE-BUSTER & ROUTING
 // ==========================================
 app.use((req, res, next) => {
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
     next();
 });
-
 app.use(express.static(__dirname));
 app.use(express.static(path.join(__dirname, 'public')));
-
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'), err => {
         if (err) res.sendFile(path.join(__dirname, 'index.html'));
@@ -28,52 +26,39 @@ app.get('/', (req, res) => {
 });
 
 // ==========================================
-// UTILITY: STRICT 1-DECIMAL ROUNDING
+// UTILITY: FORMATTING & SESSIONS
 // ==========================================
 const formatTC = (amount) => Math.round(amount * 10) / 10;
+function generateSessionToken() { return crypto.randomBytes(32).toString('hex'); }
 
-// HELPER: Dual-Currency Bet Deductor
 async function deductBet(user, betAmount) {
     let amt = formatTC(betAmount);
     let totalBal = formatTC((user.credits || 0) + (user.playableCredits || 0));
-    
     if (amt <= 0 || totalBal < amt) return { success: false };
 
     let fromPlayable = 0;
     let fromMain = 0;
-
     if ((user.playableCredits || 0) >= amt) {
-        fromPlayable = amt;
-        user.playableCredits = formatTC(user.playableCredits - amt);
+        fromPlayable = amt; user.playableCredits = formatTC(user.playableCredits - amt);
     } else {
-        fromPlayable = user.playableCredits || 0;
-        fromMain = formatTC(amt - fromPlayable);
-        user.playableCredits = 0;
-        user.credits = formatTC((user.credits || 0) - fromMain);
+        fromPlayable = user.playableCredits || 0; fromMain = formatTC(amt - fromPlayable);
+        user.playableCredits = 0; user.credits = formatTC((user.credits || 0) - fromMain);
     }
     return { success: true, fromPlayable, fromMain };
 }
 
-function generateSessionToken() {
-    return crypto.randomBytes(32).toString('hex');
-}
-
 // ==========================================
-// 1. MONGODB DATABASE SETUP
+// MONGODB SETUP
 // ==========================================
 const MONGO_URI = process.env.MONGO_URL || 'mongodb://localhost:27017/stickntrade';
-mongoose.connect(MONGO_URI)
-    .then(async () => {
-        console.log('✅ Connected to MongoDB Database');
-        const adminExists = await User.findOne({ username: 'admin' });
-        if (!adminExists) {
-            await new User({ username: 'admin', password: 'Kenm44ashley', role: 'Admin', credits: 10000, playableCredits: 0 }).save();
-        }
-    }).catch(err => { console.error('❌ MongoDB Connection Error.', err); });
+mongoose.connect(MONGO_URI).then(async () => {
+    console.log('✅ Connected to MongoDB Database');
+    const adminExists = await User.findOne({ username: 'admin' });
+    if (!adminExists) {
+        await new User({ username: 'admin', password: 'Kenm44ashley', role: 'Admin', credits: 10000, playableCredits: 0 }).save();
+    }
+}).catch(err => { console.error('❌ MongoDB Connection Error.', err); });
 
-// ==========================================
-// 2. DATABASE SCHEMAS
-// ==========================================
 const userSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
     password: { type: String, required: true },
@@ -82,21 +67,19 @@ const userSchema = new mongoose.Schema({
     playableCredits: { type: Number, default: 0 }, 
     status: { type: String, default: 'Offline' },
     ipAddress: { type: String, default: 'Unknown' },
-    sessionToken: { type: String, default: null }, // NEW: Persistent Sessions
+    sessionToken: { type: String, default: null }, 
     joinDate: { type: Date, default: Date.now },
     dailyReward: { lastClaim: { type: Date, default: null }, streak: { type: Number, default: 0 } }
 });
 const User = mongoose.model('User', userSchema);
 
 const txSchema = new mongoose.Schema({
-    username: String, type: String, amount: Number, ref: String,
-    status: { type: String, default: 'Pending' }, date: { type: Date, default: Date.now }
+    username: String, type: String, amount: Number, ref: String, status: { type: String, default: 'Pending' }, date: { type: Date, default: Date.now }
 });
 const Transaction = mongoose.model('Transaction', txSchema);
 
 const codeSchema = new mongoose.Schema({
-    batchId: String, amount: Number, code: String, creditType: { type: String, default: 'playable' },
-    redeemedBy: { type: String, default: null }, date: { type: Date, default: Date.now }
+    batchId: String, amount: Number, code: String, creditType: { type: String, default: 'playable' }, redeemedBy: { type: String, default: null }, date: { type: Date, default: Date.now }
 });
 const GiftCode = mongoose.model('GiftCode', codeSchema);
 
@@ -111,51 +94,39 @@ const adminLogSchema = new mongoose.Schema({
 const AdminLog = mongoose.model('AdminLog', adminLogSchema);
 
 // ==========================================
-// 3. CASINO ENGINE & PVP STATE MACHINE
+// CASINO ENGINE
 // ==========================================
 let rooms = { baccarat: 0, perya: 0, dt: 0, sicbo: 0, pvp: 0 };
 let sharedTables = { time: 15, status: 'BETTING', bets: [] };
-let connectedUsers = {}; // Tracks username -> socketId
+let connectedUsers = {}; 
 
 let globalResults = { baccarat: [], perya: [], dt: [], sicbo: [] }; 
 let gameStats = { 
-    baccarat: { total: 0, Player: 0, Banker: 0, Tie: 0 }, 
-    dt: { total: 0, Dragon: 0, Tiger: 0, Tie: 0 }, 
-    sicbo: { total: 0, Big: 0, Small: 0, Triple: 0 }, 
-    perya: { total: 0, Yellow: 0, White: 0, Pink: 0, Blue: 0, Red: 0, Green: 0 }, 
-    coinflip: { total: 0, Heads: 0, Tails: 0 }, 
-    d20: { total: 0, Win: 0, Lose: 0 }, 
-    blackjack: { total: 0, Win: 0, Lose: 0, Push: 0 } 
+    baccarat: { total: 0, Player: 0, Banker: 0, Tie: 0 }, dt: { total: 0, Dragon: 0, Tiger: 0, Tie: 0 }, 
+    sicbo: { total: 0, Big: 0, Small: 0, Triple: 0 }, perya: { total: 0, Yellow: 0, White: 0, Pink: 0, Blue: 0, Red: 0, Green: 0 }, 
+    coinflip: { total: 0, Heads: 0, Tails: 0 }, d20: { total: 0, Win: 0, Lose: 0 }, blackjack: { total: 0, Win: 0, Lose: 0, Push: 0 } 
 };
 
 function logGlobalResult(game, resultStr) { 
-    if(globalResults[game]) { 
-        globalResults[game].unshift({ result: resultStr, time: new Date() }); 
-        if (globalResults[game].length > 5) globalResults[game].pop(); 
-    } 
+    if(globalResults[game]) { globalResults[game].unshift({ result: resultStr, time: new Date() }); if (globalResults[game].length > 5) globalResults[game].pop(); } 
 }
-function checkResetStats(game) { 
-    if (gameStats[game].total >= 100) { Object.keys(gameStats[game]).forEach(key => { gameStats[game][key] = 0; }); } 
-}
+function checkResetStats(game) { if (gameStats[game].total >= 100) { Object.keys(gameStats[game]).forEach(key => { gameStats[game][key] = 0; }); } }
 
 function drawCard() {
     const vs = ['2','3','4','5','6','7','8','9','10','J','Q','K','A']; const ss = ['♠','♣','♥','♦'];
     let v = vs[Math.floor(Math.random() * vs.length)]; let s = ss[Math.floor(Math.random() * ss.length)];
-    let bac = isNaN(parseInt(v)) ? (v === 'A' ? 1 : 0) : (v === '10' ? 0 : parseInt(v));
-    let bj = isNaN(parseInt(v)) ? (v === 'A' ? 11 : 10) : parseInt(v);
+    let bac = isNaN(parseInt(v)) ? (v === 'A' ? 1 : 0) : (v === '10' ? 0 : parseInt(v)); let bj = isNaN(parseInt(v)) ? (v === 'A' ? 11 : 10) : parseInt(v);
     let dt = 0; if (v === 'A') dt = 1; else if (v === 'K') dt = 13; else if (v === 'Q') dt = 12; else if (v === 'J') dt = 11; else dt = parseInt(v);
     let hl = 0; if (v === 'A') hl = 1; else if (v === 'K') hl = 13; else if (v === 'Q') hl = 12; else if (v === 'J') hl = 11; else hl = parseInt(v);
     return { val: v, suit: s, bacVal: bac, bjVal: bj, dtVal: dt, hlVal: hl, raw: v, suitHtml: (s === '♥' || s === '♦') ? `<span class="card-red">${s}</span>` : s };
 }
+function getBJScore(hand) { let score = 0, aces = 0; for (let c of hand) { score += c.bjVal; if (c.raw === 'A') aces += 1; } while (score > 21 && aces > 0) { score -= 10; aces -= 1; } return score; }
 
 // --- PVP ARENA ENGINE ---
 let pvpState = {
-    status: 'EMPTY', // EMPTY, WAITING, SETUP, BETTING, MATCH
-    game: null, targetScore: 1, wager: 0, pot: 0,
-    p1: null, p2: null, spectatorBets: [], timer: 0, turn: 1, 
-    board: Array(9).fill(null), actions: { p1: null, p2: null }, tempData: {}
+    status: 'EMPTY', game: null, targetScore: 1, wager: 0, pot: 0, p1: null, p2: null, spectatorBets: [], timer: 0, turn: 1, board: Array(9).fill(null), actions: { p1: null, p2: null }, tempData: {}
 };
-let pvpCountdownInterval = null; // Ghost match fix
+let pvpCountdownInterval = null; 
 
 function resetPVP() {
     if(pvpCountdownInterval) { clearInterval(pvpCountdownInterval); pvpCountdownInterval = null; }
@@ -163,42 +134,25 @@ function resetPVP() {
     io.to('pvp').emit('pvpUpdate', pvpState);
 }
 
-// FULL REFUND FUNCTION (Pre-Match)
 async function refundPVPEscrow() {
     if (pvpState.p1 && pvpState.wager > 0) {
         let u1 = await User.findById(pvpState.p1._id);
-        if(u1) { 
-            u1.playableCredits = formatTC(u1.playableCredits + pvpState.p1.lockedFromPlayable); 
-            u1.credits = formatTC(u1.credits + pvpState.p1.lockedFromMain); 
-            await u1.save(); 
-            io.to(pvpState.p1.socketId).emit('balanceUpdateData', {credits: u1.credits, playable: u1.playableCredits}); 
-        }
+        if(u1) { u1.playableCredits = formatTC(u1.playableCredits + pvpState.p1.lockedFromPlayable); u1.credits = formatTC(u1.credits + pvpState.p1.lockedFromMain); await u1.save(); io.to(pvpState.p1.socketId).emit('balanceUpdateData', {credits: u1.credits, playable: u1.playableCredits}); }
     }
     if (pvpState.p2 && pvpState.wager > 0 && pvpState.status !== 'SETUP') {
         let u2 = await User.findById(pvpState.p2._id);
-        if(u2) { 
-            u2.playableCredits = formatTC(u2.playableCredits + pvpState.p2.lockedFromPlayable); 
-            u2.credits = formatTC(u2.credits + pvpState.p2.lockedFromMain); 
-            await u2.save(); 
-            io.to(pvpState.p2.socketId).emit('balanceUpdateData', {credits: u2.credits, playable: u2.playableCredits}); 
-        }
+        if(u2) { u2.playableCredits = formatTC(u2.playableCredits + pvpState.p2.lockedFromPlayable); u2.credits = formatTC(u2.credits + pvpState.p2.lockedFromMain); await u2.save(); io.to(pvpState.p2.socketId).emit('balanceUpdateData', {credits: u2.credits, playable: u2.playableCredits}); }
     }
     for (let b of pvpState.spectatorBets) {
         let sU = await User.findById(b._id);
-        if(sU) { 
-            sU.playableCredits = formatTC(sU.playableCredits + b.fromPlayable); 
-            sU.credits = formatTC(sU.credits + b.fromMain); 
-            await sU.save(); 
-            io.to(b.socketId).emit('balanceUpdateData', {credits: sU.credits, playable: sU.playableCredits}); 
-        }
+        if(sU) { sU.playableCredits = formatTC(sU.playableCredits + b.fromPlayable); sU.credits = formatTC(sU.credits + b.fromMain); await sU.save(); io.to(b.socketId).emit('balanceUpdateData', {credits: sU.credits, playable: sU.playableCredits}); }
     }
 }
 
 async function resolvePVPMatch(winnerNum) {
     let winner = winnerNum === 1 ? pvpState.p1 : pvpState.p2;
     let loser = winnerNum === 1 ? pvpState.p2 : pvpState.p1;
-    
-    let houseTax = formatTC(pvpState.pot * 0.05); // Exact 5% Rake
+    let houseTax = formatTC(pvpState.pot * 0.05); 
     let winPayout = formatTC(pvpState.pot - houseTax);
 
     if (winner) {
@@ -207,34 +161,25 @@ async function resolvePVPMatch(winnerNum) {
             wUser.credits = formatTC((wUser.credits || 0) + winPayout); await wUser.save(); 
             await new CreditLog({ username: wUser.username, action: 'PVP WON', amount: winPayout, details: `Defeated ${loser ? loser.username : 'Opponent'}` }).save();
             io.to(winner.socketId).emit('balanceUpdateData', { credits: wUser.credits, playable: wUser.playableCredits });
-            io.to(winner.socketId).emit('silentNotification', { title: "VICTORY", msg: `You won ${winPayout} TC (5% House Tax Applied).` });
+            io.to(winner.socketId).emit('silentNotification', { title: "VICTORY", msg: `You won ${winPayout} TC (5% Tax).` });
         }
     }
-    
-    // Log the rake for the Admin Dashboard Profit Tracker
-    await new CreditLog({ username: 'SYSTEM', action: 'HOUSE RAKE', amount: houseTax, details: `PVP Escrow Tax` }).save();
+    await new CreditLog({ username: 'SYSTEM', action: 'HOUSE RAKE', amount: houseTax, details: `PVP Match Tax` }).save();
 
     for (let b of pvpState.spectatorBets) {
         let sUser = await User.findById(b._id);
         if(sUser) {
             if (b.choice === winnerNum) {
-                let sWin = formatTC(b.amount * 1.95);
-                sUser.credits = formatTC((sUser.credits || 0) + sWin); await sUser.save();
-                io.to(b.socketId).emit('balanceUpdateData', { credits: sUser.credits, playable: sUser.playableCredits });
-            } else {
-                await new CreditLog({ username: sUser.username, action: 'GAME', amount: -b.amount, details: `PVP Spectator Loss` }).save();
-            }
+                let sWin = formatTC(b.amount * 1.95); sUser.credits = formatTC((sUser.credits || 0) + sWin); await sUser.save(); io.to(b.socketId).emit('balanceUpdateData', { credits: sUser.credits, playable: sUser.playableCredits });
+            } else { await new CreditLog({ username: sUser.username, action: 'GAME', amount: -b.amount, details: `PVP Spectator Loss` }).save(); }
         }
     }
-    
     io.to('pvp').emit('pvpMatchOver', { winnerNum: winnerNum, winnerName: winner ? winner.username : "Player", payout: winPayout });
     setTimeout(() => { resetPVP(); pushAdminData(); }, 5000);
 }
 
-// Disconnect Router: Pre-Match Refund vs Mid-Match TKO
 async function handlePVPDisconnect(playerNum) {
     if(pvpCountdownInterval) { clearInterval(pvpCountdownInterval); pvpCountdownInterval = null; }
-    
     if(pvpState.status === 'EMPTY' || pvpState.status === 'WAITING') {
         if(playerNum === 1) pvpState.p1 = null; else pvpState.p2 = null;
         pvpState.status = (pvpState.p1 || pvpState.p2) ? 'WAITING' : 'EMPTY';
@@ -242,27 +187,20 @@ async function handlePVPDisconnect(playerNum) {
     } 
     else if (pvpState.status === 'SETUP' || pvpState.status === 'BETTING') {
         io.to('pvp').emit('silentNotification', { title: "MATCH ABORTED", msg: "A player left before the match began. Escrows refunded." });
-        await refundPVPEscrow();
-        resetPVP();
+        await refundPVPEscrow(); resetPVP();
     }
     else if (pvpState.status === 'MATCH') {
-        io.to('pvp').emit('silentNotification', { title: "TKO!", msg: "A player disconnected mid-fight. Technical Knockout applied." });
+        io.to('pvp').emit('silentNotification', { title: "TKO!", msg: "A player disconnected mid-fight. TKO applied." });
         await resolvePVPMatch(playerNum === 1 ? 2 : 1);
     }
 }
 
-// ==========================================
-// 4. SHARED TABLES REAL-TIME LOOP
-// ==========================================
+// --- SHARED TABLES LOOP ---
 setInterval(() => {
     if (sharedTables.status === 'BETTING') {
-        sharedTables.time--;
-        io.emit('timerUpdate', sharedTables.time);
-
+        sharedTables.time--; io.emit('timerUpdate', sharedTables.time);
         if (sharedTables.time <= 0) {
-            sharedTables.status = 'RESOLVING';
-            io.emit('lockBets');
-
+            sharedTables.status = 'RESOLVING'; io.emit('lockBets');
             setTimeout(async () => {
                 let dtD = drawCard(), dtT = drawCard();
                 let dtWin = dtD.dtVal > dtT.dtVal ? 'Dragon' : (dtT.dtVal > dtD.dtVal ? 'Tiger' : 'Tie');
@@ -289,10 +227,8 @@ setInterval(() => {
                     let bDraws = false;
                     if (pC.length === 2) { if (bS <= 5) bDraws = true; } 
                     else {
-                        if (bS <= 2) bDraws = true;
-                        else if (bS === 3 && p3Val !== 8) bDraws = true;
-                        else if (bS === 4 && p3Val >= 2 && p3Val <= 7) bDraws = true;
-                        else if (bS === 5 && p3Val >= 4 && p3Val <= 7) bDraws = true;
+                        if (bS <= 2) bDraws = true; else if (bS === 3 && p3Val !== 8) bDraws = true;
+                        else if (bS === 4 && p3Val >= 2 && p3Val <= 7) bDraws = true; else if (bS === 5 && p3Val >= 4 && p3Val <= 7) bDraws = true;
                         else if (bS === 6 && (p3Val === 6 || p3Val === 7)) bDraws = true;
                     }
                     if (bDraws) { bC.push(drawCard()); bS = (bS + bC[bC.length-1].bacVal) % 10; b3Drawn = true; }
@@ -308,7 +244,6 @@ setInterval(() => {
                     else if (b.room === 'sicbo') { if (b.choice === sbWin) payout = b.amount * 2; } 
                     else if (b.room === 'perya') { let m = pyR.filter(c => c === b.choice).length; if (m > 0) payout = b.amount + (b.amount * m); } 
                     else if (b.room === 'baccarat') { if (bacWin === 'Tie') { payout = b.choice === 'Tie' ? b.amount * 9 : (b.choice === 'Player' || b.choice === 'Banker' ? b.amount : 0); } else if (bacWin === 'Player' && b.choice === 'Player') { payout = b.amount * 2; } else if (bacWin === 'Banker' && b.choice === 'Banker') { payout = b.amount * 1.95; } }
-
                     if (!playerStats[b.userId]) playerStats[b.userId] = { socketId: b.socketId, username: b.username, amountWon: 0, amountBet: 0, room: b.room };
                     playerStats[b.userId].amountBet += b.amount; playerStats[b.userId].amountWon += formatTC(payout);
                 });
@@ -323,7 +258,6 @@ setInterval(() => {
                     }
                 });
 
-                // Explicitly emit results only to the specific rooms
                 io.to('dt').emit('sharedResults', { room: 'dt', dCard: dtD, tCard: dtT, winner: dtWin, resStr: dtResStr, stats: gameStats.dt });
                 io.to('sicbo').emit('sharedResults', { room: 'sicbo', roll: sbR, sum: sbSum, winner: sbWin, resStr: sbResStr, stats: gameStats.sicbo });
                 io.to('perya').emit('sharedResults', { room: 'perya', roll: pyR, stats: gameStats.perya });
@@ -337,51 +271,33 @@ setInterval(() => {
     }
 }, 1000);
 
-// ==========================================
-// 5. HELPER: PUSH ADMIN DATA
-// ==========================================
 async function pushAdminData(targetSocket = null) {
     try {
-        const users = await User.find(); 
-        const txs = await Transaction.find().sort({ date: -1 }); 
-        const gcs = await GiftCode.find().sort({ date: -1 });
-        
+        const users = await User.find(); const txs = await Transaction.find().sort({ date: -1 }); const gcs = await GiftCode.find().sort({ date: -1 });
         let totalEconomy = formatTC(users.reduce((a, b) => a + (b.credits || 0) + (b.playableCredits || 0), 0));
         let approvedDeposits = txs.filter(t => t.type === 'Deposit' && t.status === 'Approved').reduce((a, b) => a + b.amount, 0);
-
         const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
         const gameLogs = await CreditLog.find({ action: { $in: ['GAME', 'HOUSE RAKE'] }, date: { $gte: oneDayAgo } });
-        
-        let hp = 0;
-        gameLogs.forEach(l => {
-            if (l.action === 'HOUSE RAKE') hp += l.amount; // House Tax increases profit
-            else if (l.action === 'GAME') hp -= l.amount; // Regular games inverted net
-        });
-        
+        let hp = 0; gameLogs.forEach(l => { if (l.action === 'HOUSE RAKE') hp += l.amount; else if (l.action === 'GAME') hp -= l.amount; });
         const adminLogs = await AdminLog.find().sort({ date: -1 }).limit(100);
-
         let payload = { users, transactions: txs, giftBatches: gcs, adminLogs, stats: { economy: totalEconomy, approvedDeposits: formatTC(approvedDeposits), limit: 2000000, houseProfit: formatTC(hp) } };
         if(targetSocket) targetSocket.emit('adminDataSync', payload); else io.to('admin_room').emit('adminDataSync', payload);
-    } catch(e) { console.error(e); }
+    } catch(e) {}
 }
 
 // ==========================================
-// 6. CLIENT SOCKET COMMUNICATION
+// SOCKET LISTENERS
 // ==========================================
 io.on('connection', (socket) => {
     socket.emit('timerUpdate', sharedTables.time);
-
     socket.isBetting = false; socket.isSharedBetting = false; socket.isCashier = false; socket.isAuth = false;
 
-    // --- SESSION RECONNECTION ---
     socket.on('reconnectSession', async (token) => {
         if (!token) return;
         try {
             const user = await User.findOne({ sessionToken: token, status: { $ne: 'Banned' } });
             if (user) {
-                user.status = 'Active'; await user.save();
-                socket.user = user; connectedUsers[user.username] = socket.id;
-                
+                user.status = 'Active'; await user.save(); socket.user = user; connectedUsers[user.username] = socket.id;
                 let now = new Date(), canClaim = true, day = 1, nextClaim = null;
                 if (user.dailyReward.lastClaim) {
                     let diffHours = (now - user.dailyReward.lastClaim) / (1000 * 60 * 60);
@@ -396,20 +312,11 @@ io.on('connection', (socket) => {
     });
 
     socket.on('logout', async () => {
-        if(socket.user) {
-            await User.findByIdAndUpdate(socket.user._id, { sessionToken: null, status: 'Offline' });
-            delete connectedUsers[socket.user.username];
-            socket.user = null;
-            socket.emit('logoutSuccess');
-            pushAdminData();
-        }
+        if(socket.user) { await User.findByIdAndUpdate(socket.user._id, { sessionToken: null, status: 'Offline' }); delete connectedUsers[socket.user.username]; socket.user = null; socket.emit('logoutSuccess'); pushAdminData(); }
     });
 
     socket.on('requestBalanceRefresh', async () => {
-        if(socket.user) {
-            let u = await User.findById(socket.user._id);
-            if(u) socket.emit('balanceUpdateData', { credits: formatTC(u.credits), playable: formatTC(u.playableCredits) });
-        }
+        if(socket.user) { let u = await User.findById(socket.user._id); if(u) socket.emit('balanceUpdateData', { credits: formatTC(u.credits), playable: formatTC(u.playableCredits) }); }
     });
 
     socket.on('getWalletLogs', async () => {
@@ -417,13 +324,11 @@ io.on('connection', (socket) => {
             const logs = await CreditLog.find({ username: socket.user.username }).sort({ date: -1 }).limit(50);
             const startOfDay = new Date(); startOfDay.setHours(0,0,0,0);
             const todayLogs = await CreditLog.find({ username: socket.user.username, date: { $gte: startOfDay }});
-            let dailyProfit = 0;
-            todayLogs.forEach(l => { if (l.action === 'GAME' || l.action === 'PVP WON') dailyProfit += l.amount; });
+            let dailyProfit = 0; todayLogs.forEach(l => { if (l.action === 'GAME' || l.action === 'PVP WON') dailyProfit += l.amount; });
             socket.emit('walletLogsData', { logs, dailyProfit: formatTC(dailyProfit) });
         }
     });
 
-    // --- SOLO GAMES ---
     socket.on('playSolo', async (data) => {
         if (!socket.user || socket.isBetting) return; socket.isBetting = true;
         try {
@@ -433,14 +338,11 @@ io.on('connection', (socket) => {
                 let amt = formatTC(data.bet);
                 if (isNaN(amt) || amt < 10) return socket.emit('localGameError', { msg: 'MIN BET IS 10 TC', game: data.game });
                 if (amt > 50000) return socket.emit('localGameError', { msg: 'MAX BET IS 50K TC', game: data.game });
-                
                 let deduction = await deductBet(user, amt);
                 if (!deduction.success) return socket.emit('localGameError', { msg: 'INSUFFICIENT TC', game: data.game });
                 await user.save();
-
                 if (data.game === 'blackjack') socket.bjState = { bet: amt, pHand: [drawCard(), drawCard()], dHand: [drawCard(), drawCard()], fromPlayable: deduction.fromPlayable, fromMain: deduction.fromMain };
             }
-
             let payout = 0;
 
             if (data.game === 'd20') {
@@ -448,22 +350,17 @@ io.on('connection', (socket) => {
                 if (data.guessType === 'exact') { if (roll === parseInt(data.guessValue)) { win = true; multiplier = 18; } } 
                 else if (data.guessType === 'highlow') { if (data.guessValue === 'high' && roll >= 11) { win = true; multiplier = 1.95; } else if (data.guessValue === 'low' && roll <= 10) { win = true; multiplier = 1.95; } } 
                 else if (data.guessType === 'oddeven') { if (data.guessValue === 'even' && roll % 2 === 0) { win = true; multiplier = 1.95; } else if (data.guessValue === 'odd' && roll % 2 !== 0) { win = true; multiplier = 1.95; } }
-                
                 if (win) { payout = formatTC(data.bet * multiplier); gameStats.d20.Win++; } else { gameStats.d20.Lose++; }
                 user.credits = formatTC(user.credits + payout); await user.save();
                 await new CreditLog({ username: user.username, action: 'GAME', amount: formatTC(payout - data.bet), details: `D20` }).save();
-                
-                pushAdminData(); 
-                socket.emit('d20Result', { roll, payout, bet: data.bet, resStr: `ROLLED ${roll}`, newBalance: { credits: user.credits, playable: user.playableCredits }, stats: gameStats.d20 }); checkResetStats('d20');
+                pushAdminData(); socket.emit('d20Result', { roll, payout, bet: data.bet, resStr: `ROLLED ${roll}`, newBalance: { credits: user.credits, playable: user.playableCredits }, stats: gameStats.d20 }); checkResetStats('d20');
             } 
             else if (data.game === 'coinflip') {
                 gameStats.coinflip.total++; let result = Math.random() < 0.5 ? 'Heads' : 'Tails'; gameStats.coinflip[result]++;
                 if (data.choice === result) payout = formatTC(data.bet * 1.95);
                 user.credits = formatTC(user.credits + payout); await user.save();
                 await new CreditLog({ username: user.username, action: 'GAME', amount: formatTC(payout - data.bet), details: `Coin Flip` }).save();
-                
-                pushAdminData(); 
-                socket.emit('coinResult', { result, payout, bet: data.bet, resStr: `LANDED ON ${result.toUpperCase()}`, newBalance: { credits: user.credits, playable: user.playableCredits }, stats: gameStats.coinflip }); checkResetStats('coinflip');
+                pushAdminData(); socket.emit('coinResult', { result, payout, bet: data.bet, resStr: `LANDED ON ${result.toUpperCase()}`, newBalance: { credits: user.credits, playable: user.playableCredits }, stats: gameStats.coinflip }); checkResetStats('coinflip');
             }
             else if (data.game === 'blackjack') {
                 if (data.action === 'start') {
@@ -473,39 +370,30 @@ io.on('connection', (socket) => {
                         if(msg === 'Blackjack!') gameStats.blackjack.Win++; else gameStats.blackjack.Push++;
                         if (msg === 'Push') { user.playableCredits = formatTC(user.playableCredits + socket.bjState.fromPlayable); user.credits = formatTC(user.credits + socket.bjState.fromMain); } else { user.credits = formatTC(user.credits + payout); }
                         await user.save(); await new CreditLog({ username: user.username, action: 'GAME', amount: formatTC(payout - socket.bjState.bet), details: `Blackjack` }).save();
-                        
-                        pushAdminData(); 
-                        socket.emit('bjUpdate', { event: 'deal', pHand: socket.bjState.pHand, dHand: socket.bjState.dHand, naturalBJ: true, payout, msg, resStr: `${msg.toUpperCase()} (${pS} TO ${dS})`, bet: socket.bjState.bet, newBalance: { credits: user.credits, playable: user.playableCredits }, stats: gameStats.blackjack });
-                        socket.bjState = null; checkResetStats('blackjack');
+                        pushAdminData(); socket.emit('bjUpdate', { event: 'deal', pHand: socket.bjState.pHand, dHand: socket.bjState.dHand, naturalBJ: true, payout, msg, resStr: `${msg.toUpperCase()} (${pS} TO ${dS})`, bet: socket.bjState.bet, newBalance: { credits: user.credits, playable: user.playableCredits }, stats: gameStats.blackjack }); socket.bjState = null; checkResetStats('blackjack');
                     } else { socket.emit('bjUpdate', { event: 'deal', pHand: socket.bjState.pHand, dHand: socket.bjState.dHand }); }
                 }
                 else if (data.action === 'hit') {
                     if(!socket.bjState) return; socket.bjState.pHand.push(drawCard()); let pS = getBJScore(socket.bjState.pHand); let dS = getBJScore(socket.bjState.dHand);
                     if (pS > 21) {
                         gameStats.blackjack.Lose++; await new CreditLog({ username: user.username, action: 'GAME', amount: formatTC(-socket.bjState.bet), details: `Blackjack` }).save();
-                        socket.emit('bjUpdate', { event: 'resolved', pHand: socket.bjState.pHand, dHand: socket.bjState.dHand, payout: 0, msg: 'Bust!', resStr: `PLAYER BUSTS! (${pS})`, bet: socket.bjState.bet, newBalance: { credits: user.credits, playable: user.playableCredits }, stats: gameStats.blackjack });
-                        socket.bjState = null; checkResetStats('blackjack');
+                        socket.emit('bjUpdate', { event: 'resolved', pHand: socket.bjState.pHand, dHand: socket.bjState.dHand, payout: 0, msg: 'Bust!', resStr: `PLAYER BUSTS! (${pS})`, bet: socket.bjState.bet, newBalance: { credits: user.credits, playable: user.playableCredits }, stats: gameStats.blackjack }); socket.bjState = null; checkResetStats('blackjack');
                     } else { socket.emit('bjUpdate', { event: 'hit', pHand: socket.bjState.pHand }); }
                 }
                 else if (data.action === 'stand') {
                     if(!socket.bjState) return; let pS = getBJScore(socket.bjState.pHand); while (getBJScore(socket.bjState.dHand) < 17) { socket.bjState.dHand.push(drawCard()); }
                     let dS = getBJScore(socket.bjState.dHand); let msg = '';
                     if (dS > 21 || pS > dS) { payout = formatTC(socket.bjState.bet * 2); msg = 'You Win!'; gameStats.blackjack.Win++; } 
-                    else if (pS === dS) { payout = formatTC(socket.bjState.bet); msg = 'Push'; gameStats.blackjack.Push++; } 
-                    else { msg = 'Dealer Wins'; gameStats.blackjack.Lose++; }
+                    else if (pS === dS) { payout = formatTC(socket.bjState.bet); msg = 'Push'; gameStats.blackjack.Push++; } else { msg = 'Dealer Wins'; gameStats.blackjack.Lose++; }
                     if (msg === 'Push') { user.playableCredits = formatTC(user.playableCredits + socket.bjState.fromPlayable); user.credits = formatTC(user.credits + socket.bjState.fromMain); } else { user.credits = formatTC(user.credits + payout); }
                     await user.save(); await new CreditLog({ username: user.username, action: 'GAME', amount: formatTC(payout - socket.bjState.bet), details: `Blackjack` }).save();
-                    
                     let resStr = (dS > 21) ? `DEALER BUSTS! (${dS} TO ${pS})` : (msg === 'Push' ? `TIE (${dS} TO ${pS})` : (msg === 'You Win!' ? `PLAYER (${dS} TO ${pS})` : `DEALER (${dS} TO ${pS})`));
-                    pushAdminData(); 
-                    socket.emit('bjUpdate', { event: 'resolved', pHand: socket.bjState.pHand, dHand: socket.bjState.dHand, payout, msg, resStr: resStr, bet: socket.bjState.bet, newBalance: { credits: user.credits, playable: user.playableCredits }, stats: gameStats.blackjack });
-                    socket.bjState = null; checkResetStats('blackjack');
+                    pushAdminData(); socket.emit('bjUpdate', { event: 'resolved', pHand: socket.bjState.pHand, dHand: socket.bjState.dHand, payout, msg, resStr: resStr, bet: socket.bjState.bet, newBalance: { credits: user.credits, playable: user.playableCredits }, stats: gameStats.blackjack }); socket.bjState = null; checkResetStats('blackjack');
                 }
             }
         } finally { socket.isBetting = false; }
     });
 
-    // --- SHARED TABLES ---
     socket.on('joinRoom', (room) => { 
         if(socket.currentRoom) { socket.leave(socket.currentRoom); rooms[socket.currentRoom]--; }
         socket.join(room); socket.currentRoom = room; rooms[room]++; 
@@ -516,114 +404,63 @@ io.on('connection', (socket) => {
     socket.on('leaveRoom', (room) => { 
         socket.leave(room); socket.currentRoom = null;
         if (rooms[room] > 0) rooms[room]--; 
-        if(room === 'pvp') {
-            if (pvpState.p1 && pvpState.p1.socketId === socket.id) handlePVPDisconnect(1);
-            else if (pvpState.p2 && pvpState.p2.socketId === socket.id) handlePVPDisconnect(2);
-        }
+        if(room === 'pvp') { if (pvpState.p1 && pvpState.p1.socketId === socket.id) handlePVPDisconnect(1); else if (pvpState.p2 && pvpState.p2.socketId === socket.id) handlePVPDisconnect(2); }
         io.emit('playerCount', rooms); 
     });
     
     socket.on('sendChat', (data) => { 
-        if (socket.user && socket.currentRoom) { 
-            io.to(socket.currentRoom).emit('chatMessage', { user: socket.user.username, text: data.msg, sys: false }); 
-        } 
+        if (socket.user && socket.currentRoom) { io.to(socket.currentRoom).emit('chatMessage', { user: socket.user.username, text: data.msg, sys: false }); } 
     });
     
-    // --- VOICE CHAT PTT ---
     socket.on('voiceData', (data) => {
-        if(socket.currentRoom === 'pvp' && socket.user) {
-            socket.to('pvp').emit('voiceStream', { username: socket.user.username, audio: data });
-        }
+        if(socket.currentRoom === 'pvp' && socket.user) { socket.to('pvp').emit('voiceStream', { username: socket.user.username, audio: data }); }
     });
 
-    // --- PVP API ---
     socket.on('pvpTakeSeat', (playerNum) => {
         if (!socket.user || pvpState.status === 'MATCH' || pvpState.status === 'BETTING') return;
         if (pvpState.p1 && pvpState.p1.socketId === socket.id) return;
         if (pvpState.p2 && pvpState.p2.socketId === socket.id) return;
-
         let pObj = { _id: socket.user._id, username: socket.user.username, socketId: socket.id, score: 0, lockedFromMain: 0, lockedFromPlayable: 0 };
-        if (playerNum === 1 && !pvpState.p1) pvpState.p1 = pObj;
-        else if (playerNum === 2 && !pvpState.p2) pvpState.p2 = pObj;
-        else return;
-
+        if (playerNum === 1 && !pvpState.p1) pvpState.p1 = pObj; else if (playerNum === 2 && !pvpState.p2) pvpState.p2 = pObj; else return;
         pvpState.status = (pvpState.p1 && pvpState.p2) ? 'SETUP' : 'WAITING';
-        io.to('pvp').emit('pvpUpdate', pvpState);
-        io.to('pvp').emit('chatMessage', { sys: true, text: `${socket.user.username} took Seat ${playerNum}.` });
+        io.to('pvp').emit('pvpUpdate', pvpState); io.to('pvp').emit('chatMessage', { sys: true, text: `${socket.user.username} took Seat ${playerNum}.` });
     });
 
     socket.on('pvpLeaveSeat', () => {
         if (pvpState.status === 'MATCH' || pvpState.status === 'BETTING') return;
-        let isP1 = pvpState.p1 && pvpState.p1.socketId === socket.id;
-        let isP2 = pvpState.p2 && pvpState.p2.socketId === socket.id;
+        let isP1 = pvpState.p1 && pvpState.p1.socketId === socket.id; let isP2 = pvpState.p2 && pvpState.p2.socketId === socket.id;
         if (!isP1 && !isP2) return;
-
-        if (pvpState.status === 'SETUP') {
-            handlePVPDisconnect(isP1 ? 1 : 2); 
-        } else {
-            if(isP1) pvpState.p1 = null; else pvpState.p2 = null;
-            pvpState.status = (pvpState.p1 || pvpState.p2) ? 'WAITING' : 'EMPTY';
-            io.to('pvp').emit('pvpUpdate', pvpState);
-        }
+        if (pvpState.status === 'SETUP') { handlePVPDisconnect(isP1 ? 1 : 2); } 
+        else { if(isP1) pvpState.p1 = null; else pvpState.p2 = null; pvpState.status = (pvpState.p1 || pvpState.p2) ? 'WAITING' : 'EMPTY'; io.to('pvp').emit('pvpUpdate', pvpState); }
     });
 
     socket.on('pvpProposeTerms', async (data) => {
         if (pvpState.status !== 'SETUP' || !pvpState.p1 || pvpState.p1.socketId !== socket.id) return;
-        
         let wager = formatTC(data.wager);
-        if(isNaN(wager) || wager < 10) return socket.emit('localGameError', { msg: "Min Wager is 10 TC" });
-        if(wager > 50000) return socket.emit('localGameError', { msg: "Max Wager is 50K TC" });
-
-        const u = await User.findById(pvpState.p1._id);
-        let deduction = await deductBet(u, wager);
+        if(isNaN(wager) || wager < 10) return socket.emit('localGameError', { msg: "Min Wager is 10 TC" }); if(wager > 50000) return socket.emit('localGameError', { msg: "Max Wager is 50K TC" });
+        const u = await User.findById(pvpState.p1._id); let deduction = await deductBet(u, wager);
         if (!deduction.success) return socket.emit('localGameError', { msg: "Insufficient TC" });
-        await u.save();
-        socket.emit('balanceUpdateData', { credits: u.credits, playable: u.playableCredits });
-
-        pvpState.p1.lockedFromPlayable = deduction.fromPlayable;
-        pvpState.p1.lockedFromMain = deduction.fromMain;
-        pvpState.game = data.game;
-        pvpState.targetScore = data.target;
-        pvpState.wager = wager;
-        pvpState.pot = wager;
-
-        io.to('pvp').emit('pvpUpdate', pvpState);
-        io.to('pvp').emit('chatMessage', { sys: true, text: `P1 proposed a ${wager} TC ${data.game.toUpperCase()} match (Target: ${data.target}). Waiting for P2 to accept.` });
+        await u.save(); socket.emit('balanceUpdateData', { credits: u.credits, playable: u.playableCredits });
+        pvpState.p1.lockedFromPlayable = deduction.fromPlayable; pvpState.p1.lockedFromMain = deduction.fromMain; pvpState.game = data.game; pvpState.targetScore = data.target; pvpState.wager = wager; pvpState.pot = wager;
+        io.to('pvp').emit('pvpUpdate', pvpState); io.to('pvp').emit('chatMessage', { sys: true, text: `P1 proposed a ${wager} TC ${data.game.toUpperCase()} match (Target: ${data.target}).` });
     });
 
     socket.on('pvpAcceptTerms', async () => {
         if (pvpState.status !== 'SETUP' || !pvpState.p2 || pvpState.p2.socketId !== socket.id) return;
+        const u = await User.findById(pvpState.p2._id); let deduction = await deductBet(u, pvpState.wager);
+        if (!deduction.success) { io.to('pvp').emit('chatMessage', { sys: true, text: `P2 has insufficient funds to accept.` }); return; }
+        await u.save(); socket.emit('balanceUpdateData', { credits: u.credits, playable: u.playableCredits });
+        pvpState.p2.lockedFromPlayable = deduction.fromPlayable; pvpState.p2.lockedFromMain = deduction.fromMain; pvpState.pot += pvpState.wager;
+        pvpState.status = 'BETTING'; pvpState.timer = 15; io.to('pvp').emit('pvpUpdate', pvpState); io.to('pvp').emit('chatMessage', { sys: true, text: `P2 accepted! 15 seconds for Spectator Betting.` });
         
-        const u = await User.findById(pvpState.p2._id);
-        let deduction = await deductBet(u, pvpState.wager);
-        if (!deduction.success) {
-            io.to('pvp').emit('chatMessage', { sys: true, text: `P2 has insufficient funds to accept the match.` });
-            return;
-        }
-        await u.save();
-        socket.emit('balanceUpdateData', { credits: u.credits, playable: u.playableCredits });
-
-        pvpState.p2.lockedFromPlayable = deduction.fromPlayable;
-        pvpState.p2.lockedFromMain = deduction.fromMain;
-        pvpState.pot += pvpState.wager;
-        
-        pvpState.status = 'BETTING';
-        pvpState.timer = 15;
-        io.to('pvp').emit('pvpUpdate', pvpState);
-        io.to('pvp').emit('chatMessage', { sys: true, text: `P2 accepted! 15 seconds for Spectator Betting.` });
-
         pvpCountdownInterval = setInterval(() => {
-            pvpState.timer--;
-            io.to('pvp').emit('pvpTimer', pvpState.timer);
+            pvpState.timer--; io.to('pvp').emit('pvpTimer', pvpState.timer);
             if (pvpState.timer <= 0) {
                 clearInterval(pvpCountdownInterval); pvpCountdownInterval = null;
-                pvpState.status = 'MATCH';
-                pvpState.turn = 1;
-                pvpState.actions = { p1: null, p2: null };
+                pvpState.status = 'MATCH'; pvpState.turn = 1; pvpState.actions = { p1: null, p2: null };
                 if (pvpState.game === 'ttt') pvpState.board = Array(9).fill(null);
                 if (pvpState.game === 'hl') pvpState.tempData.curr = Math.floor(Math.random()*13)+1;
-                io.to('pvp').emit('pvpUpdate', pvpState);
-                io.to('pvp').emit('chatMessage', { sys: true, text: `MATCH STARTED!` });
+                io.to('pvp').emit('pvpUpdate', pvpState); io.to('pvp').emit('chatMessage', { sys: true, text: `MATCH STARTED!` });
             }
         }, 1000);
     });
@@ -633,38 +470,24 @@ io.on('connection', (socket) => {
         if (pvpState.game === 'ttt' || pvpState.game === 'rps') return socket.emit('localGameError', {msg: "Betting disabled for skill games."});
         if (pvpState.p1 && pvpState.p1.socketId === socket.id) return socket.emit('localGameError', {msg: "Duelists cannot spectate bet."});
         if (pvpState.p2 && pvpState.p2.socketId === socket.id) return socket.emit('localGameError', {msg: "Duelists cannot spectate bet."});
-
-        let amt = formatTC(data.amount);
-        if (isNaN(amt) || amt < 10) return socket.emit('localGameError', { msg: 'MIN BET IS 10 TC' });
-        
+        let amt = formatTC(data.amount); if (isNaN(amt) || amt < 10) return socket.emit('localGameError', { msg: 'MIN BET IS 10 TC' });
         let userSpecTotal = pvpState.spectatorBets.filter(b => b._id.toString() === socket.user._id.toString()).reduce((a,b) => a + b.amount, 0);
         if (userSpecTotal + amt > 50000) return socket.emit('localGameError', { msg: 'MAX 50K TOTAL SPECTATOR BET' });
-
-        const u = await User.findById(socket.user._id);
-        let deduction = await deductBet(u, amt);
+        const u = await User.findById(socket.user._id); let deduction = await deductBet(u, amt);
         if (!deduction.success) return socket.emit('localGameError', { msg: 'INSUFFICIENT TC' });
-        await u.save();
-        socket.emit('balanceUpdateData', { credits: u.credits, playable: u.playableCredits });
-
+        await u.save(); socket.emit('balanceUpdateData', { credits: u.credits, playable: u.playableCredits });
         pvpState.spectatorBets.push({ _id: u._id, socketId: socket.id, username: u.username, choice: data.choice, amount: amt, fromMain: deduction.fromMain, fromPlayable: deduction.fromPlayable });
         socket.emit('pvpSpecBetSuccess', { choice: data.choice, amount: amt });
     });
 
     socket.on('pvpAction', (actionData) => {
         if (pvpState.status !== 'MATCH') return;
-        
-        let isP1 = pvpState.p1 && pvpState.p1.socketId === socket.id;
-        let isP2 = pvpState.p2 && pvpState.p2.socketId === socket.id;
-        if (!isP1 && !isP2) return;
-
-        let pNum = isP1 ? 1 : 2;
+        let isP1 = pvpState.p1 && pvpState.p1.socketId === socket.id; let isP2 = pvpState.p2 && pvpState.p2.socketId === socket.id;
+        if (!isP1 && !isP2) return; let pNum = isP1 ? 1 : 2;
 
         if (pvpState.game === 'ttt') {
-            if (pvpState.turn !== pNum) return;
-            if (pvpState.board[actionData.cell] !== null) return;
-            let symbol = pNum === 1 ? 'X' : 'O';
-            pvpState.board[actionData.cell] = symbol;
-            
+            if (pvpState.turn !== pNum) return; if (pvpState.board[actionData.cell] !== null) return;
+            let symbol = pNum === 1 ? 'X' : 'O'; pvpState.board[actionData.cell] = symbol;
             const w = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
             let won = w.some(c => pvpState.board[c[0]] === symbol && pvpState.board[c[1]] === symbol && pvpState.board[c[2]] === symbol);
             
@@ -675,19 +498,12 @@ io.on('connection', (socket) => {
             } else if (!pvpState.board.includes(null)) {
                 io.to('pvp').emit('pvpRoundResult', { board: pvpState.board, winner: 0, reason: "Draw! Board Reset." });
                 setTimeout(() => { pvpState.board = Array(9).fill(null); pvpState.turn = 1; io.to('pvp').emit('pvpUpdate', pvpState); }, 2000);
-            } else {
-                pvpState.turn = pNum === 1 ? 2 : 1;
-                io.to('pvp').emit('pvpUpdate', pvpState);
-            }
+            } else { pvpState.turn = pNum === 1 ? 2 : 1; io.to('pvp').emit('pvpUpdate', pvpState); }
             return;
         }
 
-        // Auto-Assign Logic for Fast Games (Coin, Hi-Lo, Roulette)
         if (pvpState.game === 'coin' || pvpState.game === 'hl' || pvpState.game === 'roulette') {
-            pvpState.actions.p1 = pNum === 1 ? actionData : null;
-            pvpState.actions.p2 = pNum === 2 ? actionData : null;
-
-            // Auto-fill opposite choice immediately
+            pvpState.actions.p1 = pNum === 1 ? actionData : null; pvpState.actions.p2 = pNum === 2 ? actionData : null;
             if (pNum === 1) {
                 if (pvpState.game === 'coin') pvpState.actions.p2 = { choice: actionData.choice === 'H' ? 'T' : 'H' };
                 else if (pvpState.game === 'hl') pvpState.actions.p2 = { choice: actionData.choice === 'H' ? 'L' : 'H' };
@@ -698,9 +514,7 @@ io.on('connection', (socket) => {
                 else if (pvpState.game === 'roulette') pvpState.actions.p1 = { choice: actionData.choice === 'RED' ? 'BLACK' : 'RED' };
             }
         } else {
-            // Dice & RPS (Requires both to click)
-            if (pNum === 1 && !pvpState.actions.p1) pvpState.actions.p1 = actionData;
-            if (pNum === 2 && !pvpState.actions.p2) pvpState.actions.p2 = actionData;
+            if (pNum === 1 && !pvpState.actions.p1) pvpState.actions.p1 = actionData; if (pNum === 2 && !pvpState.actions.p2) pvpState.actions.p2 = actionData;
         }
         
         io.to('pvp').emit('pvpActionLocked', pNum);
@@ -710,72 +524,49 @@ io.on('connection', (socket) => {
             let p1Act = pvpState.actions.p1; let p2Act = pvpState.actions.p2;
 
             if (pvpState.game === 'dice') {
-                let p1R = [Math.ceil(Math.random()*6), Math.ceil(Math.random()*6), Math.ceil(Math.random()*6)];
-                let p2R = [Math.ceil(Math.random()*6), Math.ceil(Math.random()*6), Math.ceil(Math.random()*6)];
+                let p1R = [Math.ceil(Math.random()*6), Math.ceil(Math.random()*6), Math.ceil(Math.random()*6)]; let p2R = [Math.ceil(Math.random()*6), Math.ceil(Math.random()*6), Math.ceil(Math.random()*6)];
                 let s1 = p1R[0]+p1R[1]+p1R[2]; let s2 = p2R[0]+p2R[1]+p2R[2];
                 res.visuals = { p1Roll: p1R, p2Roll: p2R, p1Sum: s1, p2Sum: s2 };
                 if (s1 > s2) res.winner = 1; else if (s2 > s1) res.winner = 2;
                 res.reason = res.winner ? `P${res.winner} WINS (${s1} vs ${s2})` : `DRAW! (${s1} vs ${s2})`;
             }
             else if (pvpState.game === 'coin') {
-                let coinIsHeads = Math.random() < 0.5;
-                let cRes = coinIsHeads ? 'H' : 'T';
-                res.visuals = { coin: cRes, p1Choice: p1Act.choice, p2Choice: p2Act.choice };
+                let coinIsHeads = Math.random() < 0.5; let cRes = coinIsHeads ? 'H' : 'T'; res.visuals = { coin: cRes, p1Choice: p1Act.choice, p2Choice: p2Act.choice };
                 let p1W = p1Act.choice === cRes; let p2W = p2Act.choice === cRes;
                 if (p1W && !p2W) res.winner = 1; else if (p2W && !p1W) res.winner = 2; else res.winner = 0;
                 res.reason = res.winner ? `P${res.winner} GUESSED RIGHT!` : (p1W ? "BOTH GUESSED RIGHT (DRAW)" : "BOTH WRONG (DRAW)");
             }
             else if (pvpState.game === 'hl') {
-                let curr = pvpState.tempData.curr; let next = Math.floor(Math.random()*13)+1;
-                while(next === curr) next = Math.floor(Math.random()*13)+1;
+                let curr = pvpState.tempData.curr; let next = Math.floor(Math.random()*13)+1; while(next === curr) next = Math.floor(Math.random()*13)+1;
                 res.visuals = { oldCard: curr, newCard: next, p1Choice: p1Act.choice, p2Choice: p2Act.choice };
-                let p1W = (next > curr && p1Act.choice === 'H') || (next < curr && p1Act.choice === 'L');
-                let p2W = (next > curr && p2Act.choice === 'H') || (next < curr && p2Act.choice === 'L');
+                let p1W = (next > curr && p1Act.choice === 'H') || (next < curr && p1Act.choice === 'L'); let p2W = (next > curr && p2Act.choice === 'H') || (next < curr && p2Act.choice === 'L');
                 if (p1W && !p2W) res.winner = 1; else if (p2W && !p1W) res.winner = 2; else res.winner = 0;
-                res.reason = res.winner ? `P${res.winner} GUESSED RIGHT!` : (p1W ? "BOTH GUESSED RIGHT (DRAW)" : "BOTH WRONG (DRAW)");
-                pvpState.tempData.curr = next;
+                res.reason = res.winner ? `P${res.winner} GUESSED RIGHT!` : (p1W ? "BOTH GUESSED RIGHT (DRAW)" : "BOTH WRONG (DRAW)"); pvpState.tempData.curr = next;
             }
             else if (pvpState.game === 'roulette') {
-                let deg = Math.floor(Math.random() * 360);
-                let isRed = Math.floor(deg / 60) % 2 === 0; 
-                let cRes = isRed ? 'RED' : 'BLACK';
+                let deg = Math.floor(Math.random() * 360); let isRed = Math.floor(deg / 60) % 2 === 0; let cRes = isRed ? 'RED' : 'BLACK';
                 res.visuals = { degree: deg + 1440, result: cRes, p1Choice: p1Act.choice, p2Choice: p2Act.choice };
                 let p1W = p1Act.choice === cRes; let p2W = p2Act.choice === cRes;
                 if (p1W && !p2W) res.winner = 1; else if (p2W && !p1W) res.winner = 2; else res.winner = 0;
                 res.reason = res.winner ? `P${res.winner} WINS!` : (p1W ? "BOTH WINS (DRAW)" : "BOTH LOST (DRAW)");
             }
             else if (pvpState.game === 'rps') {
-                let v1 = p1Act.choice; let v2 = p2Act.choice;
-                res.visuals = { p1Choice: v1, p2Choice: v2 };
-                if (v1 !== v2) {
-                    if ((v1==='R'&&v2==='S')||(v1==='P'&&v2==='R')||(v1==='S'&&v2==='P')) res.winner = 1; else res.winner = 2;
-                }
+                let v1 = p1Act.choice; let v2 = p2Act.choice; res.visuals = { p1Choice: v1, p2Choice: v2 };
+                if (v1 !== v2) { if ((v1==='R'&&v2==='S')||(v1==='P'&&v2==='R')||(v1==='S'&&v2==='P')) res.winner = 1; else res.winner = 2; }
                 res.reason = res.winner ? `P${res.winner} WINS ROUND!` : "DRAW!";
             }
 
             if (res.winner === 1) pvpState.p1.score++; else if (res.winner === 2) pvpState.p2.score++;
-            
-            res.scores = { p1: pvpState.p1.score, p2: pvpState.p2.score };
-            io.to('pvp').emit('pvpRoundResult', res);
-            checkPVPMatchWin();
+            res.scores = { p1: pvpState.p1.score, p2: pvpState.p2.score }; io.to('pvp').emit('pvpRoundResult', res); checkPVPMatchWin();
         }
     });
 
     function checkPVPMatchWin() {
-        if (pvpState.p1.score >= pvpState.targetScore) {
-            setTimeout(() => { resolvePVPMatch(1); }, 4000);
-        } else if (pvpState.p2.score >= pvpState.targetScore) {
-            setTimeout(() => { resolvePVPMatch(2); }, 4000);
-        } else {
-            setTimeout(() => { 
-                pvpState.actions = { p1: null, p2: null }; 
-                if (pvpState.game === 'ttt') pvpState.board = Array(9).fill(null);
-                io.to('pvp').emit('pvpUpdate', pvpState); 
-            }, 4000);
-        }
+        if (pvpState.p1.score >= pvpState.targetScore) { setTimeout(() => { resolvePVPMatch(1); }, 4000); } 
+        else if (pvpState.p2.score >= pvpState.targetScore) { setTimeout(() => { resolvePVPMatch(2); }, 4000); } 
+        else { setTimeout(() => { pvpState.actions = { p1: null, p2: null }; if (pvpState.game === 'ttt') pvpState.board = Array(9).fill(null); io.to('pvp').emit('pvpUpdate', pvpState); }, 4000); }
     }
 
-    // --- CASHIER & SHARED CONTINUED ---
     socket.on('placeSharedBet', async (data) => {
         if (!socket.user || sharedTables.status !== 'BETTING') return;
         if (socket.isSharedBetting) return; socket.isSharedBetting = true;
@@ -793,7 +584,6 @@ io.on('connection', (socket) => {
     });
 
     socket.on('undoSharedBet', async (data) => {
-        // Anti-latency exploit: Lock undo at 1 second
         if (!socket.user || sharedTables.status !== 'BETTING' || sharedTables.time <= 1) return;
         if (socket.isSharedBetting) return; socket.isSharedBetting = true;
         try {
@@ -802,41 +592,30 @@ io.on('connection', (socket) => {
                 if (b.userId.toString() === socket.user._id.toString() && b.room === data.room) {
                     let user = await User.findById(socket.user._id);
                     if (user) {
-                        user.playableCredits = formatTC((user.playableCredits || 0) + b.fromPlayable);
-                        user.credits = formatTC((user.credits || 0) + b.fromMain);
-                        await user.save();
-                        socket.emit('balanceUpdateData', { credits: user.credits, playable: user.playableCredits });
-                        socket.emit('undoSuccess', { choice: b.choice, amount: b.amount });
+                        user.playableCredits = formatTC((user.playableCredits || 0) + b.fromPlayable); user.credits = formatTC((user.credits || 0) + b.fromMain);
+                        await user.save(); socket.emit('balanceUpdateData', { credits: user.credits, playable: user.playableCredits }); socket.emit('undoSuccess', { choice: b.choice, amount: b.amount });
                     }
-                    sharedTables.bets.splice(i, 1);
-                    break;
+                    sharedTables.bets.splice(i, 1); break;
                 }
             }
         } finally { socket.isSharedBetting = false; }
     });
 
     socket.on('submitTransaction', async (data) => { 
-        if (!socket.user) return;
-        if (socket.isCashier) return; socket.isCashier = true;
+        if (!socket.user) return; if (socket.isCashier) return; socket.isCashier = true;
         try {
-            let amount = formatTC(data.amount);
-            if(isNaN(amount) || amount <= 0) return;
-
+            let amount = formatTC(data.amount); if(isNaN(amount) || amount <= 0) return;
             if (data.type === 'Deposit' && amount < 1000) return socket.emit('localGameError', { msg: 'MIN DEPOSIT IS 1,000 TC', game: 'cashier' });
             if (data.type === 'Withdrawal' && amount < 10000) return socket.emit('localGameError', { msg: 'MIN WITHDRAWAL IS 10,000 TC', game: 'cashier' });
-
             if(data.type === 'Withdrawal') {
                 const user = await User.findOneAndUpdate({ _id: socket.user._id, credits: { $gte: amount } }, { $inc: { credits: -amount } }, { new: true });
                 if (!user) return socket.emit('localGameError', { msg: 'Insufficient TC.', game: 'cashier' });
                 socket.emit('balanceUpdateData', { credits: user.credits, playable: user.playableCredits });
             }
-
             await new Transaction({ username: socket.user.username, type: data.type, amount: amount, ref: data.ref }).save(); 
             if(data.type === 'Withdrawal') await new CreditLog({ username: socket.user.username, action: 'WITHDRAWAL', amount: -amount, details: `Pending` }).save();
             else await new CreditLog({ username: socket.user.username, action: 'DEPOSIT', amount: amount, details: `Pending` }).save();
-            
-            const txs = await Transaction.find({ username: socket.user.username }).sort({ date: -1 });
-            socket.emit('transactionsData', txs); pushAdminData(); 
+            const txs = await Transaction.find({ username: socket.user.username }).sort({ date: -1 }); socket.emit('transactionsData', txs); pushAdminData(); 
         } finally { socket.isCashier = false; }
     });
 
@@ -859,15 +638,10 @@ io.on('connection', (socket) => {
             const user = await User.findOne({ username: data.username, password: data.password });
             if (!user) return socket.emit('authError', 'Invalid login credentials.');
             if (user.status === 'Banned') return socket.emit('authError', 'This account has been banned.');
-
-            if (isNaN(user.credits) || user.credits === null) user.credits = 0;
-            if (isNaN(user.playableCredits) || user.playableCredits === null) user.playableCredits = 0;
-
+            if (isNaN(user.credits) || user.credits === null) user.credits = 0; if (isNaN(user.playableCredits) || user.playableCredits === null) user.playableCredits = 0;
             let ip = socket.handshake.headers['x-forwarded-for'] || socket.handshake.address;
             user.ipAddress = ip; user.status = 'Active'; user.sessionToken = generateSessionToken(); await user.save(); 
-            socket.user = user; connectedUsers[user.username] = socket.id;
-            
-            pushAdminData();
+            socket.user = user; connectedUsers[user.username] = socket.id; pushAdminData();
             let now = new Date(), canClaim = true, day = 1, nextClaim = null;
             if (user.dailyReward.lastClaim) {
                 let diffHours = (now - user.dailyReward.lastClaim) / (1000 * 60 * 60);
@@ -885,10 +659,8 @@ io.on('connection', (socket) => {
             if (mongoose.connection.readyState !== 1) return socket.emit('authError', 'Database Offline.');
             const exists = await User.findOne({ username: data.username });
             if (exists) return socket.emit('authError', 'Username is already taken.');
-            
             let ip = socket.handshake.headers['x-forwarded-for'] || socket.handshake.address;
-            await new User({ username: data.username, password: data.password, ipAddress: ip }).save();
-            pushAdminData(); socket.emit('registerSuccess', 'Account created! You may now login.');
+            await new User({ username: data.username, password: data.password, ipAddress: ip }).save(); pushAdminData(); socket.emit('registerSuccess', 'Account created! You may now login.');
         } catch(e) { socket.emit('authError', 'System Error: ' + e.message); } finally { socket.isAuth = false; }
     });
 
@@ -917,19 +689,15 @@ io.on('connection', (socket) => {
         if (!socket.rooms.has('admin_room')) return; 
         try {
             const adminName = socket.user ? socket.user.username : 'System';
-
             if (data.type === 'forceResetArena') {
                 io.to('pvp').emit('silentNotification', { title: "ADMIN OVERRIDE", msg: "Arena forcefully reset by Admin. Escrow refunded." });
-                await refundPVPEscrow();
-                resetPVP();
-                await new AdminLog({ adminName, action: 'RESET ARENA', details: `Forcefully reset PVP Arena` }).save();
-                socket.emit('adminSuccess', `Arena Reset Successfully.`);
+                await refundPVPEscrow(); resetPVP();
+                await new AdminLog({ adminName, action: 'RESET ARENA', details: `Forcefully reset PVP Arena` }).save(); socket.emit('adminSuccess', `Arena Reset Successfully.`);
             }
             else if (data.type === 'editUser') { 
                 let u = await User.findById(data.id);
                 if (u) {
-                    u.credits = formatTC(data.credits); u.playableCredits = formatTC(data.playableCredits); u.role = data.role; await u.save();
-                    await new AdminLog({ adminName, action: 'EDIT USER', details: `Updated balances for ${u.username}` }).save();
+                    u.credits = formatTC(data.credits); u.playableCredits = formatTC(data.playableCredits); u.role = data.role; await u.save(); await new AdminLog({ adminName, action: 'EDIT USER', details: `Updated balances for ${u.username}` }).save();
                     let targetSocketId = connectedUsers[u.username];
                     if (targetSocketId) { io.to(targetSocketId).emit('balanceUpdateData', { credits: u.credits, playable: u.playableCredits }); io.to(targetSocketId).emit('silentNotification', { id: Date.now(), title: 'Balance Updated', msg: 'An admin has manually adjusted your account balance.', date: new Date() }); }
                     socket.emit('adminSuccess', `Successfully updated ${u.username}.`);
@@ -956,17 +724,14 @@ io.on('connection', (socket) => {
                 await new AdminLog({ adminName, action: 'BROADCAST', details: `Msg: ${data.msg}` }).save(); socket.emit('adminSuccess', `Broadcast sent successfully.`);
             }
             else if (data.type === 'giftCredits') {
-                let amount = formatTC(data.amount); let updateQuery = data.creditType === 'playable' ? { $inc: { playableCredits: amount } } : { $inc: { credits: amount } };
-                let notifMsg = `Admin has gifted you ${amount} ${data.creditType === 'playable' ? 'Playable P' : 'TC'}!`;
+                let amount = formatTC(data.amount); let updateQuery = data.creditType === 'playable' ? { $inc: { playableCredits: amount } } : { $inc: { credits: amount } }; let notifMsg = `Admin has gifted you ${amount} ${data.creditType === 'playable' ? 'Playable P' : 'TC'}!`;
                 if (data.target === 'all_registered') {
                     await User.updateMany({}, updateQuery); io.emit('silentNotification', { id: Date.now(), title: 'Gift Received!', msg: notifMsg, date: new Date() }); io.emit('forceBalanceRefresh'); 
                     await new AdminLog({ adminName, action: 'GIFT', details: `Mass gifted ${amount} to All Registered` }).save(); socket.emit('adminSuccess', `Mass gift sent to All Registered users.`);
-                } 
-                else if (data.target === 'all_active') {
+                } else if (data.target === 'all_active') {
                     await User.updateMany({ status: 'Active' }, updateQuery); io.emit('silentNotification', { id: Date.now(), title: 'Gift Received!', msg: notifMsg, date: new Date() }); io.emit('forceBalanceRefresh');
                     await new AdminLog({ adminName, action: 'GIFT', details: `Mass gifted ${amount} to All Active` }).save(); socket.emit('adminSuccess', `Mass gift sent to All Active users.`);
-                } 
-                else {
+                } else {
                     let u = await User.findOne({ username: new RegExp('^' + data.target + '$', 'i') });
                     if (u) {
                         if(data.creditType === 'playable') u.playableCredits = formatTC((u.playableCredits || 0) + amount); else u.credits = formatTC((u.credits || 0) + amount);
@@ -980,8 +745,7 @@ io.on('connection', (socket) => {
             else if (data.type === 'resolveTx') {
                 let tx = await Transaction.findById(data.id);
                 if (tx && tx.status === 'Pending') {
-                    tx.status = data.status; await tx.save(); await new AdminLog({ adminName, action: 'RESOLVE TX', details: `Marked ${tx.type} for ${tx.username} as ${data.status}` }).save();
-                    let targetSocketId = connectedUsers[tx.username];
+                    tx.status = data.status; await tx.save(); await new AdminLog({ adminName, action: 'RESOLVE TX', details: `Marked ${tx.type} for ${tx.username} as ${data.status}` }).save(); let targetSocketId = connectedUsers[tx.username];
                     if (tx.type === 'Deposit' && data.status === 'Approved') {
                         let u = await User.findOne({ username: tx.username });
                         if (u) { u.credits = formatTC((u.credits || 0) + tx.amount); await u.save(); await new CreditLog({ username: u.username, action: 'DEPOSIT', amount: tx.amount, details: `Approved` }).save();
@@ -989,12 +753,7 @@ io.on('connection', (socket) => {
                         }
                     }
                     else if (data.status === 'Rejected') {
-                        if (tx.type === 'Withdrawal') {
-                            let u = await User.findOne({ username: tx.username });
-                            if (u) { u.credits = formatTC((u.credits || 0) + tx.amount); await u.save(); await new CreditLog({ username: u.username, action: 'REFUND', amount: tx.amount, details: `Withdrawal Rejected` }).save();
-                                if (targetSocketId) io.to(targetSocketId).emit('balanceUpdateData', { credits: u.credits, playable: u.playableCredits }); 
-                            }
-                        }
+                        if (tx.type === 'Withdrawal') { let u = await User.findOne({ username: tx.username }); if (u) { u.credits = formatTC((u.credits || 0) + tx.amount); await u.save(); await new CreditLog({ username: u.username, action: 'REFUND', amount: tx.amount, details: `Withdrawal Rejected` }).save(); if (targetSocketId) io.to(targetSocketId).emit('balanceUpdateData', { credits: u.credits, playable: u.playableCredits }); } }
                         if (targetSocketId) { io.to(targetSocketId).emit('silentNotification', { id: Date.now(), title: `${tx.type} Rejected`, msg: `Your request was rejected.`, date: new Date() }); }
                     }
                     socket.emit('adminSuccess', `Transaction marked as ${data.status}.`);
@@ -1009,7 +768,7 @@ io.on('connection', (socket) => {
                 await GiftCode.deleteMany({ batchId: data.batchId }); await new AdminLog({ adminName, action: 'DELETE BATCH', details: `Deleted batch ${data.batchId}` }).save(); socket.emit('adminSuccess', `Batch ${data.batchId} deleted.`);
             }
             await pushAdminData();
-        } catch(e) { console.error("Admin Action Error:", e); socket.emit('adminError', "Server Error: " + e.message); }
+        } catch(e) { socket.emit('adminError', "Server Error: " + e.message); }
     });
 
     socket.on('getGlobalResults', (game) => { socket.emit('globalResultsData', { game: game, results: globalResults[game] || [], stats: gameStats[game] || { total: 0 } }); });
@@ -1021,9 +780,7 @@ io.on('connection', (socket) => {
             if(pvpState.p2 && pvpState.p2.socketId === socket.id) handlePVPDisconnect(2);
             delete connectedUsers[socket.user.username];
         }
-        if(socket.currentRoom && rooms[socket.currentRoom] > 0) {
-            rooms[socket.currentRoom]--; io.emit('playerCount', rooms);
-        }
+        if(socket.currentRoom && rooms[socket.currentRoom] > 0) { rooms[socket.currentRoom]--; io.emit('playerCount', rooms); }
         pushAdminData();
     });
 });
