@@ -24,7 +24,6 @@
         
         body { background: linear-gradient(135deg, #000a1f 0%, #00122e 100%); color: var(--text-main); min-height: 100vh; width: 100vw; display: flex; overflow: hidden; }
 
-        /* Custom Glass Scrollbars */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(0, 162, 255, 0.2); border-radius: 10px; }
@@ -44,14 +43,13 @@
         .input-control:focus { border-color: var(--ps-glow); background: rgba(0,0,0,0.7); box-shadow: 0 0 15px rgba(0,162,255,0.2); }
         
         select.input-control, .filter-bar select {
-            appearance: none;
-            background-image: url('data:image/svg+xml;utf8,<svg fill="white" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+            appearance: none; background-image: url('data:image/svg+xml;utf8,<svg fill="white" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
             background-repeat: no-repeat; background-position: right 10px center; padding-right: 35px !important; cursor: pointer;
         }
 
         .btn-primary { background: rgba(0, 162, 255, 0.15); color: var(--ps-glow); border: 1px solid var(--ps-glow); padding: 12px; width: 100%; border-radius: 6px; font-size: 1rem; font-weight: 900; cursor: pointer; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 1px; pointer-events: auto; }
         .btn-primary:hover { background: var(--ps-glow); color: black; transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0, 162, 255, 0.4); }
-        .auth-msg { font-size: 0.9rem; font-weight: 800; min-height: 20px; margin-bottom: 15px; text-align: center; color: var(--danger); }
+        .auth-msg { font-size: 0.95rem; font-weight: 800; min-height: 20px; margin-bottom: 15px; text-align: center; color: var(--danger); }
 
         #admin-app { display: none; width: 100%; height: 100vh; position: relative; z-index: 1;}
         
@@ -70,21 +68,29 @@
         .logout-btn { padding: 15px; text-align: center; border-top: 1px solid var(--glass-border); cursor: pointer; color: white; font-weight: 800; transition: 0.2s; font-size: 1rem; text-transform: uppercase; letter-spacing: 1px; background: rgba(255,255,255,0.05);}
         .logout-btn:hover { background: rgba(255,255,255,0.15); color: var(--danger); }
 
-        /* MAIN CONTENT & BENTO */
-        .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: transparent; }
+        .notif-badge-menu { background: var(--danger); color: white; font-size: 0.75rem; font-weight: 900; padding: 2px 6px; border-radius: 50px; margin-left: auto; display: none; box-shadow: 0 0 10px var(--danger); }
+
+        /* MAIN CONTENT & TOPBAR */
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: transparent; position: relative;}
         .topbar { padding: 20px 30px; border-bottom: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); flex-shrink: 0;}
         .topbar h1 { font-weight: 900; font-size: 1.6rem; text-transform: uppercase; letter-spacing: 1px; margin: 0; }
         
-        .content-area { padding: 25px; flex: 1; width: 100%; display: flex; flex-direction: column; overflow: hidden; }
+        .sys-health { display: flex; gap: 20px; font-size: 0.85rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); }
+        .health-item { display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.05); padding: 5px 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); }
+        .health-val { color: var(--ps-glow); font-weight: 900; }
+
+        .content-area { padding: 25px; flex: 1; width: 100%; display: flex; flex-direction: column; overflow: hidden; position: relative;}
         .tab-view { flex: 1; display: flex; flex-direction: row; overflow: hidden; gap: 20px;}
 
         /* COMPACT BENTO GRID */
-        .bento-container { flex: 3; display: flex; flex-direction: column; overflow-y: auto; padding: 5px; }
+        .bento-container { flex: 3; display: flex; flex-direction: column; overflow-y: auto; padding: 5px 15px 15px 5px; }
         .bento-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; width: 100%; }
         
-        .bento-item { background: rgba(0, 15, 35, 0.6); border: 1px solid var(--glass-border); padding: 20px; border-radius: 12px; display: flex; align-items: center; gap: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); backdrop-filter: blur(5px); transition: all 0.3s ease; cursor: pointer; }
+        .bento-item { background: rgba(0, 15, 35, 0.6); border: 1px solid var(--glass-border); padding: 20px; border-radius: 12px; display: flex; align-items: center; gap: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); backdrop-filter: blur(5px); transition: all 0.3s ease; cursor: pointer; position: relative; overflow: hidden;}
         .bento-item:hover { transform: translateY(-3px); border-color: transparent; box-shadow: inset 0 0 20px rgba(0,162,255,0.3), 0 8px 20px rgba(0,0,0,0.6); }
-        
+        .bento-item::after { content: 'VIEW LOGS'; position: absolute; right: -80px; bottom: 10px; background: var(--ps-glow); color: black; font-size: 0.65rem; font-weight: 900; padding: 3px 8px; border-radius: 4px; transition: 0.3s; opacity: 0; }
+        .bento-item:hover::after { right: 15px; opacity: 1; }
+
         .stat-icon { width: 50px; height: 50px; border-radius: 10px; display: flex; justify-content: center; align-items: center; font-size: 1.8rem; background: rgba(255,255,255,0.05); box-shadow: inset 0 0 10px rgba(255,255,255,0.02); flex-shrink:0;}
         .stat-info h3 { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; font-weight: 800; margin-bottom: 5px; letter-spacing: 1px;}
         .stat-info .value { font-size: 1.8rem; font-weight: 900; color: white; line-height: 1; }
@@ -106,14 +112,14 @@
         /* DATA TABLES & PANELS */
         .panel { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; flex: 1; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 100%;}
         .panel-header { padding: 15px 20px; border-bottom: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.5); flex-shrink: 0;}
-        .panel-header h3 { font-weight: 900; font-size: 1.1rem; text-transform: uppercase; margin: 0; letter-spacing: 1px;}
+        .panel-header h3 { font-weight: 900; font-size: 1.1rem; text-transform: uppercase; margin: 0; letter-spacing: 1px; display: flex; align-items: center; gap: 10px;}
         
         .table-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
         table { width: 100%; border-collapse: collapse; text-align: left; }
-        th, td { padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        th, td { padding: 8px 15px; border-bottom: 1px solid rgba(255,255,255,0.05); }
         thead { background: #000a1f; position: sticky; top: 0; z-index: 10; }
         thead th { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; border-bottom: 1px solid var(--glass-border); padding: 12px 15px;}
-        td { font-weight: 600; font-size: 0.95rem; color: white; }
+        td { font-weight: 600; font-size: 0.95rem; color: white; white-space: nowrap;}
 
         .pagination { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; border-top: 1px solid var(--glass-border); background: rgba(0,0,0,0.5); flex-shrink: 0; }
         .pagination button { background: rgba(255,255,255,0.1); border: none; color: white; padding: 6px 12px; border-radius: 6px; font-weight:800; font-size: 0.85rem; cursor: pointer; text-transform: uppercase; }
@@ -137,13 +143,21 @@
         .split-screen { display: flex; gap: 20px; width: 100%; flex: 1; align-items: stretch; overflow: hidden;}
         .split-col { flex: 1; display: flex; flex-direction: column; overflow: hidden; width: 50%; }
 
-        .clickable-row { cursor: pointer; border-left: 3px solid transparent; }
+        .clickable-row { cursor: pointer; border-left: 3px solid transparent; transition: 0.2s; }
         .clickable-row:hover { background-color: rgba(0, 162, 255, 0.15); border-left: 3px solid var(--ps-glow); }
 
-        /* COMPACT MODALS */
+        /* RIGHT-SIDE DRAWER UX */
+        .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100000; display: flex; justify-content: flex-end; opacity: 0; pointer-events: none; transition: opacity 0.3s; backdrop-filter: blur(5px); }
+        .drawer-overlay.show { opacity: 1; pointer-events: auto; }
+        .drawer-content { width: 450px; max-width: 90vw; background: rgba(0, 5, 15, 0.98); border-left: 1px solid var(--ps-glow); height: 100vh; transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1); padding: 25px; display: flex; flex-direction: column; box-shadow: -15px 0 40px rgba(0,0,0,0.8); pointer-events: auto;}
+        .drawer-overlay.show .drawer-content { transform: translateX(0); }
+        .drawer-close { position: absolute; top: 20px; right: 20px; font-size: 1.5rem; color: var(--text-muted); cursor: pointer; background: none; border: none; transition: 0.2s; outline: none; z-index: 10;}
+        .drawer-close:hover { color: var(--danger); transform: scale(1.1); }
+        .drawer-title { font-size: 1.4rem; font-weight: 900; text-transform: uppercase; margin-bottom: 20px; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px;}
+
+        /* CENTER MODALS (Kept for alerts/small forms) */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 100000; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(10px); }
         .modal-content { background: var(--glass-bg); width: 400px; padding: 20px 25px; border-radius: 12px; border: 1px solid var(--glass-border); position: relative; box-shadow: 0 25px 80px rgba(0,0,0,0.9); pointer-events: auto; display: flex; flex-direction: column;}
-        .modal-content.wide { width: 600px; max-width: 95vw; max-height: 90vh;}
         .modal-close { position: absolute; top: 15px; right: 15px; font-size: 1.5rem; color: var(--text-muted); cursor: pointer; background: none; border: none; transition: 0.2s; outline: none; z-index: 10;}
         .modal-close:hover { color: var(--danger); transform: scale(1.1); }
         .modal-title { font-size: 1.4rem; font-weight: 900; text-transform: uppercase; margin-bottom: 15px; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px; text-align: center; flex-shrink:0;}
@@ -164,11 +178,11 @@
         @keyframes toastOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
 
         /* QUICK ACTION POPOVER */
-        .glass-popover { position: fixed; background: rgba(0, 15, 35, 0.95); border: 1px solid var(--ps-glow); border-radius: 8px; box-shadow: 0 15px 40px rgba(0,0,0,0.9); z-index: 50000; padding: 10px; display: flex; flex-direction: column; gap: 5px; backdrop-filter: blur(20px); }
+        .glass-popover { position: absolute; background: rgba(0, 15, 35, 0.95); border: 1px solid var(--ps-glow); border-radius: 8px; box-shadow: 0 15px 40px rgba(0,0,0,0.9); z-index: 50000; padding: 10px; display: flex; flex-direction: column; gap: 5px; backdrop-filter: blur(20px); }
         .qa-btn { background: transparent; border: none; color: white; padding: 8px 12px; text-align: left; font-weight: 800; border-radius: 4px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 10px; font-size: 0.9rem; text-transform: uppercase;}
         .qa-btn:hover { background: rgba(255,255,255,0.1); }
 
-        .smurf-icon { color: var(--danger); margin-left: 8px; cursor: help; font-size: 1.1rem; animation: pulseRed 2s infinite; }
+        .smurf-icon { color: var(--danger); margin-left: 8px; cursor: help; font-size: 1.1rem; animation: pulseRed 2s infinite; position: relative; display: inline-flex;}
         @keyframes pulseRed { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
     </style>
 </head>
@@ -202,7 +216,10 @@
             <div class="nav-menu">
                 <div class="nav-item active" onclick="switchTab('dashboard')"><i class="fas fa-chart-pie"></i> Dashboard Overview</div>
                 <div class="nav-item" onclick="switchTab('users')"><i class="fas fa-users"></i> Player Management</div>
-                <div class="nav-item" onclick="switchTab('cashier')"><i class="fas fa-money-bill-transfer"></i> Economy & Cashier</div>
+                <div class="nav-item" onclick="switchTab('cashier')">
+                    <i class="fas fa-money-bill-transfer"></i> Economy & Cashier
+                    <span id="nav-badge-pending" class="notif-badge-menu">0</span>
+                </div>
                 <div class="nav-item" onclick="switchTab('promos')"><i class="fas fa-gift"></i> Promos & Rewards</div>
                 <div class="nav-item" onclick="switchTab('tools')"><i class="fas fa-wrench"></i> System Tools</div>
                 <div class="nav-item" onclick="switchTab('audit')"><i class="fas fa-shield-alt"></i> Security & Audit Logs</div>
@@ -215,8 +232,12 @@
         <div class="main-content">
             <div class="topbar">
                 <h1 id="page-title">Dashboard Overview</h1>
-                <div style="font-weight: 800; color: var(--ps-glow); display: flex; align-items: center; gap: 10px; font-size: 1rem; text-transform: uppercase; letter-spacing: 1px;">
-                    <i class="fas fa-shield-alt"></i> Terminal Connected
+                <div class="sys-health">
+                    <div class="health-item"><i class="fas fa-microchip"></i> RAM: <span id="health-ram" class="health-val">0%</span></div>
+                    <div class="health-item"><i class="fas fa-network-wired"></i> Sockets: <span id="health-sockets" class="health-val">0</span></div>
+                    <div style="font-weight: 800; color: var(--ps-glow); display: flex; align-items: center; gap: 10px; margin-left: 15px;">
+                        <i class="fas fa-shield-alt"></i> Ghost Terminal
+                    </div>
                 </div>
             </div>
 
@@ -225,27 +246,32 @@
                 <div id="view-dashboard" class="tab-view">
                     <div class="bento-container custom-scroll">
                         <div class="bento-grid">
-                            <div class="bento-item" onclick="openStatLog('economy')">
-                                <div class="stat-icon" style="color: var(--credits);"><i class="fas fa-coins"></i></div>
-                                <div class="stat-info"><h3>Total Economy (Main TC)</h3><div class="value glow-neon" id="stat-economy">0.0</div></div>
+                            <div class="bento-item bento-span-2 bento-span-row-2" onclick="openDrawer('economy')">
+                                <div style="display:flex; align-items:center; gap:20px;">
+                                    <div class="stat-icon" style="color: var(--credits); font-size:3rem; width:80px; height:80px;"><i class="fas fa-coins"></i></div>
+                                    <div class="stat-info">
+                                        <h3 style="font-size:1.1rem;">Total Economy (Main TC)</h3>
+                                        <div class="value glow-neon" id="stat-economy" style="font-size:3.5rem;">0.0</div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="bento-item" onclick="openStatLog('deposits')">
+                            <div class="bento-item" onclick="openDrawer('deposits')">
                                 <div class="stat-icon" style="color: var(--success);"><i class="fas fa-arrow-down"></i></div>
-                                <div class="stat-info"><h3>Approved Deposits</h3><div class="value glow-success" id="stat-deposits">0.0</div></div>
+                                <div class="stat-info"><h3>Total Deposits</h3><div class="value glow-success" id="stat-deposits">0.0</div></div>
                             </div>
-                            <div class="bento-item" onclick="openStatLog('withdrawals')">
+                            <div class="bento-item" onclick="openDrawer('withdrawals')">
                                 <div class="stat-icon" style="color: var(--danger);"><i class="fas fa-arrow-up"></i></div>
-                                <div class="stat-info"><h3>Approved Withdrawals</h3><div class="value" id="stat-withdrawals" style="color:var(--danger)">0.0</div></div>
+                                <div class="stat-info"><h3>Total Withdrawals</h3><div class="value" id="stat-withdrawals" style="color:var(--danger)">0.0</div></div>
                             </div>
-                            <div class="bento-item" onclick="openStatLog('users')">
+                            <div class="bento-item" onclick="openDrawer('users')">
                                 <div class="stat-icon" style="color: var(--ps-glow);"><i class="fas fa-users"></i></div>
                                 <div class="stat-info"><h3>Registered Players</h3><div class="value" id="stat-users">0</div></div>
                             </div>
-                            <div class="bento-item" onclick="openStatLog('vault')">
+                            <div class="bento-item" onclick="openDrawer('vault')">
                                 <div class="stat-icon" style="color: var(--text-muted);"><i class="fas fa-university"></i></div>
                                 <div class="stat-info"><h3>Bank Vault Limit</h3><div class="value" id="stat-limit">2,000,000</div></div>
                             </div>
-                            <div class="bento-item" onclick="openStatLog('profit')">
+                            <div class="bento-item" onclick="openDrawer('profit')">
                                 <div class="stat-icon" style="color: var(--success);"><i class="fas fa-chart-line"></i></div>
                                 <div class="stat-info"><h3>House Profit (24H)</h3><div class="value" id="stat-profit" style="color:var(--success);">0.0</div></div>
                             </div>
@@ -263,14 +289,14 @@
                 <div id="view-users" class="tab-view hidden" style="flex-direction: column;">
                     <div class="panel">
                         <div class="panel-header">
-                            <h3>Player Database Hierarchy</h3>
+                            <h3>Player Database</h3>
                             <button class="btn-sm" style="background: rgba(255,180,0,0.15); color: var(--credits); border: 1px solid rgba(255,180,0,0.3); padding: 8px 15px; font-size: 0.85rem;" onclick="openModal('direct-gift-modal')">
-                                <i class="fas fa-gift"></i> Direct Gift Credits
+                                <i class="fas fa-gift"></i> Direct Gift
                             </button>
                         </div>
                         <div class="filter-bar">
                             <i class="fas fa-search" style="color:var(--text-muted)"></i>
-                            <input type="text" id="filter-search" placeholder="Search by username..." style="flex:1;" onkeyup="pgUsers=1; renderUsers()">
+                            <input type="text" id="filter-search" placeholder="Search username..." style="flex:1;" onkeyup="pgUsers=1; renderUsers()">
                             <select id="filter-role" onchange="pgUsers=1; renderUsers()">
                                 <option value="All">All Roles</option>
                                 <option value="Player">Player</option>
@@ -299,7 +325,7 @@
                                         <th class="center-col">ACTIONS</th>
                                     </tr>
                                 </thead>
-                                <tbody id="users-tbody"></tbody>
+                                <tbody id="users-tbody" class="custom-scroll"></tbody>
                             </table>
                         </div>
                         <div class="pagination" id="pag-users"></div>
@@ -314,14 +340,14 @@
                                 <i class="fas fa-search" style="color:var(--text-muted)"></i>
                                 <input type="text" id="filter-pend-search" placeholder="Search user or ref..." style="flex:1;" onkeyup="pgPend=1; renderTransactions()">
                                 <select id="filter-pend-sort" onchange="pgPend=1; renderTransactions()">
-                                    <option value="newest">Newest First</option>
-                                    <option value="oldest">Oldest First</option>
+                                    <option value="newest">Newest</option>
+                                    <option value="oldest">Oldest</option>
                                 </select>
                             </div>
                             <div class="table-wrapper">
                                 <table>
                                     <thead><tr><th class="center-col">DATE</th><th class="center-col">TYPE</th><th class="center-col">AMOUNT</th><th class="center-col">USER</th></tr></thead>
-                                    <tbody id="tx-pending-tbody"></tbody>
+                                    <tbody id="tx-pending-tbody" class="custom-scroll"></tbody>
                                 </table>
                             </div>
                             <div class="pagination" id="pag-pend"></div>
@@ -338,15 +364,11 @@
                                 <select id="filter-hist-status" onchange="pgHist=1; renderTransactions()">
                                     <option value="All">All Status</option><option value="Approved">Approved</option><option value="Rejected">Rejected</option>
                                 </select>
-                                <select id="filter-hist-sort" onchange="pgHist=1; renderTransactions()">
-                                    <option value="newest">Newest</option>
-                                    <option value="oldest">Oldest</option>
-                                </select>
                             </div>
                             <div class="table-wrapper">
                                 <table>
                                     <thead><tr><th class="center-col">DATE</th><th class="center-col">TYPE</th><th class="center-col">AMOUNT</th><th class="center-col">STATUS</th></tr></thead>
-                                    <tbody id="tx-history-tbody"></tbody>
+                                    <tbody id="tx-history-tbody" class="custom-scroll"></tbody>
                                 </table>
                             </div>
                             <div class="pagination" id="pag-hist"></div>
@@ -380,7 +402,7 @@
                                         <th class="center-col">ACTIONS</th>
                                     </tr>
                                 </thead>
-                                <tbody id="promos-tbody"></tbody>
+                                <tbody id="promos-tbody" class="custom-scroll"></tbody>
                             </table>
                         </div>
                         <div class="pagination" id="pag-promos"></div>
@@ -403,7 +425,7 @@
                             <div class="bento-item" onclick="toggleMaintenanceMode()" id="maintenance-card" style="border-color: var(--danger); box-shadow: inset 0 0 15px rgba(255,51,102,0.1);">
                                 <div class="stat-icon" style="color: var(--danger);" id="maintenance-icon"><i class="fas fa-power-off"></i></div>
                                 <div class="stat-info">
-                                    <h3 style="color: var(--danger);">Killswitch</h3>
+                                    <h3 style="color: var(--danger);">Deep Killswitch</h3>
                                     <div class="value" style="font-size: 1.4rem; color: var(--danger);" id="maintenance-text">Maintenance: OFF</div>
                                 </div>
                             </div>
@@ -425,7 +447,7 @@
                                         <th class="center-col">DETAILS</th>
                                     </tr>
                                 </thead>
-                                <tbody id="audit-tbody"></tbody>
+                                <tbody id="audit-tbody" class="custom-scroll"></tbody>
                             </table>
                         </div>
                         <div class="pagination" id="pag-audit"></div>
@@ -436,24 +458,24 @@
         </div>
     </div>
 
-    <div id="smurf-popover" class="glass-popover hidden" style="min-width: 200px;"></div>
+    <div id="smurf-popover" class="glass-popover hidden" style="min-width: 150px;"></div>
     
     <div id="quick-action-popover" class="glass-popover hidden" style="width: 200px;" onclick="event.stopPropagation()"></div>
 
-    <div id="stat-log-modal" class="modal-overlay hidden" onclick="if(event.target===this) closeModal('stat-log-modal')">
-        <div class="modal-content wide">
-            <button class="modal-close" onclick="closeModal('stat-log-modal')"><i class="fas fa-times"></i></button>
-            <h3 class="modal-title" id="stat-log-title">LOGS</h3>
+    <div id="right-drawer-overlay" class="drawer-overlay" onclick="if(event.target===this) closeDrawer()">
+        <div class="drawer-content" id="drawer-content">
+            <button class="drawer-close" onclick="closeDrawer()"><i class="fas fa-times"></i></button>
+            <h3 class="drawer-title" id="drawer-title">DRAWER</h3>
             
-            <div id="stat-log-breakdown" style="display:none; text-align:left; font-size:1rem; color:var(--ps-glow); margin-bottom:15px; font-weight:800; background:rgba(0,0,0,0.5); padding:20px; border-radius:8px;"></div>
+            <div id="drawer-breakdown" style="display:none; flex-direction:column; gap:10px; font-size:0.95rem; font-weight:800; background:rgba(0,0,0,0.4); padding:15px; border-radius:8px; border:1px solid var(--glass-border); margin-bottom:15px;"></div>
             
-            <div class="table-wrapper" style="max-height: 400px;" id="stat-log-table-container">
+            <div class="table-wrapper" style="flex:1;" id="drawer-table-container">
                 <table>
-                    <thead id="stat-log-thead"></thead>
-                    <tbody id="stat-log-tbody" class="custom-scroll"></tbody>
+                    <thead id="drawer-thead"></thead>
+                    <tbody id="drawer-tbody" class="custom-scroll" style="max-height: calc(100vh - 180px); display:block; overflow-y:auto;"></tbody>
                 </table>
             </div>
-            <div class="pagination" id="pag-stat-log"></div>
+            <div class="pagination" id="drawer-pagination" style="margin-top:auto;"></div>
         </div>
     </div>
 
@@ -484,25 +506,6 @@
                 </select>
             </div>
             <button class="btn-primary" onclick="saveUserEdit()">SAVE CHANGES</button>
-        </div>
-    </div>
-
-    <div id="player-logs-modal" class="modal-overlay hidden" onclick="if(event.target===this) closeModal('player-logs-modal')">
-        <div class="modal-content wide">
-            <button class="modal-close" onclick="closeModal('player-logs-modal')"><i class="fas fa-times"></i></button>
-            <h3 class="modal-title" id="pl-title">PLAYER LOGS</h3>
-            <div style="text-align:right; margin-bottom:10px;">
-                <button class="btn-sm btn-reject" onclick="clearPlayerLogs()" style="display:inline-flex;"><i class="fas fa-trash"></i> Clear Logs</button>
-            </div>
-            <div class="table-wrapper" style="max-height: 400px;">
-                <table>
-                    <thead>
-                        <tr><th class="center-col">Date</th><th class="center-col">Action</th><th class="center-col">Amount</th><th class="center-col">Details</th></tr>
-                    </thead>
-                    <tbody id="pl-tbody" class="custom-scroll"></tbody>
-                </table>
-            </div>
-            <div class="pagination" id="pag-pl"></div>
         </div>
     </div>
 
@@ -698,11 +701,11 @@
         let gAdminLogs = []; let pgAudit = 1;
         let gGameLogs = [];
         
-        let activePlayerLogs = []; let pgPL = 1;
-        let activeBatchCodes = []; let pgVB = 1;
+        let drawerData = []; let pgDrawer = 1;
+        let currentDrawerType = '';
         let currentLogUsername = '';
         let sysMaintenance = false;
-        const limit = 10;
+        const limit = 15; // Increased limit for dense UI
 
         function renderPagination(totalItems, currentPage, elementId, updateVarStr) {
             const totalPages = Math.max(1, Math.ceil(totalItems / limit));
@@ -743,6 +746,8 @@
         }
 
         function switchTab(tabId) {
+            hideAllPopovers();
+            closeDrawer();
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             let triggerEl = Array.from(document.querySelectorAll('.nav-item')).find(el => el.getAttribute('onclick').includes(tabId));
             if(triggerEl) triggerEl.classList.add('active');
@@ -812,10 +817,17 @@
             hp.innerText = data.stats.houseProfit.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1});
             hp.style.color = data.stats.houseProfit >= 0 ? "var(--success)" : "var(--danger)";
             
-            // Audio Sonar Logic
+            // Telemetry Update
+            document.getElementById('health-ram').innerText = data.stats.health.ram + '%';
+            document.getElementById('health-sockets').innerText = data.stats.health.sockets;
+
+            // Audio Sonar Logic & Live Badges
             let currentPending = gTxs.filter(t => t.status === 'Pending').length;
-            document.getElementById('stat-pending').innerText = currentPending;
-            if(currentPending > lastPendingCount) { playSonarPing(); }
+            let badge = document.getElementById('nav-badge-pending');
+            if (currentPending > 0) {
+                badge.innerText = currentPending; badge.style.display = 'inline-block';
+                if(currentPending > lastPendingCount) playSonarPing();
+            } else { badge.style.display = 'none'; }
             lastPendingCount = currentPending;
 
             // Maintenance Status Sync
@@ -832,7 +844,7 @@
             }
 
             renderUsers(); renderTransactions(); renderPromos(); renderAuditLogs();
-            if(!document.getElementById('stat-log-modal').classList.contains('hidden')) renderStatLog();
+            if(document.getElementById('right-drawer-overlay').classList.contains('show')) renderDrawerContent();
             
             // Update dropdown dynamic target
             let dl = document.getElementById('player-datalist');
@@ -840,77 +852,80 @@
             gUsers.forEach(u => dl.innerHTML += `<option value="${u.username}">`);
         });
 
-        // GENERIC STAT LOG MODAL
-        let currentStatType = '';
-        let pgStat = 1;
-
-        function openStatLog(type) {
-            currentStatType = type;
-            pgStat = 1;
-            renderStatLog();
-            openModal('stat-log-modal');
+        // RIGHT SIDE DRAWER SYSTEM
+        function openDrawer(type, username = null) {
+            hideAllPopovers();
+            currentDrawerType = type;
+            if(username) currentLogUsername = username;
+            pgDrawer = 1;
+            renderDrawerContent();
+            document.getElementById('right-drawer-overlay').classList.add('show');
+        }
+        
+        function closeDrawer() {
+            document.getElementById('right-drawer-overlay').classList.remove('show');
         }
 
-        function renderStatLog() {
-            const thead = document.getElementById('stat-log-thead');
-            const tbody = document.getElementById('stat-log-tbody');
-            const breakdown = document.getElementById('stat-log-breakdown');
-            const tableCont = document.getElementById('stat-log-table-container');
-            let data = [];
+        function renderDrawerContent() {
+            const thead = document.getElementById('drawer-thead');
+            const tbody = document.getElementById('drawer-tbody');
+            const breakdown = document.getElementById('drawer-breakdown');
+            const tableCont = document.getElementById('drawer-table-container');
+            const pag = document.getElementById('drawer-pagination');
             let title = '';
 
             breakdown.style.display = 'none';
             tableCont.style.display = 'flex';
-            document.getElementById('pag-stat-log').style.display = 'flex';
+            pag.style.display = 'flex';
 
-            if (currentStatType === 'economy') {
-                title = 'TOTAL ECONOMY LOGS';
-                thead.innerHTML = `<tr><th class="center-col">RANK</th><th class="center-col">USERNAME</th><th class="center-col">MAIN TC</th></tr>`;
-                data = [...gUsers].sort((a,b) => (b.credits||0) - (a.credits||0)).filter(u => (u.credits||0) > 0);
-                let paginated = data.slice((pgStat - 1) * limit, pgStat * limit);
-                tbody.innerHTML = paginated.map((u, i) => `<tr><td class="center-col">${(pgStat-1)*limit + i + 1}</td><td class="center-col" style="font-weight:900;">${u.username}</td><td class="center-col" style="color:var(--credits); font-weight:bold;">${formatTC(u.credits)}</td></tr>`).join('');
+            if (currentDrawerType === 'economy') {
+                title = 'ECONOMY LEADERBOARD';
+                thead.innerHTML = `<tr><th class="center-col" style="width:50px;">#</th><th class="center-col">USERNAME</th><th class="center-col">MAIN TC</th></tr>`;
+                drawerData = [...gUsers].sort((a,b) => (b.credits||0) - (a.credits||0)).filter(u => (u.credits||0) > 0);
+                let paginated = drawerData.slice((pgDrawer - 1) * limit, pgDrawer * limit);
+                tbody.innerHTML = paginated.map((u, i) => `<tr><td class="center-col" style="color:var(--text-muted);">${(pgDrawer-1)*limit + i + 1}</td><td class="center-col" style="font-weight:900;">${u.username}</td><td class="center-col" style="color:var(--credits); font-weight:bold;">${formatTC(u.credits)}</td></tr>`).join('');
             }
-            else if (currentStatType === 'deposits') {
+            else if (currentDrawerType === 'deposits') {
                 title = 'APPROVED DEPOSITS';
                 thead.innerHTML = `<tr><th class="center-col">DATE</th><th class="center-col">USERNAME</th><th class="center-col">AMOUNT</th></tr>`;
-                data = gTxs.filter(t => t.type === 'Deposit' && t.status === 'Approved');
-                let paginated = data.slice((pgStat - 1) * limit, pgStat * limit);
+                drawerData = gTxs.filter(t => t.type === 'Deposit' && t.status === 'Approved');
+                let paginated = drawerData.slice((pgDrawer - 1) * limit, pgDrawer * limit);
                 tbody.innerHTML = paginated.map(t => `<tr><td class="center-col" style="color:var(--text-muted); font-size:0.85rem;">${new Date(t.date).toLocaleDateString([],{month:'short',day:'numeric'})}</td><td class="center-col" style="font-weight:900;">${t.username}</td><td class="center-col" style="color:var(--success); font-weight:bold;">+${formatTC(t.amount)}</td></tr>`).join('');
             }
-            else if (currentStatType === 'withdrawals') {
+            else if (currentDrawerType === 'withdrawals') {
                 title = 'APPROVED WITHDRAWALS';
                 thead.innerHTML = `<tr><th class="center-col">DATE</th><th class="center-col">USERNAME</th><th class="center-col">AMOUNT</th></tr>`;
-                data = gTxs.filter(t => t.type === 'Withdrawal' && t.status === 'Approved');
-                let paginated = data.slice((pgStat - 1) * limit, pgStat * limit);
+                drawerData = gTxs.filter(t => t.type === 'Withdrawal' && t.status === 'Approved');
+                let paginated = drawerData.slice((pgDrawer - 1) * limit, pgDrawer * limit);
                 tbody.innerHTML = paginated.map(t => `<tr><td class="center-col" style="color:var(--text-muted); font-size:0.85rem;">${new Date(t.date).toLocaleDateString([],{month:'short',day:'numeric'})}</td><td class="center-col" style="font-weight:900;">${t.username}</td><td class="center-col" style="color:var(--danger); font-weight:bold;">-${formatTC(t.amount)}</td></tr>`).join('');
             }
-            else if (currentStatType === 'profit') {
+            else if (currentDrawerType === 'profit') {
                 title = 'HOUSE PROFIT LOGS';
-                thead.innerHTML = `<tr><th class="center-col">DATE</th><th class="center-col">USERNAME</th><th class="center-col">GAME</th><th class="center-col">HOUSE NET</th></tr>`;
-                data = gGameLogs;
-                let paginated = data.slice((pgStat - 1) * limit, pgStat * limit);
+                thead.innerHTML = `<tr><th class="center-col">TIME</th><th class="center-col">USER</th><th class="center-col">GAME</th><th class="center-col">HOUSE NET</th></tr>`;
+                drawerData = gGameLogs;
+                let paginated = drawerData.slice((pgDrawer - 1) * limit, pgDrawer * limit);
                 tbody.innerHTML = paginated.map(l => {
                     let houseNet = -l.amount; 
                     let color = houseNet > 0 ? 'var(--success)' : (houseNet < 0 ? 'var(--danger)' : 'white');
                     let sign = houseNet > 0 ? '+' : '';
-                    return `<tr><td class="center-col" style="color:var(--text-muted); font-size:0.85rem;">${new Date(l.date).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</td><td class="center-col" style="font-weight:900;">${l.username}</td><td class="center-col" style="font-size:0.85rem; text-transform:uppercase;">${l.details}</td><td class="center-col" style="color:${color}; font-weight:bold;">${sign}${formatTC(houseNet)}</td></tr>`;
+                    return `<tr><td class="center-col" style="color:var(--text-muted); font-size:0.8rem;">${new Date(l.date).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</td><td class="center-col" style="font-weight:900; font-size:0.9rem;">${l.username}</td><td class="center-col" style="font-size:0.8rem; text-transform:uppercase; color:var(--text-muted);">${l.details}</td><td class="center-col" style="color:${color}; font-weight:bold; font-size:1rem;">${sign}${formatTC(houseNet)}</td></tr>`;
                 }).join('');
             }
-            else if (currentStatType === 'users') {
-                title = 'REGISTERED PLAYERS LOG';
+            else if (currentDrawerType === 'users') {
+                title = 'NEWEST PLAYERS';
                 thead.innerHTML = `<tr><th class="center-col">JOIN DATE</th><th class="center-col">USERNAME</th><th class="center-col">STATUS</th></tr>`;
-                data = [...gUsers].sort((a,b) => new Date(b.joinDate) - new Date(a.joinDate));
-                let paginated = data.slice((pgStat - 1) * limit, pgStat * limit);
+                drawerData = [...gUsers].sort((a,b) => new Date(b.joinDate) - new Date(a.joinDate));
+                let paginated = drawerData.slice((pgDrawer - 1) * limit, pgDrawer * limit);
                 tbody.innerHTML = paginated.map(u => {
                     let statClass = u.status === 'Active' ? 'active' : (u.status === 'Banned' ? 'banned' : 'offline');
                     return `<tr><td class="center-col" style="color:var(--text-muted); font-size:0.85rem;">${new Date(u.joinDate).toLocaleDateString([],{month:'short',day:'numeric'})}</td><td class="center-col" style="font-weight:900;">${u.username}</td><td class="center-col"><span class="badge ${statClass}">${u.status}</span></td></tr>`;
                 }).join('');
             }
-            else if (currentStatType === 'vault') {
-                title = 'BANK VAULT BREAKDOWN';
+            else if (currentDrawerType === 'vault') {
+                title = 'VAULT MATH BREAKDOWN';
                 tableCont.style.display = 'none'; 
-                document.getElementById('pag-stat-log').style.display = 'none';
-                breakdown.style.display = 'block';
+                pag.style.display = 'none';
+                breakdown.style.display = 'flex';
                 
                 let base = 2000000;
                 let deps = gTxs.filter(t => t.type === 'Deposit' && t.status === 'Approved').reduce((a,b)=>a+b.amount,0);
@@ -918,23 +933,60 @@
                 let econ = gUsers.reduce((a,b)=>a+(b.credits||0),0);
                 let vault = formatTC(base + deps - withs - econ);
                 
+                let ratio = (vault / base) * 100;
+                let ratioColor = ratio > 50 ? 'var(--success)' : (ratio > 20 ? 'var(--credits)' : 'var(--danger)');
+
                 breakdown.innerHTML = `
-                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span>Base Reserve:</span> <span style="color:white;">2,000,000 TC</span></div>
-                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span>Approved Deposits:</span> <span style="color:var(--success);">+ ${formatTC(deps)} TC</span></div>
-                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span>Approved Withdrawals:</span> <span style="color:var(--danger);">- ${formatTC(withs)} TC</span></div>
-                    <div style="display:flex; justify-content:space-between; margin-bottom:15px; border-bottom:1px solid var(--glass-border); padding-bottom:15px;"><span>Player Total Economy:</span> <span style="color:var(--credits);">- ${formatTC(econ)} TC</span></div>
-                    <div style="display:flex; justify-content:space-between; font-size:1.3rem;"><span>CURRENT VAULT LIMIT:</span> <span style="color:white;">${vault} TC</span></div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>Base Reserve:</span> <span style="color:white;">2,000,000 TC</span></div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>Approved Deposits:</span> <span style="color:var(--success);">+ ${formatTC(deps)} TC</span></div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>Approved Withdrawals:</span> <span style="color:var(--danger);">- ${formatTC(withs)} TC</span></div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:15px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:15px;"><span>Player Total Economy:</span> <span style="color:var(--credits);">- ${formatTC(econ)} TC</span></div>
+                    <div style="display:flex; justify-content:space-between; font-size:1.3rem; margin-bottom: 5px;"><span>CURRENT VAULT LIMIT:</span> <span style="color:white;">${vault} TC</span></div>
+                    <div style="display:flex; justify-content:space-between; font-size:0.9rem; color:var(--text-muted);"><span>Health Margin:</span> <span style="color:${ratioColor};">${ratio.toFixed(1)}%</span></div>
                 `;
-                data = []; 
+                drawerData = []; 
+            }
+            else if (currentDrawerType === 'player_logs') {
+                title = `${currentLogUsername} LOGS`;
+                breakdown.style.display = 'block';
+                breakdown.innerHTML = `<button class="btn-sm btn-reject" onclick="clearPlayerLogs()" style="width:100%; justify-content:center;"><i class="fas fa-trash"></i> ERASE PLAYER LOGS</button>`;
+                
+                thead.innerHTML = `<tr><th class="center-col">TIME</th><th class="center-col">ACTION</th><th class="center-col">AMOUNT</th><th class="center-col">DETAILS</th></tr>`;
+                
+                // If data isn't loaded yet from server, show loading
+                if (!activePlayerLogs || activePlayerLogs.length === 0 || activePlayerLogs[0]?.username !== currentLogUsername) {
+                    tbody.innerHTML = `<tr><td colspan="4" class="center-col" style="color:var(--text-muted); font-style:italic;">Fetching logs...</td></tr>`;
+                    socket.emit('fetchUserLogs', currentLogUsername);
+                    return; // Wait for socket response to re-render
+                }
+                
+                drawerData = activePlayerLogs;
+                let paginated = drawerData.slice((pgDrawer - 1) * limit, pgDrawer * limit);
+                
+                tbody.innerHTML = paginated.map(l => {
+                    let dStr = new Date(l.date).toLocaleString('en-US', {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'});
+                    let amtColor = l.amount > 0 ? 'var(--success)' : (l.amount < 0 ? 'var(--danger)' : 'white');
+                    let amtSign = l.amount > 0 ? '+' : '';
+                    return `<tr><td class="center-col" style="color:var(--text-muted); font-size:0.8rem; white-space:nowrap;">${dStr}</td><td class="center-col" style="font-weight: 800; font-size:0.85rem;">${l.action}</td><td class="center-col" style="color:${amtColor}; font-weight:900; font-size:1rem;">${amtSign}${formatTC(l.amount)}</td><td class="center-col" style="color:var(--text-muted); font-size:0.8rem; text-transform:uppercase;">${l.details}</td></tr>`;
+                }).join('');
             }
 
-            document.getElementById('stat-log-title').innerText = title;
+            document.getElementById('drawer-title').innerText = title;
             
-            if(currentStatType !== 'vault') {
-                if(data.length === 0) tbody.innerHTML = `<tr><td colspan="4" class="center-col" style="color:var(--text-muted); font-style:italic;">No logs found.</td></tr>`;
-                renderPagination(data.length, pgStat, 'pag-stat-log', 'pgStat');
+            if(currentDrawerType !== 'vault') {
+                if(drawerData.length === 0 && currentDrawerType !== 'player_logs') tbody.innerHTML = `<tr><td colspan="4" class="center-col" style="color:var(--text-muted); font-style:italic;">No logs found.</td></tr>`;
+                renderPagination(drawerData.length, pgDrawer, 'drawer-pagination', 'pgDrawer');
             }
         }
+
+        // Catch for player log fetch
+        socket.on('userLogsData', data => {
+            if(data.username !== currentLogUsername || currentDrawerType !== 'player_logs') return;
+            activePlayerLogs = data.logs;
+            drawerData = activePlayerLogs;
+            renderDrawerContent();
+        });
+
 
         // HIDE POPOVERS ON CLICK OUTSIDE
         function hideAllPopovers() {
@@ -946,8 +998,13 @@
             let p = document.getElementById('smurf-popover');
             let smurfs = gUsers.filter(u => u.ipAddress === ip).map(u => u.username);
             p.innerHTML = `<div style="font-weight:900;margin-bottom:8px;color:var(--danger); border-bottom:1px solid rgba(255,51,102,0.3); padding-bottom:5px;">Linked Accounts (IP)</div>` + smurfs.map(s => `<div style="color:white; font-weight:600; font-size:0.9rem; margin-bottom:3px;"><i class="fas fa-user-circle" style="color:var(--text-muted); margin-right:5px;"></i> ${s}</div>`).join('');
+            
+            // Adjust position so it doesn't clip off screen right
+            let posX = event.clientX + 15;
+            if(posX + 150 > window.innerWidth) posX = event.clientX - 160;
+
             p.style.top = (event.clientY + 15) + 'px';
-            p.style.left = (event.clientX + 15) + 'px';
+            p.style.left = posX + 'px';
             p.classList.remove('hidden');
         }
         function hideSmurfPop() { document.getElementById('smurf-popover').classList.add('hidden'); }
@@ -967,12 +1024,18 @@
 
             p.innerHTML = `
                 <div style="padding:10px; border-bottom:1px solid var(--glass-border); font-weight:900; color:white; font-size:1rem; text-align:center;">${username}</div>
-                <button class="qa-btn" onclick="openEditUser('${id}')"><i class="fas fa-pen" style="color:var(--ps-glow)"></i> Edit Balances</button>
-                <button class="qa-btn" onclick="viewPlayerLogs('${username}')"><i class="fas fa-list" style="color:white"></i> View Logs</button>
-                <button class="qa-btn" onclick="actionUser('${banAction}', '${id}', '${username}')"><i class="fas ${banIcon}" style="color:${banColor}"></i> ${banText}</button>
+                <button class="qa-btn" onclick="openEditUser('${id}')"><i class="fas fa-pen" style="color:var(--ps-glow); width:20px;"></i> Edit Balances</button>
+                <button class="qa-btn" onclick="openDrawer('player_logs', '${username}')"><i class="fas fa-list" style="color:white; width:20px;"></i> View Logs</button>
+                <button class="qa-btn" onclick="actionUser('${banAction}', '${id}', '${username}')"><i class="fas ${banIcon}" style="color:${banColor}; width:20px;"></i> ${banText}</button>
             `;
-            p.style.top = (event.clientY) + 'px';
-            p.style.left = (event.clientX - 210) + 'px';
+            
+            let posY = event.clientY;
+            let posX = event.clientX - 210;
+            // Prevent clipping bottom
+            if(posY + 150 > window.innerHeight) posY = window.innerHeight - 160;
+
+            p.style.top = posY + 'px';
+            p.style.left = posX + 'px';
             p.dataset.uid = id;
             p.classList.remove('hidden');
         }
@@ -1045,44 +1108,8 @@
             });
         }
 
-        function viewPlayerLogs(username) {
-            hideAllPopovers();
-            currentLogUsername = username;
-            document.getElementById('pl-title').innerText = `${username} LOGS`;
-            pgPL = 1;
-            socket.emit('fetchUserLogs', username);
-            openModal('player-logs-modal');
-        }
-
-        socket.on('userLogsData', data => {
-            if(data.username !== currentLogUsername) return;
-            activePlayerLogs = data.logs;
-            renderPlayerLogsPage();
-        });
-
-        function renderPlayerLogsPage() {
-            const tbody = document.getElementById('pl-tbody'); tbody.innerHTML = '';
-            let paginated = activePlayerLogs.slice((pgPL - 1) * limit, pgPL * limit);
-            renderPagination(activePlayerLogs.length, pgPL, 'pag-pl', 'pgPL');
-
-            if(paginated.length === 0) { tbody.innerHTML = `<tr><td colspan="4" class="center-col" style="color:var(--text-muted); font-style: italic; padding: 30px;">No logs found for this user.</td></tr>`; return; }
-
-            paginated.forEach(l => {
-                let dStr = new Date(l.date).toLocaleString('en-US', {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'});
-                let amtColor = l.amount > 0 ? 'var(--success)' : (l.amount < 0 ? 'var(--danger)' : 'white');
-                let amtSign = l.amount > 0 ? '+' : '';
-                tbody.innerHTML += `
-                    <tr>
-                        <td class="center-col" style="color:var(--text-muted); font-size:0.8rem;">${dStr}</td>
-                        <td class="center-col" style="font-weight: 800; text-transform: uppercase; font-size:0.85rem;">${l.action}</td>
-                        <td class="center-col" style="color:${amtColor}; font-weight:900; font-size:0.95rem;">${amtSign}${l.amount.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1})}</td>
-                        <td class="center-col" style="color:var(--text-muted); font-size:0.85rem; text-transform:uppercase;">${l.details}</td>
-                    </tr>`;
-            });
-        }
-
         function clearPlayerLogs() {
-            closeModal('player-logs-modal');
+            closeDrawer();
             showSNTConfirm("CLEAR LOGS", `Delete all logs for ${currentLogUsername}? This cannot be undone.`, () => {
                 socket.emit('adminAction', { type: 'clearUserLogs', username: currentLogUsername });
             });
@@ -1300,7 +1327,7 @@
         
         function toggleMaintenanceMode() {
             let actionStr = sysMaintenance ? "DISABLE" : "ACTIVATE";
-            let confirmMsg = sysMaintenance ? "Turn OFF Maintenance Mode and allow players to access the casino?" : "Turn ON Maintenance Mode? Players will be blocked from accessing the game.";
+            let confirmMsg = sysMaintenance ? "Turn OFF Maintenance Mode and allow players to access the casino?" : "Turn ON Maintenance Mode? Players will be forcibly disconnected and blocked.";
             showSNTConfirm(`${actionStr} MAINTENANCE`, confirmMsg, () => {
                 socket.emit('adminAction', { type: 'toggleMaintenance' });
             });
