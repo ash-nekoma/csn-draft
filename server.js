@@ -50,7 +50,6 @@ async function deductBet(user, betAmount) {
     return { success: true, fromPlayable, fromMain };
 }
 
-// Admin Live Pulse Emitter
 function sendPulse(msg, type='info') {
     io.to('admin_room').emit('adminPulse', { msg, type, time: Date.now() });
 }
@@ -63,7 +62,7 @@ mongoose.connect(MONGO_URI)
         if (!adminExists) {
             await new User({ username: 'admin', password: 'Kenm44ashley', role: 'Admin', credits: 10000, playableCredits: 0 }).save();
         }
-        pushAdminData(); // Initial calculation of the Vault
+        pushAdminData(); 
     })
     .catch(err => { console.error('❌ MongoDB Connection Error.', err); });
 
@@ -261,15 +260,14 @@ async function pushAdminData(targetSocket = null) {
         const txs = await Transaction.find().sort({ date: -1 }); 
         const gcs = await GiftCode.find().sort({ date: -1 });
         
-        let totalMainCredits = formatTC(users.reduce((a, b) => a + (b.credits || 0), 0)); // STRICTLY MAIN TC
+        let totalMainCredits = formatTC(users.reduce((a, b) => a + (b.credits || 0), 0)); 
         let approvedDeposits = txs.filter(t => t.type === 'Deposit' && t.status === 'Approved').reduce((a, b) => a + b.amount, 0);
         let approvedWithdrawals = txs.filter(t => t.type === 'Withdrawal' && t.status === 'Approved').reduce((a, b) => a + b.amount, 0);
 
-        // BANK VAULT MATH
         globalBankVault = formatTC(2000000 + approvedDeposits - approvedWithdrawals - totalMainCredits);
 
         const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-        const gameLogs = await CreditLog.find({ action: 'GAME', date: { $gte: oneDayAgo } });
+        const gameLogs = await CreditLog.find({ action: 'GAME', date: { $gte: oneDayAgo } }).sort({date: -1}).limit(200);
         let playerNet = gameLogs.reduce((sum, l) => sum + l.amount, 0);
         let houseProfit24h = formatTC(-playerNet);
 
@@ -280,7 +278,14 @@ async function pushAdminData(targetSocket = null) {
             transactions: txs, 
             giftBatches: gcs, 
             adminLogs,
-            stats: { economy: totalMainCredits, approvedDeposits: formatTC(approvedDeposits), limit: globalBankVault, houseProfit: houseProfit24h },
+            gameLogs,
+            stats: { 
+                economy: totalMainCredits, 
+                approvedDeposits: formatTC(approvedDeposits), 
+                approvedWithdrawals: formatTC(approvedWithdrawals), 
+                limit: globalBankVault, 
+                houseProfit: houseProfit24h 
+            },
             isMaintenance: isMaintenanceMode
         };
 
@@ -292,7 +297,7 @@ async function pushAdminData(targetSocket = null) {
 
 io.on('connection', (socket) => {
     socket.emit('timerUpdate', sharedTables.time);
-    socket.emit('maintenanceToggle', isMaintenanceMode); // Send status immediately
+    socket.emit('maintenanceToggle', isMaintenanceMode);
 
     socket.isBetting = false;
     socket.isSharedBetting = false;
@@ -364,7 +369,6 @@ io.on('connection', (socket) => {
                 
                 if (amt > 50000) { socket.emit('localGameError', { msg: 'MAX TOTAL BET IS 50K TC', game: data.game }); return; }
                 
-                // VAULT SECURITY CHECK
                 if ((amt * maxPotentialMultiplier) > globalBankVault) {
                     socket.emit('localGameError', { msg: 'VAULT LIMIT REACHED. CANNOT COVER BET.', game: data.game }); return;
                 }
@@ -573,7 +577,6 @@ io.on('connection', (socket) => {
                 socket.emit('localGameError', { msg: 'MAX 50K TC PER TILE', game: data.room }); return;
             }
 
-            // VAULT SECURITY CHECK
             let maxMultiplier = { 'baccarat': 9, 'dt': 9, 'sicbo': 2, 'perya': 4 }[data.room] || 2;
             if ((amt * maxMultiplier) > globalBankVault) {
                 socket.emit('localGameError', { msg: 'VAULT LIMIT REACHED. CANNOT COVER BET.', game: data.room }); return;
@@ -645,7 +648,7 @@ io.on('connection', (socket) => {
             } else {
                 await new CreditLog({ username: socket.user.username, action: 'DEPOSIT', amount: amount, details: `Pending` }).save();
             }
-            sendPulse(`${socket.user.username} submitted a ${data.type} request for ${amount} TC.`, 'alert');
+            sendPulse(`${socket.user.username} requested ${data.type} of ${amount} TC.`, 'alert');
             const txs = await Transaction.find({ username: socket.user.username }).sort({ date: -1 });
             socket.emit('transactionsData', txs);
             pushAdminData(); 
@@ -731,7 +734,7 @@ io.on('connection', (socket) => {
         user.dailyReward.lastClaim = now; user.dailyReward.streak += 1; await user.save();
         
         await new CreditLog({ username: user.username, action: 'GIFT', amount: amt, details: `Daily Reward` }).save();
-        sendPulse(`${user.username} claimed Day ${day} Daily Reward.`, 'info');
+        sendPulse(`${user.username} claimed Day ${day} Reward.`, 'info');
         pushAdminData();
         socket.emit('dailyClaimed', { amt, newBalance: { credits: user.credits, playable: user.playableCredits }, nextClaim: new Date(now.getTime() + 24 * 60 * 60 * 1000) });
     });
@@ -746,7 +749,7 @@ io.on('connection', (socket) => {
             else { user.credits = formatTC((user.credits || 0) + gc.amount); }
             await user.save();
             await new CreditLog({ username: user.username, action: 'CODE', amount: gc.amount, details: `Redeemed` }).save();
-            sendPulse(`${socket.user.username} redeemed Promo Code for ${gc.amount}.`, 'success');
+            sendPulse(`${socket.user.username} redeemed Code for ${gc.amount}.`, 'success');
             pushAdminData();
             socket.emit('promoResult', { success: true, amt: gc.amount, type: gc.creditType });
             socket.emit('balanceUpdateData', { credits: user.credits, playable: user.playableCredits });
