@@ -114,19 +114,21 @@
         .brand-title { font-weight: 900; letter-spacing: 2px; text-transform: uppercase; font-size: 1.5rem; color: var(--text-main); line-height: 1; text-shadow: 0 0 10px rgba(0, 162, 255, 0.5); }
         .brand-sub { color: var(--ps-glow); font-weight: 800; font-size: 0.9rem; letter-spacing: 3px; margin-top: 2px; text-transform: uppercase; }
 
-        .topbar-right { display: flex; flex-direction: row; align-items: center; gap: 20px;}
+        .topbar-right { display: flex; flex-direction: row; align-items: center; gap: 15px;}
         
-        .player-profile { display: flex; align-items: center; gap: 8px; font-weight: 800; color: white; font-size: 1rem; text-transform: uppercase; }
+        .player-profile { display: flex; align-items: center; gap: 8px; font-weight: 800; color: white; font-size: 1rem; text-transform: uppercase; margin-right: 10px;}
         .player-profile i { color: var(--ps-glow); font-size: 1.4rem; }
 
-        .wallet-pill { background: rgba(0,0,0,0.8); border: 1px solid rgba(255,180,0,0.4); padding: 5px 15px; border-radius: 8px; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; cursor: pointer; transition: 0.3s; box-shadow: inset 0 0 10px rgba(255,180,0,0.1); }
+        .wallet-pill { background: rgba(0,0,0,0.8); border: 1px solid rgba(255,180,0,0.4); padding: 5px 15px; height: 45px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; box-shadow: inset 0 0 10px rgba(255,180,0,0.1); }
         .wallet-pill:hover { border-color: var(--credits); transform: translateY(-2px); box-shadow: 0 0 15px rgba(255,180,0,0.3); }
         .wallet-main { display: flex; align-items: center; gap: 6px; }
         .wallet-main i { color: var(--credits); font-size: 1.1rem; }
-        #nav-credits { color: var(--credits); font-weight: 900; font-size: 1.1rem; }
+        #nav-credits { color: var(--credits); font-weight: 900; font-size: 1.1rem; line-height: 1; }
         .wallet-unit { color: var(--text-muted); font-size: 0.8rem; font-weight: 800; }
-        #nav-playable { font-size: 0.75rem; color: var(--playable); font-weight: 900; line-height: 1; text-shadow: 0 0 5px rgba(179, 102, 255, 0.5); margin-top: 2px; padding: 2px 5px; border-radius: 4px; transition: 0.2s;}
-        #nav-playable:hover { background: rgba(179, 102, 255, 0.15); transform: scale(1.05); }
+        
+        #pill-playable { display: none; border-color: rgba(179, 102, 255, 0.4); box-shadow: inset 0 0 10px rgba(179, 102, 255, 0.1); }
+        #pill-playable:hover { border-color: var(--playable); box-shadow: 0 0 15px rgba(179, 102, 255, 0.3); }
+        #nav-playable { color: var(--playable); font-weight: 900; font-size: 1.1rem; line-height: 1; }
 
         .topbar-actions { display: flex; flex-direction: row; align-items: center; gap: 15px; background: rgba(0,0,0,0.8); padding: 8px 20px; border-radius: 50px; border: 1px solid var(--glass-border); width: fit-content; position: relative;}
         .top-icon-btn { position: relative; cursor: pointer; background: transparent; border: none; font-size: 1.15rem; transition: 0.2s; display: flex; align-items: center; justify-content: center; color: white; width: 20px; }
@@ -261,8 +263,8 @@
         .game-title { font-size: 1.2rem; font-weight: 900; color: white; text-transform:uppercase; letter-spacing: 1px; margin-bottom: 5px; }
         .game-desc { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; }
 
-        .live-badge { position: absolute; top: 15px; right: 15px; background: transparent; color: var(--danger); font-size: 0.8rem; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 4px; z-index: 10;}
-        .live-dot { width: 8px; height: 8px; background-color: var(--danger); border-radius: 50%; animation: pulseRed 1.5s infinite; }
+        .live-badge { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.6); color: var(--danger); font-size: 1.1rem; padding: 6px 12px; border-radius: 8px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 6px; z-index: 10; border: 1px solid rgba(255,51,102,0.3);}
+        .live-dot { width: 12px; height: 12px; background-color: var(--danger); border-radius: 50%; animation: pulseRed 1.5s infinite; }
 
         .active-players { position: absolute; top: 15px; left: 15px; color: var(--success); font-size: 0.9rem; font-weight: 800; z-index: 10; display: flex; align-items: center; gap: 6px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
 
@@ -300,10 +302,12 @@
         /* SHARED BET BUTTONS */
         .bet-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; width: 100%; }
         .bet-grid.perya-grid { grid-template-columns: repeat(3, 1fr); gap: 10px;}
-        .bet-btn { background: rgba(0,0,0,0.6); border: 1px solid var(--glass-border); color: white; padding: 15px 10px; min-height: 50px; border-radius: 8px; font-weight: 900; font-size: 1.1rem; cursor: pointer; transition: 0.2s; text-transform: uppercase; letter-spacing: 1px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;}
+        .bet-btn { position: relative; background: rgba(0,0,0,0.6); border: 1px solid var(--glass-border); color: white; padding: 15px 10px; min-height: 50px; border-radius: 8px; font-weight: 900; font-size: 1.1rem; cursor: pointer; transition: 0.2s; text-transform: uppercase; letter-spacing: 1px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;}
         .bet-btn:hover { background: rgba(255,255,255,0.1); transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
         .bet-btn.has-bet { border-top: 2px solid var(--tile-color, var(--ps-glow)) !important; border-left: 2px solid var(--tile-color, var(--ps-glow)) !important; border-right: 2px solid var(--tile-color, var(--ps-glow)) !important; box-shadow: inset 0 0 15px rgba(255,255,255,0.1), 0 -5px 20px rgba(0,0,0,0.6); color: #fff !important; text-shadow: 0 0 10px var(--tile-color, var(--ps-glow)); transform: translateY(-3px); }
-        .bet-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; box-shadow: none !important; border-color: var(--glass-border) !important; color: var(--text-muted) !important; }
+        .bet-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; box-shadow: none !important; border-color: var(--glass-border) !important; color: var(--text-muted) !important; text-shadow: none !important;}
+        
+        .tile-bet-badge { position: absolute; top: -10px; right: -10px; background: var(--credits); color: black; font-size: 0.8rem; font-weight: 900; padding: 4px 8px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.9); pointer-events: none; display: none; z-index: 10;}
 
         /* MODALS & BOTTOM SHEETS */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 1000000; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(10px); }
@@ -504,6 +508,14 @@
                 <i class="fas fa-user-circle"></i>
                 <span id="player-name-display">Player</span>
             </div>
+
+            <div class="wallet-pill" id="pill-playable" onclick="openModal('playable-info-modal')" style="display: none; border-color: rgba(179, 102, 255, 0.4); box-shadow: inset 0 0 10px rgba(179, 102, 255, 0.1); margin-right: 10px;">
+                <div class="wallet-main">
+                    <i class="fas fa-star" style="color: var(--playable);"></i>
+                    <span id="nav-playable" style="color: var(--playable); font-weight: 900; font-size: 1.1rem;">0.0</span>
+                    <span class="wallet-unit" style="color: var(--playable); opacity: 0.8;">P</span>
+                </div>
+            </div>
             
             <div class="wallet-pill" id="pill-credits" onclick="openCashier()" title="Open Cashier">
                 <div class="wallet-main">
@@ -511,7 +523,6 @@
                     <span id="nav-credits">0.0</span>
                     <span class="wallet-unit">TC</span>
                 </div>
-                <div id="nav-playable" style="display: none; cursor:pointer;" onclick="event.stopPropagation(); openModal('playable-info-modal')">+ 0.0 P</div>
             </div>
             
             <div class="topbar-actions">
@@ -838,7 +849,17 @@
                     <div class="glass-header">
                         <div>LIVE CHAT</div>
                         <div style="display:flex; align-items:center; gap:10px; font-size: 0.95rem; font-weight:800;">
-                            <div style="display:flex; align-items:center; gap:6px; color:var(--success); cursor: pointer;" onclick="fetchActivePlayers()"><i class="fas fa-users"></i> <span id="sg-active-players">0</span></div>
+                            
+                            <div class="dropdown-wrapper">
+                                <div style="display:flex; align-items:center; gap:6px; color:var(--success); cursor: pointer;" onclick="fetchActivePlayers(event)">
+                                    <i class="fas fa-users"></i> <span id="sg-active-players">0</span>
+                                </div>
+                                <div id="ap-popover" class="custom-dropdown hidden" style="top: 30px; right: 0; width: 250px; z-index: 2500; cursor: default;" onclick="event.stopPropagation()">
+                                    <div style="padding: 10px 15px; border-bottom: 1px solid var(--glass-border); font-weight: 900; color: white;">ACTIVE PLAYERS</div>
+                                    <div id="ap-list-container" class="custom-scroll" style="max-height: 200px; overflow-y: auto; padding: 10px;"></div>
+                                </div>
+                            </div>
+
                             <button style="background:transparent; border:none; color:white; font-size:1.2rem; display:none;" id="chat-close-btn" onclick="toggleMobileChat()"><i class="fas fa-times"></i></button>
                         </div>
                     </div>
@@ -888,16 +909,6 @@
                 <li>Playable Credits <strong>cannot</strong> be withdrawn in the Cashier.</li>
             </ul>
         </div>
-    </div>
-  </div>
-
-  <div id="active-players-modal" class="modal-overlay hidden" style="display: none;" onclick="if(event.target===this) closeModal('active-players-modal')">
-    <div class="modal-content" style="width: 350px; text-align: center;">
-        <i class="fas fa-times modal-close-icon" onclick="closeModal('active-players-modal')"></i>
-        <h3 style="color: var(--success); border-bottom: none; margin-bottom: 5px;">Active Players</h3>
-        <p style="color: var(--text-muted); margin-bottom: 15px; font-weight: 600;">Currently in this room</p>
-        <div id="ap-list-container" class="custom-scroll" style="max-height: 300px; overflow-y: auto; text-align: left;">
-            </div>
     </div>
   </div>
 
@@ -1371,9 +1382,14 @@
 
         document.getElementById('nav-credits').innerText = tc; 
         
-        const pDisp = document.getElementById('nav-playable');
-        if (myPlayable > 0) { pDisp.style.display = 'block'; pDisp.innerText = `+ ${ptc} P`; }
-        else { pDisp.style.display = 'none'; }
+        const pillPlayable = document.getElementById('pill-playable');
+        const navPlayable = document.getElementById('nav-playable');
+        if (myPlayable > 0) { 
+            pillPlayable.style.display = 'flex'; 
+            navPlayable.innerText = ptc; 
+        } else { 
+            pillPlayable.style.display = 'none'; 
+        }
         
         document.querySelectorAll('.cashier-balance-display').forEach(el => el.innerText = tc + ' TC');
     }
@@ -1462,7 +1478,7 @@
         
         let statsHtml = ``;
         if (data.stats.total > 0) {
-            if (data.game === 'd20' || data.game === 'coinflip' || data.game === 'blackjack') {
+            if (data.game === 'd20' || data.game === 'blackjack') {
                 let winP = ((data.stats.Win / data.stats.total) * 100).toFixed(1);
                 let loseP = ((data.stats.Lose / data.stats.total) * 100).toFixed(1);
                 statsHtml = `<span><span style="color:var(--success); font-weight:800;">WIN: ${winP}%</span></span><span><span style="color:var(--danger); font-weight:800;">LOSE: ${loseP}%</span></span>`;
@@ -1664,7 +1680,7 @@
           document.querySelectorAll('.d20-toggle.has-bet').forEach(b => {
              b.classList.remove('has-bet'); b.style.borderColor = ''; b.style.color = '';
           });
-          betEl.value = '';
+          // Note: betEl.value is intentionally NOT cleared here so players don't have to re-type it.
       });
       
       socket.on('localGameError', (data) => { if(data.game==='d20') { showLocalFlash('d20', data.msg, "error"); btn.disabled=false; } });
@@ -1855,19 +1871,19 @@
         if(sgCount && window.activeSharedGame) sgCount.innerText = counts[window.activeSharedGame] || 0;
     });
     
-    function fetchActivePlayers() {
+    function fetchActivePlayers(e) {
         if(!window.activeSharedGame) return;
+        toggleCustomDropdown('ap-popover', e);
         socket.emit('getRoomPlayers', window.activeSharedGame);
     }
     
     socket.on('roomPlayersList', (players) => {
         const container = document.getElementById('ap-list-container');
         if (players.length === 0) {
-            container.innerHTML = '<div style="color:var(--text-muted); font-style:italic; padding:10px;">Room is empty.</div>';
+            container.innerHTML = '<div style="color:var(--text-muted); font-style:italic; padding:10px; text-align:center;">Room is empty.</div>';
         } else {
-            container.innerHTML = players.map(p => `<div style="padding:12px; background:rgba(255,255,255,0.05); margin-bottom:5px; border-radius:6px; font-weight:800; color:white;">${p}</div>`).join('');
+            container.innerHTML = players.map(p => `<div style="padding:8px 12px; background:rgba(255,255,255,0.05); margin-bottom:5px; border-radius:6px; font-weight:800; color:white;">${p}</div>`).join('');
         }
-        openModal('active-players-modal');
     });
 
     function undoSharedBet() {
@@ -1879,8 +1895,15 @@
         mySBetsStack.pop();
         if(mySBets[data.choice]) {
             mySBets[data.choice] -= data.amount;
+            
+            let badge = document.getElementById('badge-' + data.choice);
+            if (mySBets[data.choice] > 0) {
+                if(badge) badge.innerText = formatTC(mySBets[data.choice]);
+            }
+            
             if(mySBets[data.choice] <= 0) {
                 delete mySBets[data.choice];
+                if(badge) badge.style.display = 'none';
                 let btn = document.querySelector(`.bet-btn[data-choice="${data.choice}"]`);
                 if(btn) {
                     btn.classList.remove('has-bet');
@@ -1932,7 +1955,7 @@
           if (bg) { 
             const choices = [ {id: 'Yellow', c: '#ffcc00'}, {id: 'White', c: '#ffffff'}, {id: 'Pink', c: '#ff66b2'}, {id: 'Blue', c: '#00a2ff'}, {id: 'Red', c: '#ff3366'}, {id: 'Green', c: '#00e676'} ];
             choices.forEach(c => { 
-              bg.innerHTML += `<button class="bet-btn perya-tile" data-choice="${c.id}" style="border-bottom-color:${c.c};" onclick="placeSharedBet('${c.id}')">${c.id}</button>`; 
+              bg.innerHTML += `<button class="bet-btn perya-tile" data-choice="${c.id}" style="border-bottom-color:${c.c};" onclick="placeSharedBet('${c.id}')">${c.id}<div class="tile-bet-badge" id="badge-${c.id}">0</div></button>`; 
             }); 
           } 
         },
@@ -2019,9 +2042,9 @@
             <div class="bet-grid controls-full" id="sg-bet-grid" style="width:100%; max-width: 600px; margin: 0 auto;"></div>`; 
           let bg = document.getElementById('sg-bet-grid'); 
           if (bg) bg.innerHTML = `
-            <button class="bet-btn shared-tile" data-choice="Player" style="border-bottom-color:var(--ps-glow);" onclick="placeSharedBet('Player')">PLAYER (2x)</button>
-            <button class="bet-btn shared-tile" data-choice="Tie" style="border-bottom-color:var(--success);" onclick="placeSharedBet('Tie')">TIE (9x)</button>
-            <button class="bet-btn shared-tile" data-choice="Banker" style="border-bottom-color:var(--danger);" onclick="placeSharedBet('Banker')">BANKER (1.95x)</button>`;
+            <button class="bet-btn shared-tile" data-choice="Player" style="border-bottom-color:var(--ps-glow);" onclick="placeSharedBet('Player')">PLAYER (2x)<div class="tile-bet-badge" id="badge-Player">0</div></button>
+            <button class="bet-btn shared-tile" data-choice="Tie" style="border-bottom-color:var(--success);" onclick="placeSharedBet('Tie')">TIE (9x)<div class="tile-bet-badge" id="badge-Tie">0</div></button>
+            <button class="bet-btn shared-tile" data-choice="Banker" style="border-bottom-color:var(--danger);" onclick="placeSharedBet('Banker')">BANKER (1.95x)<div class="tile-bet-badge" id="badge-Banker">0</div></button>`;
         },
         animateResult: async function(data) {
             let pHand = document.getElementById('bac-p-hand'), bHand = document.getElementById('bac-b-hand');
@@ -2111,9 +2134,9 @@
             <div class="bet-grid controls-full" id="sg-bet-grid" style="width:100%; max-width: 600px; margin: 0 auto;"></div>`; 
           let bg = document.getElementById('sg-bet-grid'); 
           if (bg) bg.innerHTML = `
-            <button class="bet-btn shared-tile" data-choice="Dragon" style="border-bottom-color:var(--danger);" onclick="placeSharedBet('Dragon')">DRAGON (2x)</button>
-            <button class="bet-btn shared-tile" data-choice="Tie" style="border-bottom-color:var(--success);" onclick="placeSharedBet('Tie')">TIE (9x)</button>
-            <button class="bet-btn shared-tile" data-choice="Tiger" style="border-bottom-color:var(--credits);" onclick="placeSharedBet('Tiger')">TIGER (2x)</button>`; 
+            <button class="bet-btn shared-tile" data-choice="Dragon" style="border-bottom-color:var(--danger);" onclick="placeSharedBet('Dragon')">DRAGON (2x)<div class="tile-bet-badge" id="badge-Dragon">0</div></button>
+            <button class="bet-btn shared-tile" data-choice="Tie" style="border-bottom-color:var(--success);" onclick="placeSharedBet('Tie')">TIE (9x)<div class="tile-bet-badge" id="badge-Tie">0</div></button>
+            <button class="bet-btn shared-tile" data-choice="Tiger" style="border-bottom-color:var(--credits);" onclick="placeSharedBet('Tiger')">TIGER (2x)<div class="tile-bet-badge" id="badge-Tiger">0</div></button>`; 
         },
         animateResult: function(data) { 
           let e1 = document.getElementById('dt-c1'); 
@@ -2177,9 +2200,9 @@
             <div class="bet-grid controls-full" id="sg-bet-grid" style="width:100%; max-width: 600px; margin: 0 auto;"></div>`; 
           let bg = document.getElementById('sg-bet-grid'); 
           if (bg) bg.innerHTML = `
-            <button class="bet-btn shared-tile" data-choice="Small" style="border-bottom-color:var(--ps-glow);" onclick="placeSharedBet('Small')">SMALL (2x)</button>
+            <button class="bet-btn shared-tile" data-choice="Small" style="border-bottom-color:var(--ps-glow);" onclick="placeSharedBet('Small')">SMALL (2x)<div class="tile-bet-badge" id="badge-Small">0</div></button>
             <div style="display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-weight:800;font-size:1rem;text-align:center;">TRIPLE LOSES</div>
-            <button class="bet-btn shared-tile" data-choice="Big" style="border-bottom-color:var(--danger);" onclick="placeSharedBet('Big')">BIG (2x)</button>`; 
+            <button class="bet-btn shared-tile" data-choice="Big" style="border-bottom-color:var(--danger);" onclick="placeSharedBet('Big')">BIG (2x)<div class="tile-bet-badge" id="badge-Big">0</div></button>`; 
         },
         animateResult: function(data) { 
           const dc = document.getElementById('sb-dice'); 
@@ -2234,6 +2257,12 @@
       if (mb) { mb.innerHTML = `${formatTC(tot)} TC`; } 
       
       updateCurrentBetsPopover();
+
+      let badge = document.getElementById('badge-' + c);
+      if (badge) {
+          badge.innerText = formatTC(mySBets[c]);
+          badge.style.display = 'block';
+      }
 
       document.querySelectorAll('#sg-bet-grid .bet-btn').forEach(b => { 
         if (b.getAttribute('data-choice') === c) { 
@@ -2319,6 +2348,7 @@
         
         updateCurrentBetsPopover();
 
+        document.querySelectorAll('.tile-bet-badge').forEach(b => { b.style.display = 'none'; b.innerText = '0'; });
         document.querySelectorAll('#sg-bet-grid .bet-btn').forEach(btn => { btn.classList.remove('has-bet'); btn.disabled = false; }); 
     }
 
