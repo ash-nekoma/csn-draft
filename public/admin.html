@@ -24,10 +24,11 @@
         
         body { background: linear-gradient(135deg, #000a1f 0%, #00122e 100%); color: var(--text-main); min-height: 100vh; width: 100vw; display: flex; overflow: hidden; }
 
-        ::-webkit-scrollbar { width: 8px; }
+        /* Custom Glass Scrollbars */
+        ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
+        ::-webkit-scrollbar-thumb { background: rgba(0, 162, 255, 0.2); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(0, 162, 255, 0.5); box-shadow: 0 0 10px var(--ps-glow); }
 
         .hidden { display: none !important; opacity: 0; pointer-events: none; }
 
@@ -45,18 +46,13 @@
         select.input-control, .filter-bar select {
             appearance: none;
             background-image: url('data:image/svg+xml;utf8,<svg fill="white" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
-            background-repeat: no-repeat;
-            background-position: right 12px center;
-            padding-right: 40px !important;
-            cursor: pointer;
+            background-repeat: no-repeat; background-position: right 12px center; padding-right: 40px !important; cursor: pointer;
         }
 
-        /* PREMIUM BUTTONS */
         .btn-primary { background: rgba(0, 162, 255, 0.15); color: var(--ps-glow); border: 1px solid var(--ps-glow); padding: 15px; width: 100%; border-radius: 8px; font-size: 1.1rem; font-weight: 900; cursor: pointer; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 1px; pointer-events: auto; }
         .btn-primary:hover { background: var(--ps-glow); color: black; transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0, 162, 255, 0.4); }
         .auth-msg { font-size: 0.95rem; font-weight: 800; min-height: 20px; margin-bottom: 15px; text-align: center; color: var(--danger); }
 
-        /* DASHBOARD LAYOUT */
         #admin-app { display: none; width: 100%; height: 100vh; position: relative; z-index: 1;}
         
         /* SIDEBAR */
@@ -74,18 +70,20 @@
         .logout-btn { padding: 20px; text-align: center; border-top: 1px solid var(--glass-border); cursor: pointer; color: white; font-weight: 800; transition: 0.2s; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px; background: rgba(255,255,255,0.05);}
         .logout-btn:hover { background: rgba(255,255,255,0.15); color: var(--danger); }
 
-        /* MAIN CONTENT */
+        /* MAIN CONTENT & BENTO */
         .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: transparent; }
         .topbar { padding: 25px 40px; border-bottom: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); flex-shrink: 0;}
         .topbar h1 { font-weight: 900; font-size: 2rem; text-transform: uppercase; letter-spacing: 1px; margin: 0; }
         
         .content-area { padding: 40px; flex: 1; width: 100%; display: flex; flex-direction: column; overflow: hidden; }
-        .tab-view { flex: 1; display: flex; flex-direction: column; overflow: hidden;}
+        .tab-view { flex: 1; display: flex; flex-direction: row; overflow: hidden; gap: 20px;}
 
-        /* BENTO BOX GRID DASHBOARD */
+        /* BENTO GRID (Fixed Cut-offs) */
+        .bento-container { flex: 3; display: flex; flex-direction: column; overflow-y: auto; padding: 10px; }
         .bento-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; width: 100%; }
+        
         .bento-item { background: rgba(0, 15, 35, 0.6); border: 1px solid var(--glass-border); padding: 30px; border-radius: 12px; display: flex; align-items: center; gap: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.7); backdrop-filter: blur(5px); transition: all 0.3s ease; cursor: pointer; }
-        .bento-item:hover { transform: translateY(-5px); border-color: var(--ps-glow); box-shadow: 0 0 25px rgba(0,162,255,0.3), inset 0 0 15px rgba(0, 162, 255, 0.15); }
+        .bento-item:hover { transform: translateY(-5px); border-color: transparent; box-shadow: inset 0 0 25px rgba(0,162,255,0.3), 0 10px 30px rgba(0,0,0,0.8); }
         
         .bento-span-2 { grid-column: span 2; }
         .bento-span-row-2 { grid-row: span 2; flex-direction: column; align-items: flex-start; justify-content: center; }
@@ -96,12 +94,23 @@
         .glow-neon { text-shadow: 0 0 15px var(--ps-glow); color: var(--ps-glow); }
         .glow-success { text-shadow: 0 0 15px var(--success); color: var(--success); }
 
+        /* LIVE PULSE SIDEBAR */
+        .live-pulse-panel { flex: 1; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 12px; display: flex; flex-direction: column; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); min-width: 300px; max-width: 400px;}
+        .pulse-header { font-weight: 900; font-size: 1.2rem; text-transform: uppercase; color: white; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--glass-border); padding-bottom: 15px; }
+        .pulse-dot { width: 10px; height: 10px; background: var(--success); border-radius: 50%; animation: pulseRed 1.5s infinite; }
+        .pulse-feed { display: flex; flex-direction: column; gap: 10px; overflow-y: auto; flex: 1; padding-right: 5px; }
+        .pulse-item { background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; border-left: 3px solid transparent; animation: slideInPulse 0.3s ease-out; }
+        .pulse-item.info { border-left-color: var(--ps-glow); }
+        .pulse-item.success { border-left-color: var(--success); }
+        .pulse-item.alert { border-left-color: var(--danger); }
+        .pulse-item.bet { border-left-color: var(--credits); }
+        @keyframes slideInPulse { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+
         /* DATA TABLES & PANELS */
-        .panel { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; flex: 1; box-shadow: 0 10px 30px rgba(0,0,0,0.5);}
+        .panel { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; flex: 1; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 100%;}
         .panel-header { padding: 20px 30px; border-bottom: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.5); flex-shrink: 0;}
         .panel-header h3 { font-weight: 900; font-size: 1.3rem; text-transform: uppercase; margin: 0; letter-spacing: 1px;}
         
-        /* TABLE FIXES FOR PAGINATION */
         .table-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
         table { width: 100%; border-collapse: collapse; text-align: left; }
         th, td { padding: 12px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); }
@@ -109,13 +118,11 @@
         thead th { color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; border-bottom: 1px solid var(--glass-border); padding: 15px 20px;}
         td { font-weight: 600; font-size: 1rem; color: white; }
 
-        /* PAGINATION UI */
         .pagination { display: flex; justify-content: space-between; align-items: center; padding: 15px 25px; border-top: 1px solid var(--glass-border); background: rgba(0,0,0,0.5); flex-shrink: 0; }
         .pagination button { background: rgba(255,255,255,0.1); border: none; color: white; padding: 8px 15px; border-radius: 6px; font-weight:800; cursor: pointer; transition: 0.2s; text-transform: uppercase; }
         .pagination button:hover:not(:disabled) { background: var(--ps-glow); color: black; }
         .pagination button:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        /* CENTER ALIGNMENT UTILITY */
         .center-col { text-align: center; justify-content: center; }
 
         .badge { padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; display: inline-block; }
@@ -130,11 +137,9 @@
         .btn-approve { background: rgba(0, 230, 118, 0.15); color: var(--success); border: 1px solid rgba(0, 230, 118, 0.3); } .btn-approve:hover { background: var(--success); color: black; }
         .btn-reject { background: rgba(255, 51, 102, 0.15); color: var(--danger); border: 1px solid rgba(255, 51, 102, 0.3); } .btn-reject:hover { background: var(--danger); color: white; }
 
-        /* SPLIT SCREEN LAYOUT FOR CASHIER */
         .split-screen { display: flex; gap: 20px; width: 100%; flex: 1; align-items: stretch; overflow: hidden;}
         .split-col { flex: 1; display: flex; flex-direction: column; overflow: hidden; width: 50%; }
 
-        /* CLICKABLE ROWS */
         .clickable-row { cursor: pointer; transition: background-color 0.2s ease; border-left: 3px solid transparent; }
         .clickable-row:hover { background-color: rgba(0, 162, 255, 0.15); border-left: 3px solid var(--ps-glow); }
 
@@ -162,9 +167,15 @@
         @keyframes toastIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes toastOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
 
+        /* QUICK ACTION POPOVER */
+        .glass-popover { position: fixed; background: rgba(0, 15, 35, 0.95); border: 1px solid var(--ps-glow); border-radius: 8px; box-shadow: 0 15px 40px rgba(0,0,0,0.9); z-index: 50000; padding: 10px; display: flex; flex-direction: column; gap: 5px; backdrop-filter: blur(20px); }
+        .qa-btn { background: transparent; border: none; color: white; padding: 10px 15px; text-align: left; font-weight: 800; border-radius: 4px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 10px; font-size: 0.95rem; text-transform: uppercase;}
+        .qa-btn:hover { background: rgba(255,255,255,0.1); }
+
+        .smurf-icon { color: var(--danger); margin-left: 8px; cursor: help; font-size: 1.1rem; animation: pulseRed 2s infinite; }
     </style>
 </head>
-<body>
+<body onclick="hideAllPopovers()">
 
     <div id="toast-container"></div>
 
@@ -215,45 +226,54 @@
             <div class="content-area">
                 
                 <div id="view-dashboard" class="tab-view">
-                    <div class="bento-grid">
-                        <div class="bento-item bento-span-2 bento-span-row-2" onclick="switchTab('users')">
-                            <div style="display:flex; align-items:center; gap:20px;">
-                                <div class="stat-icon" style="color: var(--credits); font-size:3rem; width:80px; height:80px;"><i class="fas fa-coins"></i></div>
-                                <div class="stat-info">
-                                    <h3 style="font-size:1.1rem;">Total Economy</h3>
-                                    <div class="value glow-neon" id="stat-economy" style="font-size:3.5rem;">0.0</div>
+                    <div class="bento-container">
+                        <div class="bento-grid">
+                            <div class="bento-item bento-span-2 bento-span-row-2" onclick="switchTab('users')">
+                                <div style="display:flex; align-items:center; gap:20px;">
+                                    <div class="stat-icon" style="color: var(--credits); font-size:3rem; width:80px; height:80px;"><i class="fas fa-coins"></i></div>
+                                    <div class="stat-info">
+                                        <h3 style="font-size:1.1rem;">Total Economy (Main TC)</h3>
+                                        <div class="value glow-neon" id="stat-economy" style="font-size:3.5rem;">0.0</div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div class="bento-item bento-span-2" onclick="switchTab('cashier')">
-                            <div class="stat-icon" style="color: var(--success);"><i class="fas fa-arrow-down"></i></div>
-                            <div class="stat-info"><h3>Total Deposits (Approved)</h3><div class="value glow-success" id="stat-deposits">0.0</div></div>
-                        </div>
+                            <div class="bento-item bento-span-2" onclick="switchTab('cashier')">
+                                <div class="stat-icon" style="color: var(--success);"><i class="fas fa-arrow-down"></i></div>
+                                <div class="stat-info"><h3>Total Deposits (Approved)</h3><div class="value glow-success" id="stat-deposits">0.0</div></div>
+                            </div>
 
-                        <div class="bento-item" onclick="switchTab('users')">
-                            <div class="stat-icon" style="color: var(--ps-glow);"><i class="fas fa-users"></i></div>
-                            <div class="stat-info"><h3>Registered Players</h3><div class="value" id="stat-users">0</div></div>
-                        </div>
+                            <div class="bento-item" onclick="switchTab('users')">
+                                <div class="stat-icon" style="color: var(--ps-glow);"><i class="fas fa-users"></i></div>
+                                <div class="stat-info"><h3>Registered Players</h3><div class="value" id="stat-users">0</div></div>
+                            </div>
 
-                        <div class="bento-item" onclick="switchTab('cashier')">
-                            <div class="stat-icon" style="color: var(--danger);"><i class="fas fa-clock"></i></div>
-                            <div class="stat-info"><h3>Pending Requests</h3><div class="value" id="stat-pending">0</div></div>
-                        </div>
+                            <div class="bento-item" onclick="switchTab('cashier')">
+                                <div class="stat-icon" style="color: var(--danger);"><i class="fas fa-clock"></i></div>
+                                <div class="stat-info"><h3>Pending Requests</h3><div class="value" id="stat-pending">0</div></div>
+                            </div>
 
-                        <div class="bento-item bento-span-2">
-                            <div class="stat-icon" style="color: var(--text-muted);"><i class="fas fa-university"></i></div>
-                            <div class="stat-info"><h3>Bank Limit</h3><div class="value" id="stat-limit">2,000,000</div></div>
+                            <div class="bento-item bento-span-2">
+                                <div class="stat-icon" style="color: var(--text-muted);"><i class="fas fa-university"></i></div>
+                                <div class="stat-info"><h3>Bank Vault Limit</h3><div class="value" id="stat-limit">2,000,000</div></div>
+                            </div>
+                            
+                            <div class="bento-item bento-span-2">
+                                <div class="stat-icon" style="color: var(--success);"><i class="fas fa-chart-line"></i></div>
+                                <div class="stat-info"><h3>House Profit (24H)</h3><div class="value" id="stat-profit" style="color:var(--success);">0.0</div></div>
+                            </div>
                         </div>
-                        
-                        <div class="bento-item bento-span-2">
-                            <div class="stat-icon" style="color: var(--success);"><i class="fas fa-chart-line"></i></div>
-                            <div class="stat-info"><h3>House Profit (24H)</h3><div class="value" id="stat-profit" style="color:var(--success);">0.0</div></div>
+                    </div>
+                    
+                    <div class="live-pulse-panel">
+                        <div class="pulse-header"><div class="pulse-dot"></div> Live Pulse</div>
+                        <div class="pulse-feed custom-scroll" id="live-pulse-container">
+                            <div style="color:var(--text-muted); font-style:italic; text-align:center; padding: 20px;">Listening for events...</div>
                         </div>
                     </div>
                 </div>
 
-                <div id="view-users" class="tab-view hidden">
+                <div id="view-users" class="tab-view hidden" style="flex-direction: column;">
                     <div class="panel">
                         <div class="panel-header">
                             <h3>Player Database Hierarchy</h3>
@@ -299,7 +319,7 @@
                     </div>
                 </div>
 
-                <div id="view-cashier" class="tab-view hidden">
+                <div id="view-cashier" class="tab-view hidden" style="flex-direction: column;">
                     <div class="split-screen">
                         <div class="panel split-col">
                             <div class="panel-header"><h3 style="color: var(--credits);"><i class="fas fa-clock"></i> Pending Requests</h3></div>
@@ -347,7 +367,7 @@
                     </div>
                 </div>
 
-                <div id="view-promos" class="tab-view hidden">
+                <div id="view-promos" class="tab-view hidden" style="flex-direction: column;">
                     <div class="panel">
                         <div class="panel-header">
                             <h3>Active Gift Codes</h3>
@@ -380,10 +400,10 @@
                     </div>
                 </div>
 
-                <div id="view-tools" class="tab-view hidden">
+                <div id="view-tools" class="tab-view hidden" style="flex-direction: column;">
                     <div class="panel">
                         <div class="panel-header"><h3>System & Communication Tools</h3></div>
-                        <div class="bento-grid" style="padding: 30px;">
+                        <div class="bento-grid" style="padding: 30px; overflow: visible;">
                             
                             <div class="bento-item" onclick="openModal('global-update-modal')">
                                 <div class="stat-icon" style="color: var(--ps-glow);"><i class="fas fa-bullhorn"></i></div>
@@ -393,11 +413,11 @@
                                 </div>
                             </div>
                             
-                            <div class="bento-item" style="opacity: 0.5; cursor: not-allowed;" title="Coming Soon">
-                                <div class="stat-icon" style="color: var(--text-muted);"><i class="fas fa-server"></i></div>
+                            <div class="bento-item" onclick="toggleMaintenanceMode()" id="maintenance-card" style="border-color: var(--danger); box-shadow: inset 0 0 15px rgba(255,51,102,0.1);">
+                                <div class="stat-icon" style="color: var(--danger);" id="maintenance-icon"><i class="fas fa-power-off"></i></div>
                                 <div class="stat-info">
-                                    <h3>Server</h3>
-                                    <div class="value" style="font-size: 1.6rem;">Maintenance Mode</div>
+                                    <h3 style="color: var(--danger);">Killswitch</h3>
+                                    <div class="value" style="font-size: 1.4rem; color: var(--danger);" id="maintenance-text">Maintenance: OFF</div>
                                 </div>
                             </div>
 
@@ -405,7 +425,7 @@
                     </div>
                 </div>
 
-                <div id="view-audit" class="tab-view hidden">
+                <div id="view-audit" class="tab-view hidden" style="flex-direction: column;">
                     <div class="panel">
                         <div class="panel-header"><h3 style="color: var(--danger);"><i class="fas fa-shield-alt"></i> Admin Audit Logs</h3></div>
                         <div class="table-wrapper">
@@ -429,7 +449,11 @@
         </div>
     </div>
 
-    <div id="edit-user-modal" class="modal-overlay hidden">
+    <div id="smurf-popover" class="glass-popover hidden" style="min-width: 200px;"></div>
+    
+    <div id="quick-action-popover" class="glass-popover hidden" style="width: 220px;" onclick="event.stopPropagation()"></div>
+
+    <div id="edit-user-modal" class="modal-overlay hidden" onclick="if(event.target===this) closeModal('edit-user-modal')">
         <div class="modal-content">
             <button class="modal-close" onclick="closeModal('edit-user-modal')"><i class="fas fa-times"></i></button>
             <h3 class="modal-title">Edit Player</h3>
@@ -459,7 +483,7 @@
         </div>
     </div>
 
-    <div id="player-logs-modal" class="modal-overlay hidden">
+    <div id="player-logs-modal" class="modal-overlay hidden" onclick="if(event.target===this) closeModal('player-logs-modal')">
         <div class="modal-content wide">
             <button class="modal-close" onclick="closeModal('player-logs-modal')"><i class="fas fa-times"></i></button>
             <h3 class="modal-title" id="pl-title">PLAYER LOGS</h3>
@@ -478,7 +502,7 @@
         </div>
     </div>
 
-    <div id="snt-confirm-modal" class="modal-overlay hidden">
+    <div id="snt-confirm-modal" class="modal-overlay hidden" onclick="if(event.target===this) closeConfirmModal()">
         <div class="modal-content" style="width: 400px; text-align: center;">
             <h3 class="modal-title" id="confirm-title" style="color: var(--danger);">SYSTEM OVERRIDE</h3>
             <p id="confirm-msg" style="font-size: 1.1rem; color: white; margin-bottom: 20px;">Are you sure?</p>
@@ -489,7 +513,7 @@
         </div>
     </div>
 
-    <div id="global-update-modal" class="modal-overlay hidden">
+    <div id="global-update-modal" class="modal-overlay hidden" onclick="if(event.target===this) closeModal('global-update-modal')">
         <div class="modal-content">
             <button class="modal-close" onclick="closeModal('global-update-modal')"><i class="fas fa-times"></i></button>
             <h3 class="modal-title">Global Broadcast</h3>
@@ -501,7 +525,7 @@
         </div>
     </div>
 
-    <div id="direct-gift-modal" class="modal-overlay hidden">
+    <div id="direct-gift-modal" class="modal-overlay hidden" onclick="if(event.target===this) closeModal('direct-gift-modal')">
         <div class="modal-content">
             <button class="modal-close" onclick="closeModal('direct-gift-modal')"><i class="fas fa-times"></i></button>
             <h3 class="modal-title" style="color:var(--credits)">Direct Gift Credits</h3>
@@ -532,7 +556,7 @@
         </div>
     </div>
 
-    <div id="create-promo-modal" class="modal-overlay hidden">
+    <div id="create-promo-modal" class="modal-overlay hidden" onclick="if(event.target===this) closeModal('create-promo-modal')">
         <div class="modal-content">
             <button class="modal-close" onclick="closeModal('create-promo-modal')"><i class="fas fa-times"></i></button>
             <h3 class="modal-title">Generate Gift Codes</h3>
@@ -556,7 +580,7 @@
         </div>
     </div>
 
-    <div id="view-batch-modal" class="modal-overlay hidden">
+    <div id="view-batch-modal" class="modal-overlay hidden" onclick="if(event.target===this) closeModal('view-batch-modal')">
         <div class="modal-content wide">
             <button class="modal-close" onclick="closeModal('view-batch-modal')"><i class="fas fa-times"></i></button>
             <h3 class="modal-title" id="vb-title">BATCH DETAILS</h3>
@@ -575,7 +599,7 @@
         </div>
     </div>
 
-    <div id="inspector-modal" class="modal-overlay hidden">
+    <div id="inspector-modal" class="modal-overlay hidden" onclick="if(event.target===this) closeModal('inspector-modal')">
         <div class="modal-content" style="width: 500px; border-top: 4px solid var(--ps-glow);">
             <button class="modal-close" onclick="closeModal('inspector-modal')"><i class="fas fa-times"></i></button>
             <h3 class="modal-title" style="border: none; margin-bottom: 5px;">REQUEST INSPECTOR</h3>
@@ -640,6 +664,21 @@
         socket.on('adminSuccess', msg => showToast(msg, 'success'));
         socket.on('adminError', msg => showToast(msg, 'error'));
 
+        socket.on('adminPulse', data => {
+            let fc = document.getElementById('live-pulse-container');
+            if(!fc) return;
+            if(fc.innerHTML.includes('Listening for events')) fc.innerHTML = '';
+            
+            let dStr = new Date(data.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+            let item = document.createElement('div');
+            item.className = `pulse-item ${data.type}`;
+            item.innerHTML = `<span style="color:var(--text-muted); font-size:0.7rem; margin-right:5px;">[${dStr}]</span> ${data.msg}`;
+            
+            fc.appendChild(item);
+            if(fc.children.length > 50) fc.removeChild(fc.firstChild);
+            fc.scrollTop = fc.scrollHeight;
+        });
+
         let gUsers = []; let pgUsers = 1;
         let gTxs = []; let pgPend = 1; let pgHist = 1;
         let gPromos = []; let pgPromos = 1;
@@ -649,6 +688,7 @@
         let activePlayerLogs = []; let pgPL = 1;
         let activeBatchCodes = []; let pgVB = 1;
         let currentLogUsername = '';
+        let sysMaintenance = false;
         const limit = 10;
 
         function renderPagination(totalItems, currentPage, elementId, updateVarStr) {
@@ -709,6 +749,7 @@
         }
 
         function openModal(id) { 
+            hideAllPopovers();
             document.querySelectorAll('.modal-error-text').forEach(el => el.innerText = '');
             document.getElementById(id).classList.remove('hidden'); 
         }
@@ -716,6 +757,7 @@
 
         let confirmActionCallback = null;
         function showSNTConfirm(title, message, callback) {
+            hideAllPopovers();
             document.getElementById('confirm-title').innerText = title;
             document.getElementById('confirm-msg').innerText = message;
             confirmActionCallback = callback;
@@ -726,6 +768,7 @@
         document.getElementById('confirm-action-btn').addEventListener('click', () => { if (confirmActionCallback) confirmActionCallback(); closeConfirmModal(); });
 
         function showSNTAlert(title, message) {
+            hideAllPopovers();
             document.getElementById('confirm-title').innerText = title;
             document.getElementById('confirm-msg').innerText = message;
             document.getElementById('confirm-action-btn').style.display = 'none'; 
@@ -760,6 +803,19 @@
             if(currentPending > lastPendingCount) { playSonarPing(); }
             lastPendingCount = currentPending;
 
+            // Maintenance Status Sync
+            sysMaintenance = data.isMaintenance;
+            let mCard = document.getElementById('maintenance-card');
+            let mIcon = document.getElementById('maintenance-icon');
+            let mText = document.getElementById('maintenance-text');
+            if(sysMaintenance) {
+                mCard.style.borderColor = 'var(--danger)'; mCard.style.boxShadow = 'inset 0 0 15px rgba(255,51,102,0.1)';
+                mIcon.style.color = 'var(--danger)'; mText.style.color = 'var(--danger)'; mText.innerText = 'Maintenance: ON';
+            } else {
+                mCard.style.borderColor = 'var(--glass-border)'; mCard.style.boxShadow = 'none';
+                mIcon.style.color = 'var(--text-muted)'; mText.style.color = 'white'; mText.innerText = 'Maintenance: OFF';
+            }
+
             renderUsers(); renderTransactions(); renderPromos(); renderAuditLogs();
             
             // Update dropdown dynamic target
@@ -769,6 +825,47 @@
             gUsers.forEach(u => d.innerHTML += `<option value="${u.username}">Specific: ${u.username}</option>`);
             if(d.querySelector(`option[value="${v}"]`)) d.value = v;
         });
+
+        // HIDE POPOVERS ON CLICK OUTSIDE
+        function hideAllPopovers() {
+            document.querySelectorAll('.glass-popover').forEach(p => p.classList.add('hidden'));
+        }
+
+        // SMURF INDICATOR LOGIC
+        function showSmurfPop(event, ip) {
+            let p = document.getElementById('smurf-popover');
+            let smurfs = gUsers.filter(u => u.ipAddress === ip).map(u => u.username);
+            p.innerHTML = `<div style="font-weight:900;margin-bottom:8px;color:var(--danger); border-bottom:1px solid rgba(255,51,102,0.3); padding-bottom:5px;">Linked Accounts (IP)</div>` + smurfs.map(s => `<div style="color:white; font-weight:600; font-size:0.9rem; margin-bottom:3px;"><i class="fas fa-user-circle" style="color:var(--text-muted); margin-right:5px;"></i> ${s}</div>`).join('');
+            p.style.top = (event.clientY + 15) + 'px';
+            p.style.left = (event.clientX + 15) + 'px';
+            p.classList.remove('hidden');
+        }
+        function hideSmurfPop() { document.getElementById('smurf-popover').classList.add('hidden'); }
+
+        // QUICK ACTION LOGIC
+        function toggleQuickActions(event, id, username, status) {
+            event.stopPropagation();
+            hideAllPopovers();
+            
+            let p = document.getElementById('quick-action-popover');
+            if (!p.classList.contains('hidden') && p.dataset.uid === id) { p.classList.add('hidden'); return; }
+            
+            let banText = status === 'Banned' ? 'Unban Player' : 'Ban Player';
+            let banAction = status === 'Banned' ? 'unban' : 'ban';
+            let banIcon = status === 'Banned' ? 'fa-unlock' : 'fa-ban';
+            let banColor = status === 'Banned' ? 'var(--success)' : 'var(--danger)';
+
+            p.innerHTML = `
+                <div style="padding:10px; border-bottom:1px solid var(--glass-border); font-weight:900; color:white; font-size:1.1rem; text-align:center;">${username}</div>
+                <button class="qa-btn" onclick="openEditUser('${id}')"><i class="fas fa-pen" style="color:var(--ps-glow)"></i> Edit Balances</button>
+                <button class="qa-btn" onclick="viewPlayerLogs('${username}')"><i class="fas fa-list" style="color:white"></i> View Logs</button>
+                <button class="qa-btn" onclick="actionUser('${banAction}', '${id}', '${username}')"><i class="fas ${banIcon}" style="color:${banColor}"></i> ${banText}</button>
+            `;
+            p.style.top = (event.clientY) + 'px';
+            p.style.left = (event.clientX - 230) + 'px';
+            p.dataset.uid = id;
+            p.classList.remove('hidden');
+        }
 
         function renderUsers() {
             const tbody = document.getElementById('users-tbody'); tbody.innerHTML = '';
@@ -791,7 +888,7 @@
             filtered.sort((a, b) => {
                 const statusOrder = { 'Active': 1, 'Offline': 2, 'Banned': 3 };
                 if (statusOrder[a.status] !== statusOrder[b.status]) return statusOrder[a.status] - statusOrder[b.status];
-                let aBal = (a.credits || 0) + (a.playableCredits || 0); let bBal = (b.credits || 0) + (b.playableCredits || 0);
+                let aBal = (a.credits || 0); let bBal = (b.credits || 0);
                 return sortDir === 'desc' ? bBal - aBal : aBal - bBal;
             });
 
@@ -802,23 +899,19 @@
 
             paginated.forEach(u => {
                 let statClass = u.status === 'Active' ? 'active' : (u.status === 'Banned' ? 'banned' : 'offline');
-                let actionBtn = u.status === 'Banned' 
-                    ? `<button class="btn-sm btn-approve" onclick="event.stopPropagation(); actionUser('unban', '${u._id}', '${u.username}')"><i class="fas fa-unlock"></i> Unban</button>`
-                    : `<button class="btn-sm btn-reject" onclick="event.stopPropagation(); actionUser('ban', '${u._id}', '${u.username}')"><i class="fas fa-ban"></i> Ban</button>`;
-
-                let displayCredits = `<div style="font-weight: 800; color: var(--credits);">${(u.credits || 0).toLocaleString(undefined, {minimumFractionDigits:1, maximumFractionDigits:1})}</div><div style="font-size: 0.8rem; color: var(--ps-glow);">+ ${(u.playableCredits || 0).toLocaleString(undefined, {minimumFractionDigits:1, maximumFractionDigits:1})} P</div>`;
+                let displayCredits = `<div style="font-weight: 900; color: var(--credits); font-size:1.1rem;">${(u.credits || 0).toLocaleString(undefined, {minimumFractionDigits:1, maximumFractionDigits:1})}</div><div style="font-size: 0.8rem; color: var(--playable); font-weight:800;">+ ${(u.playableCredits || 0).toLocaleString(undefined, {minimumFractionDigits:1, maximumFractionDigits:1})} P</div>`;
                 
-                let smurfWarning = (u.ipAddress && u.ipAddress !== 'Unknown' && ipCounts[u.ipAddress] > 1) ? `<i class="fas fa-exclamation-triangle" style="color:var(--danger); margin-left:8px;" title="Multiple accounts detected on this IP!"></i>` : '';
+                let smurfWarning = (u.ipAddress && u.ipAddress !== 'Unknown' && ipCounts[u.ipAddress] > 1) ? `<i class="fas fa-exclamation-circle smurf-icon" onmouseover="showSmurfPop(event, '${u.ipAddress}')" onmouseout="hideSmurfPop()"></i>` : '';
 
                 tbody.innerHTML += `
-                    <tr class="clickable-row" onclick="viewPlayerLogs('${u.username}')">
+                    <tr class="clickable-row">
                         <td class="center-col" style="color:var(--text-muted);">${new Date(u.joinDate).toLocaleDateString()}</td>
                         <td class="center-col"><div style="font-weight:900; font-size:1.1rem; color: white; display:flex; align-items:center; justify-content:center;">${u.username} ${smurfWarning}</div></td>
                         <td class="center-col">${displayCredits}</td>
                         <td class="center-col">${u.role}</td>
                         <td class="center-col"><span class="badge ${statClass}">${u.status}</span></td>
-                        <td class="center-col" onclick="event.stopPropagation();">
-                            <div class="action-btns"><button class="btn-sm btn-edit" onclick="openEditUser('${u._id}')"><i class="fas fa-pen"></i> Edit</button>${actionBtn}</div>
+                        <td class="center-col">
+                            <button class="btn-sm btn-edit" onclick="toggleQuickActions(event, '${u._id}', '${u.username}', '${u.status}')" style="background:transparent; border-color:var(--glass-border); color:white; font-size:1.2rem; padding:4px 15px;"><i class="fas fa-ellipsis-h"></i></button>
                         </td>
                     </tr>`;
             });
@@ -844,6 +937,7 @@
         }
 
         function viewPlayerLogs(username) {
+            hideAllPopovers();
             currentLogUsername = username;
             document.getElementById('pl-title').innerText = `${username} LOGS`;
             pgPL = 1;
@@ -904,7 +998,6 @@
             if(hType !== 'All') histories = histories.filter(t => t.type === hType);
             if(hStat !== 'All') histories = histories.filter(t => t.status === hStat);
 
-            // Time sorting
             pendings.sort((a,b) => pSort === 'newest' ? new Date(b.date) - new Date(a.date) : new Date(a.date) - new Date(b.date));
             histories.sort((a,b) => hSort === 'newest' ? new Date(b.date) - new Date(a.date) : new Date(a.date) - new Date(b.date));
 
@@ -949,7 +1042,6 @@
             
             const proofContainer = document.getElementById('inspector-proof-container');
             if (type === 'Deposit') {
-                // LIGHTBOX INTEGRATION
                 proofContainer.innerHTML = `<img src="${proofRef}" style="max-width:100%; max-height:200px; border-radius:8px; cursor:zoom-in;" alt="Proof of Payment" onclick="openLightbox('${proofRef}')" onerror="this.src='https://via.placeholder.com/400x200/111/fff?text=Image+Not+Found'">`;
             } else {
                 proofContainer.innerHTML = `<div style="font-size: 1.2rem; color: var(--text-main); text-align: center; padding: 20px;">Payout Details Provided:<br><span style="color: var(--credits); font-family: monospace;">${proofRef}</span></div>`;
@@ -981,7 +1073,7 @@
             if(paginated.length === 0) { tbody.innerHTML = `<tr><td colspan="5" class="center-col" style="color:var(--text-muted); font-style:italic; padding:30px;">No batches found.</td></tr>`; return; }
 
             paginated.forEach(b => {
-                let tColor = b.type === 'playable' ? 'var(--ps-glow)' : 'var(--credits)';
+                let tColor = b.type === 'playable' ? 'var(--playable)' : 'var(--credits)';
                 let tName = b.type === 'playable' ? 'Playable' : 'Regular';
                 tbody.innerHTML += `
                     <tr>
@@ -1041,11 +1133,13 @@
         }
 
         function actionUser(type, id, username) {
+            hideAllPopovers();
             let msg = type === 'ban' ? `Are you sure you want to BAN ${username}?` : `Are you sure you want to UNBAN ${username}?`;
             showSNTConfirm("MODIFY ACCOUNT", msg, () => { socket.emit('adminAction', { type: type, id: id }); });
         }
 
         function openEditUser(id) {
+            hideAllPopovers();
             const u = gUsers.find(x => x._id === id); if(!u) return;
             document.getElementById('edit-u-id').value = u._id;
             document.getElementById('edit-u-name').value = u.username;
@@ -1092,6 +1186,14 @@
             showSNTConfirm("GLOBAL BROADCAST", `Send this message to everyone online?\n"${msg}"`, () => {
                 socket.emit('adminAction', { type: 'sendUpdate', msg: msg });
                 document.getElementById('tool-msg').value = ''; 
+            });
+        }
+        
+        function toggleMaintenanceMode() {
+            let actionStr = sysMaintenance ? "DISABLE" : "ACTIVATE";
+            let confirmMsg = sysMaintenance ? "Turn OFF Maintenance Mode and allow players to access the casino?" : "Turn ON Maintenance Mode? Players will be blocked from accessing the game.";
+            showSNTConfirm(`${actionStr} MAINTENANCE`, confirmMsg, () => {
+                socket.emit('adminAction', { type: 'toggleMaintenance' });
             });
         }
 
