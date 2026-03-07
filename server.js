@@ -10,9 +10,9 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
 
-// ==========================================
-// CACHE-BUSTER & RAILWAY ROUTING
-// ==========================================
+let isMaintenanceMode = false;
+let globalBankVault = 2000000;
+
 app.use((req, res, next) => {
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
     next();
@@ -29,7 +29,6 @@ app.get('/', (req, res) => {
 
 const formatTC = (amount) => Math.round(amount * 10) / 10;
 
-// HELPER: Dual-Currency Bet Deductor
 async function deductBet(user, betAmount) {
     let amt = formatTC(betAmount);
     let totalBal = formatTC((user.credits || 0) + (user.playableCredits || 0));
@@ -51,9 +50,11 @@ async function deductBet(user, betAmount) {
     return { success: true, fromPlayable, fromMain };
 }
 
-// ==========================================
-// 1. MONGODB DATABASE SETUP
-// ==========================================
+// Admin Live Pulse Emitter
+function sendPulse(msg, type='info') {
+    io.to('admin_room').emit('adminPulse', { msg, type, time: Date.now() });
+}
+
 const MONGO_URI = process.env.MONGO_URL || 'mongodb://localhost:27017/stickntrade';
 mongoose.connect(MONGO_URI)
     .then(async () => {
@@ -61,14 +62,11 @@ mongoose.connect(MONGO_URI)
         const adminExists = await User.findOne({ username: 'admin' });
         if (!adminExists) {
             await new User({ username: 'admin', password: 'Kenm44ashley', role: 'Admin', credits: 10000, playableCredits: 0 }).save();
-            console.log('🛡️ Default Admin Account Created');
         }
+        pushAdminData(); // Initial calculation of the Vault
     })
     .catch(err => { console.error('❌ MongoDB Connection Error.', err); });
 
-// ==========================================
-// 2. DATABASE SCHEMAS
-// ==========================================
 const userSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
     password: { type: String, required: true },
@@ -104,13 +102,9 @@ const adminLogSchema = new mongoose.Schema({
 });
 const AdminLog = mongoose.model('AdminLog', adminLogSchema);
 
-// ==========================================
-// 3. CASINO ENGINE & GLOBAL HISTORY / STATS
-// ==========================================
 let rooms = { baccarat: 0, perya: 0, dt: 0, sicbo: 0 };
 let sharedTables = { time: 15, status: 'BETTING', bets: [] };
 let connectedUsers = {}; 
-
 let globalResults = { baccarat: [], perya: [], dt: [], sicbo: [] }; 
 
 let gameStats = {
@@ -129,7 +123,6 @@ function logGlobalResult(game, resultStr) {
         if (globalResults[game].length > 5) globalResults[game].pop(); 
     }
 }
-
 function checkResetStats(game) {
     if (gameStats[game].total >= 100) { Object.keys(gameStats[game]).forEach(key => { gameStats[game][key] = 0; }); }
 }
@@ -154,9 +147,6 @@ function getBJScore(hand) {
     return score;
 }
 
-// ==========================================
-// 4. SHARED TABLES REAL-TIME LOOP
-// ==========================================
 setInterval(() => {
     if (sharedTables.status === 'BETTING') {
         sharedTables.time--;
@@ -206,12 +196,8 @@ setInterval(() => {
                 sharedTables.bets.forEach(b => {
                     let payout = 0;
                     if (b.room === 'dt') { 
-                        if (dtWin === 'Tie') {
-                            if (b.choice === 'Tie') payout = b.amount * 9; 
-                            else payout = b.amount; 
-                        } else {
-                            if (b.choice === dtWin) payout = b.amount * 2;
-                        }
+                        if (dtWin === 'Tie') { if (b.choice === 'Tie') payout = b.amount * 9; else payout = b.amount; } 
+                        else { if (b.choice === dtWin) payout = b.amount * 2; }
                     } 
                     else if (b.room === 'sicbo') { if (b.choice === sbWin) payout = b.amount * 2; } 
                     else if (b.room === 'perya') {
@@ -219,10 +205,7 @@ setInterval(() => {
                         if (matches > 0) payout = b.amount + (b.amount * matches);
                     } 
                     else if (b.room === 'baccarat') {
-                        if (bacWin === 'Tie') { 
-                            if (b.choice === 'Tie') payout = b.amount * 9; 
-                            else if (b.choice === 'Player' || b.choice === 'Banker') payout = b.amount; 
-                        } 
+                        if (bacWin === 'Tie') { if (b.choice === 'Tie') payout = b.amount * 9; else if (b.choice === 'Player' || b.choice === 'Banker') payout = b.amount; } 
                         else if (bacWin === 'Player') { if (b.choice === 'Player') payout = b.amount * 2; } 
                         else if (bacWin === 'Banker') { if (b.choice === 'Banker') payout = b.amount * 1.95; }
                     }
@@ -249,13 +232,11 @@ setInterval(() => {
                     }
                 });
 
-                // Immediate emit to trigger visuals
                 io.to('dt').emit('sharedResults', { room: 'dt', dCard: dtD, tCard: dtT, winner: dtWin, resStr: dtResStr });
                 io.to('sicbo').emit('sharedResults', { room: 'sicbo', roll: sbR, sum: sbSum, winner: sbWin, resStr: sbResStr });
                 io.to('perya').emit('sharedResults', { room: 'perya', roll: pyR });
                 io.to('baccarat').emit('sharedResults', { room: 'baccarat', pCards: pC, bCards: bC, pScore: pS, bScore: bS, winner: bacWin, resStr: bacResStr, p3Drawn: p3Drawn, b3Drawn: b3Drawn });
 
-                // Defer stats update so clients don't see spoilers mid-animation
                 setTimeout(() => { logGlobalResult('dt', dtResStr); gameStats.dt.total++; gameStats.dt[dtWin]++; checkResetStats('dt'); }, 2500);
                 setTimeout(() => { logGlobalResult('sicbo', sbResStr); gameStats.sicbo.total++; gameStats.sicbo[sbWin]++; checkResetStats('sicbo'); }, 2500);
                 setTimeout(() => { logGlobalResult('perya', pyR.join(',')); gameStats.perya.total++; pyR.forEach(c => gameStats.perya[c]++); checkResetStats('perya'); }, 2500);
@@ -280,8 +261,12 @@ async function pushAdminData(targetSocket = null) {
         const txs = await Transaction.find().sort({ date: -1 }); 
         const gcs = await GiftCode.find().sort({ date: -1 });
         
-        let totalEconomy = formatTC(users.reduce((a, b) => a + (b.credits || 0) + (b.playableCredits || 0), 0));
+        let totalMainCredits = formatTC(users.reduce((a, b) => a + (b.credits || 0), 0)); // STRICTLY MAIN TC
         let approvedDeposits = txs.filter(t => t.type === 'Deposit' && t.status === 'Approved').reduce((a, b) => a + b.amount, 0);
+        let approvedWithdrawals = txs.filter(t => t.type === 'Withdrawal' && t.status === 'Approved').reduce((a, b) => a + b.amount, 0);
+
+        // BANK VAULT MATH
+        globalBankVault = formatTC(2000000 + approvedDeposits - approvedWithdrawals - totalMainCredits);
 
         const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
         const gameLogs = await CreditLog.find({ action: 'GAME', date: { $gte: oneDayAgo } });
@@ -295,7 +280,8 @@ async function pushAdminData(targetSocket = null) {
             transactions: txs, 
             giftBatches: gcs, 
             adminLogs,
-            stats: { economy: totalEconomy, approvedDeposits: formatTC(approvedDeposits), limit: 2000000, houseProfit: houseProfit24h } 
+            stats: { economy: totalMainCredits, approvedDeposits: formatTC(approvedDeposits), limit: globalBankVault, houseProfit: houseProfit24h },
+            isMaintenance: isMaintenanceMode
         };
 
         if(targetSocket) { targetSocket.emit('adminDataSync', payload); }
@@ -306,6 +292,7 @@ async function pushAdminData(targetSocket = null) {
 
 io.on('connection', (socket) => {
     socket.emit('timerUpdate', sharedTables.time);
+    socket.emit('maintenanceToggle', isMaintenanceMode); // Send status immediately
 
     socket.isBetting = false;
     socket.isSharedBetting = false;
@@ -344,6 +331,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('playSolo', async (data) => {
+        if (isMaintenanceMode) return socket.emit('localGameError', { msg: 'SYSTEM UNDER MAINTENANCE', game: data.game });
         if (!socket.user) return;
         if (socket.isBetting) return; 
         socket.isBetting = true;
@@ -356,7 +344,8 @@ io.on('connection', (socket) => {
             
             if (isNewBet) {
                 let amt = formatTC(data.bet || 0);
-                
+                let maxPotentialMultiplier = 1;
+
                 if (data.game === 'd20') {
                     if (!Array.isArray(data.bets) || data.bets.length === 0) { socket.emit('localGameError', { msg: 'Select at least one bet', game: 'd20' }); return; }
                     let totalD20Bet = 0;
@@ -366,12 +355,20 @@ io.on('connection', (socket) => {
                         totalD20Bet += a;
                     }
                     amt = totalD20Bet;
+                    maxPotentialMultiplier = 1.95 * data.bets.length; 
                 } else {
                     if (isNaN(amt) || amt < 10) { socket.emit('localGameError', { msg: 'MIN BET IS 10 TC', game: data.game }); return; }
+                    if (data.game === 'coinflip') maxPotentialMultiplier = 1.95;
+                    if (data.game === 'blackjack') maxPotentialMultiplier = 2.5;
                 }
                 
                 if (amt > 50000) { socket.emit('localGameError', { msg: 'MAX TOTAL BET IS 50K TC', game: data.game }); return; }
                 
+                // VAULT SECURITY CHECK
+                if ((amt * maxPotentialMultiplier) > globalBankVault) {
+                    socket.emit('localGameError', { msg: 'VAULT LIMIT REACHED. CANNOT COVER BET.', game: data.game }); return;
+                }
+
                 if (data.game === 'coinflip') {
                     if (data.choice !== 'Heads' && data.choice !== 'Tails') { socket.emit('localGameError', { msg: 'INVALID CHOICE', game: 'coinflip' }); return; }
                 }
@@ -381,6 +378,7 @@ io.on('connection', (socket) => {
                     socket.emit('localGameError', { msg: 'INSUFFICIENT TC', game: data.game }); return;
                 }
                 await user.save();
+                sendPulse(`${user.username} bet ${amt} TC on ${data.game.toUpperCase()}`, 'bet');
 
                 if (data.game === 'blackjack') {
                     socket.bjState = { 
@@ -555,6 +553,7 @@ io.on('connection', (socket) => {
     });
     
     socket.on('placeSharedBet', async (data) => {
+        if (isMaintenanceMode) return socket.emit('localGameError', { msg: 'SYSTEM UNDER MAINTENANCE', game: data.room });
         if (!socket.user || sharedTables.status !== 'BETTING') return;
         if (socket.isSharedBetting) return;
         socket.isSharedBetting = true;
@@ -564,7 +563,6 @@ io.on('connection', (socket) => {
             if (!user) return;
 
             let amt = formatTC(data.amount);
-            
             if (isNaN(amt) || amt < 10) { socket.emit('localGameError', { msg: 'MIN BET IS 10 TC', game: data.room }); return; }
 
             let currentTileBet = sharedTables.bets
@@ -574,22 +572,22 @@ io.on('connection', (socket) => {
             if (currentTileBet + amt > 50000) {
                 socket.emit('localGameError', { msg: 'MAX 50K TC PER TILE', game: data.room }); return;
             }
+
+            // VAULT SECURITY CHECK
+            let maxMultiplier = { 'baccarat': 9, 'dt': 9, 'sicbo': 2, 'perya': 4 }[data.room] || 2;
+            if ((amt * maxMultiplier) > globalBankVault) {
+                socket.emit('localGameError', { msg: 'VAULT LIMIT REACHED. CANNOT COVER BET.', game: data.room }); return;
+            }
             
             let deduction = await deductBet(user, amt);
             if (!deduction.success) {
                 socket.emit('localGameError', { msg: 'INSUFFICIENT TC', game: data.room }); return;
             }
             await user.save();
+            sendPulse(`${user.username} placed ${amt} TC on ${data.room.toUpperCase()}`, 'bet');
             
             sharedTables.bets.push({ 
-                userId: user._id, 
-                socketId: socket.id, 
-                username: user.username, 
-                room: data.room, 
-                choice: data.choice, 
-                amount: amt,
-                fromPlayable: deduction.fromPlayable,
-                fromMain: deduction.fromMain 
+                userId: user._id, socketId: socket.id, username: user.username, room: data.room, choice: data.choice, amount: amt, fromPlayable: deduction.fromPlayable, fromMain: deduction.fromMain 
             });
         } finally {
             socket.isSharedBetting = false;
@@ -635,11 +633,7 @@ io.on('connection', (socket) => {
             if (data.type === 'Withdrawal' && amount < 10000) { socket.emit('localGameError', { msg: 'MIN WITHDRAWAL IS 10,000 TC', game: 'cashier' }); return; }
 
             if(data.type === 'Withdrawal') {
-                const user = await User.findOneAndUpdate(
-                    { _id: socket.user._id, credits: { $gte: amount } },
-                    { $inc: { credits: -amount } },
-                    { new: true }
-                );
+                const user = await User.findOneAndUpdate({ _id: socket.user._id, credits: { $gte: amount } }, { $inc: { credits: -amount } }, { new: true });
                 if (!user) { socket.emit('localGameError', { msg: 'Insufficient TC.', game: 'cashier' }); return; }
                 socket.emit('balanceUpdateData', { credits: user.credits, playable: user.playableCredits });
             }
@@ -651,6 +645,7 @@ io.on('connection', (socket) => {
             } else {
                 await new CreditLog({ username: socket.user.username, action: 'DEPOSIT', amount: amount, details: `Pending` }).save();
             }
+            sendPulse(`${socket.user.username} submitted a ${data.type} request for ${amount} TC.`, 'alert');
             const txs = await Transaction.find({ username: socket.user.username }).sort({ date: -1 });
             socket.emit('transactionsData', txs);
             pushAdminData(); 
@@ -690,6 +685,7 @@ io.on('connection', (socket) => {
             user.ipAddress = ip; user.status = 'Active'; await user.save(); 
             socket.user = user; connectedUsers[user.username] = socket.id;
             
+            sendPulse(`${user.username} logged in.`, 'info');
             pushAdminData();
             
             let now = new Date(), canClaim = true, day = 1, nextClaim = null;
@@ -715,6 +711,7 @@ io.on('connection', (socket) => {
             let ip = socket.handshake.headers['x-forwarded-for'] || socket.handshake.address;
             await new User({ username: data.username, password: data.password, ipAddress: ip }).save();
             
+            sendPulse(`New account created: ${data.username}`, 'success');
             pushAdminData();
             socket.emit('registerSuccess', 'Account created! You may now login.');
         } catch(e) { socket.emit('authError', 'System Error: ' + e.message); } finally { socket.isAuth = false; }
@@ -734,6 +731,7 @@ io.on('connection', (socket) => {
         user.dailyReward.lastClaim = now; user.dailyReward.streak += 1; await user.save();
         
         await new CreditLog({ username: user.username, action: 'GIFT', amount: amt, details: `Daily Reward` }).save();
+        sendPulse(`${user.username} claimed Day ${day} Daily Reward.`, 'info');
         pushAdminData();
         socket.emit('dailyClaimed', { amt, newBalance: { credits: user.credits, playable: user.playableCredits }, nextClaim: new Date(now.getTime() + 24 * 60 * 60 * 1000) });
     });
@@ -748,6 +746,7 @@ io.on('connection', (socket) => {
             else { user.credits = formatTC((user.credits || 0) + gc.amount); }
             await user.save();
             await new CreditLog({ username: user.username, action: 'CODE', amount: gc.amount, details: `Redeemed` }).save();
+            sendPulse(`${socket.user.username} redeemed Promo Code for ${gc.amount}.`, 'success');
             pushAdminData();
             socket.emit('promoResult', { success: true, amt: gc.amount, type: gc.creditType });
             socket.emit('balanceUpdateData', { credits: user.credits, playable: user.playableCredits });
@@ -759,7 +758,13 @@ io.on('connection', (socket) => {
         try {
             const adminName = socket.user ? socket.user.username : 'System';
 
-            if (data.type === 'editUser') { 
+            if (data.type === 'toggleMaintenance') {
+                isMaintenanceMode = !isMaintenanceMode;
+                io.emit('maintenanceToggle', isMaintenanceMode);
+                sendPulse(`Maintenance Mode is now ${isMaintenanceMode ? 'ON' : 'OFF'}`, 'alert');
+                socket.emit('adminSuccess', `Maintenance Mode: ${isMaintenanceMode ? 'ACTIVE' : 'DISABLED'}`);
+            }
+            else if (data.type === 'editUser') { 
                 let u = await User.findById(data.id);
                 if (u) {
                     u.credits = formatTC(data.credits);
@@ -768,6 +773,7 @@ io.on('connection', (socket) => {
                     await u.save();
                     
                     await new AdminLog({ adminName, action: 'EDIT USER', details: `Updated balances for ${u.username}` }).save();
+                    sendPulse(`${adminName} edited balances for ${u.username}`, 'info');
                     
                     let targetSocketId = connectedUsers[u.username];
                     if (targetSocketId) {
@@ -779,22 +785,24 @@ io.on('connection', (socket) => {
             }
             else if (data.type === 'ban') { 
                 let u = await User.findById(data.id);
-                if(u) { u.status = 'Banned'; await u.save(); await new AdminLog({ adminName, action: 'BAN', details: `Banned user ${u.username}` }).save(); socket.emit('adminSuccess', `Banned ${u.username}.`); }
+                if(u) { u.status = 'Banned'; await u.save(); await new AdminLog({ adminName, action: 'BAN', details: `Banned user ${u.username}` }).save(); sendPulse(`${adminName} BANNED ${u.username}`, 'alert'); socket.emit('adminSuccess', `Banned ${u.username}.`); }
             }
             else if (data.type === 'unban') { 
                 let u = await User.findById(data.id);
-                if(u) { u.status = 'Active'; await u.save(); await new AdminLog({ adminName, action: 'UNBAN', details: `Unbanned user ${u.username}` }).save(); socket.emit('adminSuccess', `Unbanned ${u.username}.`); }
+                if(u) { u.status = 'Active'; await u.save(); await new AdminLog({ adminName, action: 'UNBAN', details: `Unbanned user ${u.username}` }).save(); sendPulse(`${adminName} UNBANNED ${u.username}`, 'success'); socket.emit('adminSuccess', `Unbanned ${u.username}.`); }
             }
             else if (data.type === 'clearUserLogs') {
                 await CreditLog.deleteMany({ username: data.username });
                 const logs = await CreditLog.find({ username: data.username }).sort({ date: -1 }).limit(100);
                 socket.emit('userLogsData', { username: data.username, logs });
                 await new AdminLog({ adminName, action: 'CLEAR LOGS', details: `Cleared logs for ${data.username}` }).save();
+                sendPulse(`${adminName} cleared logs for ${data.username}`, 'info');
                 socket.emit('adminSuccess', `Cleared logs for ${data.username}.`);
             }
             else if (data.type === 'sendUpdate') { 
                 io.emit('silentNotification', { id: Date.now(), title: 'System Announcement', msg: data.msg, date: new Date() }); 
                 await new AdminLog({ adminName, action: 'BROADCAST', details: `Msg: ${data.msg}` }).save();
+                sendPulse(`${adminName} sent Global Broadcast.`, 'info');
                 socket.emit('adminSuccess', `Broadcast sent successfully.`);
             }
             else if (data.type === 'giftCredits') {
@@ -807,6 +815,7 @@ io.on('connection', (socket) => {
                     io.emit('silentNotification', { id: Date.now(), title: 'Gift Received!', msg: notifMsg, date: new Date() });
                     io.emit('forceBalanceRefresh'); 
                     await new AdminLog({ adminName, action: 'GIFT', details: `Mass gifted ${amount} to All Registered` }).save();
+                    sendPulse(`${adminName} mass gifted ${amount} to All Registered`, 'success');
                     socket.emit('adminSuccess', `Mass gift sent to All Registered users.`);
                 } 
                 else if (data.target === 'all_active') {
@@ -814,6 +823,7 @@ io.on('connection', (socket) => {
                     io.emit('silentNotification', { id: Date.now(), title: 'Gift Received!', msg: notifMsg, date: new Date() });
                     io.emit('forceBalanceRefresh');
                     await new AdminLog({ adminName, action: 'GIFT', details: `Mass gifted ${amount} to All Active` }).save();
+                    sendPulse(`${adminName} mass gifted ${amount} to All Active`, 'success');
                     socket.emit('adminSuccess', `Mass gift sent to All Active users.`);
                 } 
                 else {
@@ -823,8 +833,8 @@ io.on('connection', (socket) => {
                         else u.credits = formatTC((u.credits || 0) + amount);
                         await u.save();
                         await new CreditLog({ username: u.username, action: 'GIFT', amount: amount, details: `From Admin` }).save();
-                        
                         await new AdminLog({ adminName, action: 'GIFT', details: `Gifted ${amount} to ${u.username}` }).save();
+                        sendPulse(`${adminName} gifted ${amount} to ${u.username}`, 'success');
                         
                         let targetSocketId = connectedUsers[u.username];
                         if (targetSocketId) {
@@ -843,7 +853,8 @@ io.on('connection', (socket) => {
                     tx.status = data.status; await tx.save();
                     
                     await new AdminLog({ adminName, action: 'RESOLVE TX', details: `Marked ${tx.type} for ${tx.username} as ${data.status}` }).save();
-                    
+                    sendPulse(`${adminName} ${data.status.toUpperCase()} ${tx.type} for ${tx.username}`, data.status === 'Approved' ? 'success' : 'alert');
+
                     let targetSocketId = connectedUsers[tx.username];
                     if (tx.type === 'Deposit' && data.status === 'Approved') {
                         let u = await User.findOne({ username: tx.username });
@@ -883,11 +894,13 @@ io.on('connection', (socket) => {
                     await new GiftCode({ batchId, amount: formatTC(data.amount), code, creditType: data.creditType }).save();
                 }
                 await new AdminLog({ adminName, action: 'CREATE BATCH', details: `Created batch ${batchId} (${data.count} codes)` }).save();
+                sendPulse(`${adminName} generated batch ${batchId}`, 'info');
                 socket.emit('adminSuccess', `Batch ${batchId} created successfully.`);
             }
             else if (data.type === 'deleteBatch') { 
                 await GiftCode.deleteMany({ batchId: data.batchId }); 
                 await new AdminLog({ adminName, action: 'DELETE BATCH', details: `Deleted batch ${data.batchId}` }).save();
+                sendPulse(`${adminName} deleted batch ${data.batchId}`, 'alert');
                 socket.emit('adminSuccess', `Batch ${data.batchId} deleted.`);
             }
             await pushAdminData();
