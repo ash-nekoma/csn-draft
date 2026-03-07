@@ -170,21 +170,15 @@ setInterval(() => {
                 let dtD = drawCard(), dtT = drawCard();
                 let dtWin = dtD.dtVal > dtT.dtVal ? 'Dragon' : (dtT.dtVal > dtD.dtVal ? 'Tiger' : 'Tie');
                 let dtResStr = dtWin === 'Tie' ? `TIE (${dtD.raw} TO ${dtT.raw})` : `${dtWin.toUpperCase()} (${dtD.raw} TO ${dtT.raw})`;
-                logGlobalResult('dt', dtResStr);
-                gameStats.dt.total++; gameStats.dt[dtWin]++;
                 
                 let sbR = [crypto.randomInt(1, 7), crypto.randomInt(1, 7), crypto.randomInt(1, 7)];
                 let sbSum = sbR[0] + sbR[1] + sbR[2];
                 let sbTrip = (sbR[0] === sbR[1] && sbR[1] === sbR[2]);
                 let sbWin = sbTrip ? 'Triple' : (sbSum <= 10 ? 'Small' : 'Big');
                 let sbResStr = sbTrip ? `TRIPLE (${sbR[0]})` : `${sbWin.toUpperCase()} (${sbSum})`;
-                logGlobalResult('sicbo', sbResStr);
-                gameStats.sicbo.total++; gameStats.sicbo[sbWin]++;
 
                 const cols = ['Yellow','White','Pink','Blue','Red','Green'];
                 let pyR = [cols[crypto.randomInt(6)], cols[crypto.randomInt(6)], cols[crypto.randomInt(6)]];
-                logGlobalResult('perya', pyR.join(','));
-                gameStats.perya.total++; pyR.forEach(c => gameStats.perya[c]++);
 
                 let pC = [drawCard(), drawCard()], bC = [drawCard(), drawCard()];
                 let pS = (pC[0].bacVal + pC[1].bacVal) % 10;
@@ -207,8 +201,6 @@ setInterval(() => {
                 }
                 let bacWin = pS > bS ? 'Player' : (bS > pS ? 'Banker' : 'Tie');
                 let bacResStr = bacWin === 'Tie' ? `TIE (${pS} TO ${bS})` : `${bacWin.toUpperCase()} (${pS} TO ${bS})`;
-                logGlobalResult('baccarat', bacResStr);
-                gameStats.baccarat.total++; gameStats.baccarat[bacWin]++;
 
                 let playerStats = {}; 
                 sharedTables.bets.forEach(b => {
@@ -257,12 +249,17 @@ setInterval(() => {
                     }
                 });
 
-                io.to('dt').emit('sharedResults', { room: 'dt', dCard: dtD, tCard: dtT, winner: dtWin, resStr: dtResStr, stats: gameStats.dt });
-                io.to('sicbo').emit('sharedResults', { room: 'sicbo', roll: sbR, sum: sbSum, winner: sbWin, resStr: sbResStr, stats: gameStats.sicbo });
-                io.to('perya').emit('sharedResults', { room: 'perya', roll: pyR, stats: gameStats.perya });
-                io.to('baccarat').emit('sharedResults', { room: 'baccarat', pCards: pC, bCards: bC, pScore: pS, bScore: bS, winner: bacWin, resStr: bacResStr, p3Drawn: p3Drawn, b3Drawn: b3Drawn, stats: gameStats.baccarat });
+                // Immediate emit to trigger visuals
+                io.to('dt').emit('sharedResults', { room: 'dt', dCard: dtD, tCard: dtT, winner: dtWin, resStr: dtResStr });
+                io.to('sicbo').emit('sharedResults', { room: 'sicbo', roll: sbR, sum: sbSum, winner: sbWin, resStr: sbResStr });
+                io.to('perya').emit('sharedResults', { room: 'perya', roll: pyR });
+                io.to('baccarat').emit('sharedResults', { room: 'baccarat', pCards: pC, bCards: bC, pScore: pS, bScore: bS, winner: bacWin, resStr: bacResStr, p3Drawn: p3Drawn, b3Drawn: b3Drawn });
 
-                checkResetStats('dt'); checkResetStats('sicbo'); checkResetStats('perya'); checkResetStats('baccarat');
+                // Defer stats update so clients don't see spoilers mid-animation
+                setTimeout(() => { logGlobalResult('dt', dtResStr); gameStats.dt.total++; gameStats.dt[dtWin]++; checkResetStats('dt'); }, 2500);
+                setTimeout(() => { logGlobalResult('sicbo', sbResStr); gameStats.sicbo.total++; gameStats.sicbo[sbWin]++; checkResetStats('sicbo'); }, 2500);
+                setTimeout(() => { logGlobalResult('perya', pyR.join(',')); gameStats.perya.total++; pyR.forEach(c => gameStats.perya[c]++); checkResetStats('perya'); }, 2500);
+                setTimeout(() => { logGlobalResult('baccarat', bacResStr); gameStats.baccarat.total++; gameStats.baccarat[bacWin]++; checkResetStats('baccarat'); }, 4500);
 
             }, 500);
 
@@ -399,7 +396,6 @@ io.on('connection', (socket) => {
             let payout = 0;
 
             if (data.game === 'd20') {
-                gameStats.d20.total++;
                 let roll = crypto.randomInt(1, 21);
                 let wonAny = false;
                 
@@ -415,20 +411,21 @@ io.on('connection', (socket) => {
                 }
                 payout = formatTC(payout);
                 
-                if (wonAny) gameStats.d20.Win++; else gameStats.d20.Lose++;
-                
                 user.credits = formatTC(user.credits + payout); await user.save();
                 let net = formatTC(payout - data.bet);
                 await new CreditLog({ username: user.username, action: 'GAME', amount: net, details: `D20` }).save();
                 
                 pushAdminData();
-                socket.emit('d20Result', { roll, payout, bet: data.bet, resStr: `ROLLED ${roll}`, newBalance: { credits: user.credits, playable: user.playableCredits }, stats: gameStats.d20 });
-                checkResetStats('d20');
+                socket.emit('d20Result', { roll, payout, bet: data.bet, resStr: `ROLLED ${roll}`, newBalance: { credits: user.credits, playable: user.playableCredits }});
+                
+                setTimeout(() => {
+                    gameStats.d20.total++;
+                    if (wonAny) gameStats.d20.Win++; else gameStats.d20.Lose++;
+                    checkResetStats('d20');
+                }, 2000);
             } 
             else if (data.game === 'coinflip') {
-                gameStats.coinflip.total++;
                 let result = crypto.randomInt(2) === 0 ? 'Heads' : 'Tails';
-                gameStats.coinflip[result]++;
                 if (data.choice === result) payout = formatTC(data.bet * 1.95);
                 
                 user.credits = formatTC(user.credits + payout); await user.save();
@@ -436,18 +433,19 @@ io.on('connection', (socket) => {
                 
                 let resStr = `${result.toUpperCase()}`;
                 pushAdminData();
-                socket.emit('coinResult', { result, payout, bet: data.bet, resStr: resStr, newBalance: { credits: user.credits, playable: user.playableCredits }, stats: gameStats.coinflip });
-                checkResetStats('coinflip');
+                socket.emit('coinResult', { result, payout, bet: data.bet, resStr: resStr, newBalance: { credits: user.credits, playable: user.playableCredits }});
+                
+                setTimeout(() => {
+                    gameStats.coinflip.total++; gameStats.coinflip[result]++; checkResetStats('coinflip');
+                }, 2000);
             }
             else if (data.game === 'blackjack') {
                 if (data.action === 'start') {
-                    gameStats.blackjack.total++; 
                     let pS = getBJScore(socket.bjState.pHand); let dS = getBJScore(socket.bjState.dHand);
                     
                     if (pS === 21) {
                         let msg = dS === 21 ? 'Push' : 'Blackjack!';
                         payout = formatTC(dS === 21 ? socket.bjState.bet : socket.bjState.bet * 2.5);
-                        if(msg === 'Blackjack!') gameStats.blackjack.Win++; else gameStats.blackjack.Push++;
                         
                         if (msg === 'Push') {
                             user.playableCredits = formatTC(user.playableCredits + socket.bjState.fromPlayable);
@@ -459,9 +457,15 @@ io.on('connection', (socket) => {
                         let resStr = `${msg.toUpperCase()} (${pS} TO ${dS})`;
                         
                         pushAdminData();
-                        socket.emit('bjUpdate', { event: 'deal', pHand: socket.bjState.pHand, dHand: socket.bjState.dHand, naturalBJ: true, payout, msg, resStr: resStr, bet: socket.bjState.bet, newBalance: { credits: user.credits, playable: user.playableCredits }, stats: gameStats.blackjack });
+                        socket.emit('bjUpdate', { event: 'deal', pHand: socket.bjState.pHand, dHand: socket.bjState.dHand, naturalBJ: true, payout, msg, resStr: resStr, bet: socket.bjState.bet, newBalance: { credits: user.credits, playable: user.playableCredits }});
                         socket.bjState = null;
-                        checkResetStats('blackjack');
+
+                        setTimeout(() => {
+                            gameStats.blackjack.total++; 
+                            if(msg === 'Blackjack!') gameStats.blackjack.Win++; else gameStats.blackjack.Push++;
+                            checkResetStats('blackjack');
+                        }, 2500);
+
                     } else {
                         socket.emit('bjUpdate', { event: 'deal', pHand: socket.bjState.pHand, dHand: socket.bjState.dHand });
                     }
@@ -469,16 +473,16 @@ io.on('connection', (socket) => {
                 else if (data.action === 'hit') {
                     if(!socket.bjState) return;
                     socket.bjState.pHand.push(drawCard());
-                    let pS = getBJScore(socket.bjState.pHand); let dS = getBJScore(socket.bjState.dHand);
+                    let pS = getBJScore(socket.bjState.pHand);
                     
                     if (pS > 21) {
-                        gameStats.blackjack.Lose++;
                         await new CreditLog({ username: user.username, action: 'GAME', amount: formatTC(-socket.bjState.bet), details: `Blackjack` }).save();
                         let resStr = `PLAYER BUSTS!`;
                         
-                        socket.emit('bjUpdate', { event: 'resolved', pHand: socket.bjState.pHand, dHand: socket.bjState.dHand, payout: 0, msg: 'Bust!', resStr: resStr, bet: socket.bjState.bet, newBalance: { credits: user.credits, playable: user.playableCredits }, stats: gameStats.blackjack });
+                        socket.emit('bjUpdate', { event: 'resolved', pHand: socket.bjState.pHand, dHand: socket.bjState.dHand, payout: 0, msg: 'Bust!', resStr: resStr, bet: socket.bjState.bet, newBalance: { credits: user.credits, playable: user.playableCredits } });
                         socket.bjState = null;
-                        checkResetStats('blackjack');
+                        
+                        setTimeout(() => { gameStats.blackjack.total++; gameStats.blackjack.Lose++; checkResetStats('blackjack'); }, 2500);
                     } else { socket.emit('bjUpdate', { event: 'hit', pHand: socket.bjState.pHand }); }
                 }
                 else if (data.action === 'stand') {
@@ -488,9 +492,9 @@ io.on('connection', (socket) => {
                     let dS = getBJScore(socket.bjState.dHand);
                     let msg = '';
                     
-                    if (dS > 21 || pS > dS) { payout = formatTC(socket.bjState.bet * 2); msg = 'You Win!'; gameStats.blackjack.Win++; } 
-                    else if (pS === dS) { payout = formatTC(socket.bjState.bet); msg = 'Push'; gameStats.blackjack.Push++; } 
-                    else { msg = 'Dealer Wins'; gameStats.blackjack.Lose++; }
+                    if (dS > 21 || pS > dS) { payout = formatTC(socket.bjState.bet * 2); msg = 'You Win!'; } 
+                    else if (pS === dS) { payout = formatTC(socket.bjState.bet); msg = 'Push'; } 
+                    else { msg = 'Dealer Wins'; }
                     
                     if (msg === 'Push') {
                         user.playableCredits = formatTC(user.playableCredits + socket.bjState.fromPlayable);
@@ -503,9 +507,16 @@ io.on('connection', (socket) => {
                     let resStr = (dS > 21) ? `DEALER BUSTS!` : (msg === 'Push' ? `TIE (${dS} TO ${pS})` : (msg === 'You Win!' ? `PLAYER (${dS} TO ${pS})` : `DEALER (${dS} TO ${pS})`));
                     
                     pushAdminData();
-                    socket.emit('bjUpdate', { event: 'resolved', pHand: socket.bjState.pHand, dHand: socket.bjState.dHand, payout, msg, resStr: resStr, bet: socket.bjState.bet, newBalance: { credits: user.credits, playable: user.playableCredits }, stats: gameStats.blackjack });
+                    socket.emit('bjUpdate', { event: 'resolved', pHand: socket.bjState.pHand, dHand: socket.bjState.dHand, payout, msg, resStr: resStr, bet: socket.bjState.bet, newBalance: { credits: user.credits, playable: user.playableCredits } });
                     socket.bjState = null;
-                    checkResetStats('blackjack');
+
+                    setTimeout(() => { 
+                        gameStats.blackjack.total++;
+                        if (dS > 21 || pS > dS) gameStats.blackjack.Win++;
+                        else if (pS === dS) gameStats.blackjack.Push++;
+                        else gameStats.blackjack.Lose++;
+                        checkResetStats('blackjack'); 
+                    }, 2500);
                 }
             }
         } finally {
