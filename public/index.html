@@ -126,7 +126,7 @@
         #nav-credits { color: var(--credits); font-weight: 900; font-size: 1.1rem; line-height: 1; }
         .wallet-unit { color: var(--text-muted); font-size: 0.8rem; font-weight: 800; }
         
-        #pill-playable { display: none; border-color: rgba(179, 102, 255, 0.4); box-shadow: inset 0 0 10px rgba(179, 102, 255, 0.1); }
+        #pill-playable { display: none; border-color: rgba(179, 102, 255, 0.4); box-shadow: inset 0 0 10px rgba(179, 102, 255, 0.1); margin-right: 4px; }
         #pill-playable:hover { border-color: var(--playable); box-shadow: 0 0 15px rgba(179, 102, 255, 0.3); }
         #nav-playable { color: var(--playable); font-weight: 900; font-size: 1.1rem; line-height: 1; }
 
@@ -210,6 +210,7 @@
 
         @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         @keyframes popBalance { 0% { transform: scale(1); } 50% { transform: scale(1.1); background: rgba(0, 230, 118, 0.3); border-color: var(--success); } 100% { transform: scale(1); } } .anim-pop { animation: popBalance 0.6s ease-out; }
+        @keyframes popBet { 0% { transform: scale(1); } 50% { transform: scale(0.95); background: rgba(255, 255, 255, 0.1); } 100% { transform: scale(1); } } .anim-pop-bet { animation: popBet 0.3s ease-out; }
         @keyframes shake { 0% { transform: rotate(0deg); } 25% { transform: rotate(-15deg); } 50% { transform: rotate(15deg); } 75% { transform: rotate(-15deg); } 100% { transform: rotate(0deg); } } .anim-shake { animation: shake 0.3s infinite; }
 
         /* STRICT CENTERED MAIN WRAPPER */
@@ -263,7 +264,7 @@
         .game-title { font-size: 1.2rem; font-weight: 900; color: white; text-transform:uppercase; letter-spacing: 1px; margin-bottom: 5px; }
         .game-desc { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; }
 
-        .live-badge { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.6); color: var(--danger); font-size: 1.1rem; padding: 6px 12px; border-radius: 8px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 6px; z-index: 10; border: 1px solid rgba(255,51,102,0.3);}
+        .live-badge { position: absolute; top: 15px; right: 15px; background: transparent; color: var(--danger); font-size: 1.3rem; padding: 0; border-radius: 0; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 6px; z-index: 10; border: none; text-shadow: 0 0 10px rgba(255,51,102,0.5);}
         .live-dot { width: 12px; height: 12px; background-color: var(--danger); border-radius: 50%; animation: pulseRed 1.5s infinite; }
 
         .active-players { position: absolute; top: 15px; left: 15px; color: var(--success); font-size: 0.9rem; font-weight: 800; z-index: 10; display: flex; align-items: center; gap: 6px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
@@ -509,7 +510,7 @@
                 <span id="player-name-display">Player</span>
             </div>
 
-            <div class="wallet-pill" id="pill-playable" onclick="openModal('playable-info-modal')" style="display: none; border-color: rgba(179, 102, 255, 0.4); box-shadow: inset 0 0 10px rgba(179, 102, 255, 0.1); margin-right: 10px;">
+            <div class="wallet-pill" id="pill-playable" onclick="openModal('playable-info-modal')" style="display: none; border-color: rgba(179, 102, 255, 0.4); box-shadow: inset 0 0 10px rgba(179, 102, 255, 0.1); margin-right: 4px;">
                 <div class="wallet-main">
                     <i class="fas fa-star" style="color: var(--playable);"></i>
                     <span id="nav-playable" style="color: var(--playable); font-weight: 900; font-size: 1.1rem;">0.0</span>
@@ -1065,7 +1066,8 @@
             'DRAGON': 'var(--danger)', 'TIGER': 'var(--credits)',
             'SMALL': 'var(--ps-glow)', 'BIG': 'var(--danger)', 'TRIPLE': 'white',
             'YELLOW': '#ffcc00', 'WHITE': '#fff', 'PINK': '#ff66b2', 'BLUE': '#00a2ff', 'RED': '#ff3366', 'GREEN': '#00e676',
-            'BUST!': 'var(--danger)', 'PUSH': 'white', 'DEALER': 'var(--danger)', 'YOU': 'var(--success)'
+            'BUST!': 'var(--danger)', 'PUSH': 'white', 'DEALER': 'var(--danger)', 'YOU': 'var(--success)',
+            'HEADS': '#ffb400', 'TAILS': '#e2e8f0'
         };
         return map[word] || 'white';
     }
@@ -1077,6 +1079,37 @@
             if(!color) return '';
             return `<div class="color-die c-${color}" style="width:14px; height:14px; border-radius:3px; display:inline-block; border:1px solid rgba(255,255,255,0.2); margin:0 1px;"></div>`;
         }).join('');
+    }
+
+    function formatBetHistory(id, betStr) {
+        if (!betStr || betStr === '-') return '-';
+        if (id === 'baccarat') {
+            return betStr.split(', ').map(b => {
+                if (b === 'Player') return `<span style="color:var(--ps-glow); font-weight:900;">P</span>`;
+                if (b === 'Banker') return `<span style="color:var(--danger); font-weight:900;">B</span>`;
+                if (b === 'Tie') return `<span style="color:var(--success); font-weight:900;">T</span>`;
+                return b;
+            }).join(' ');
+        }
+        if (id === 'dt') {
+            return betStr.split(', ').map(b => {
+                if (b === 'Dragon') return `<div style="width:14px; height:14px; border-radius:50%; background:var(--danger); display:inline-block; box-shadow: 0 0 5px var(--danger);"></div>`;
+                if (b === 'Tiger') return `<div style="width:14px; height:14px; border-radius:50%; background:var(--credits); display:inline-block; box-shadow: 0 0 5px var(--credits);"></div>`;
+                if (b === 'Tie') return `<div style="width:14px; height:14px; border-radius:50%; background:var(--success); display:inline-block; box-shadow: 0 0 5px var(--success);"></div>`;
+                return b;
+            }).join(' ');
+        }
+        if (id === 'sicbo') {
+            return betStr.split(', ').map(b => {
+                if (b === 'Small') return `<span style="color:var(--ps-glow); font-weight:900;">S</span>`;
+                if (b === 'Big') return `<span style="color:var(--danger); font-weight:900;">B</span>`;
+                return b;
+            }).join(' ');
+        }
+        if (id === 'perya') {
+            return `<div style="display:flex; justify-content:center; align-items:center; gap:2px; flex-wrap:nowrap;">${colorsToDice(betStr)}</div>`;
+        }
+        return `<span style="font-weight:800; color:${getBetColor(betStr.split(',')[0])}">${betStr}</span>`;
     }
 
     function openModal(id) { 
@@ -1196,13 +1229,13 @@
             let lossVal = h.didBet ? (h.lostBet > 0 ? `<span style="color:var(--danger)">-${formatTC(h.lostBet)}</span>` : '-') : '-';
             if (h.didBet && h.wonProfit === 0 && h.lostBet === 0) { winVal = '<span style="color:white">PUSH</span>'; lossVal = '-'; }
             
-            let bHtml = h.bet; let rHtml = h.result;
+            let bHtml = formatBetHistory(id, h.bet); 
+            let rHtml = h.result;
+
             if (id === 'perya') {
-                bHtml = h.bet === '-' ? '-' : `<div style="display:flex; justify-content:center; align-items:center; gap:2px; flex-wrap:nowrap;">${colorsToDice(h.bet)}</div>`;
                 rHtml = `<div style="display:flex; justify-content:center; align-items:center; gap:2px; flex-wrap:nowrap;">${colorsToDice(h.result)}</div>`;
             } else {
-                let safeB = h.bet ? h.bet.toString() : '-'; let safeR = h.result ? h.result.toString() : '-';
-                bHtml = safeB === '-' ? '-' : `<span style="font-weight:800; color:${getBetColor(safeB.split(',')[0])}">${safeB}</span>`;
+                let safeR = h.result ? h.result.toString() : '-';
                 rHtml = `<span style="font-weight:900; color:${getBetColor(safeR.split(' ')[0])}">${safeR}</span>`;
             }
             list.innerHTML += `<div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:6px; display:grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap:10px; align-items:center; font-size:0.95rem; text-transform:uppercase; text-align:center; white-space:nowrap;"><div>${rHtml}</div><div>${bHtml}</div><div>${winVal}</div><div>${lossVal}</div></div>`;
@@ -1372,6 +1405,13 @@
       if (p1) { p1.classList.remove('anim-pop'); void p1.offsetWidth; p1.classList.add('anim-pop'); } 
     }
 
+    function triggerBetAnim() {
+        let p1 = document.getElementById('pill-credits');
+        let p2 = document.getElementById('pill-playable');
+        if(p1 && p1.style.display !== 'none') { p1.classList.remove('anim-pop-bet'); void p1.offsetWidth; p1.classList.add('anim-pop-bet'); }
+        if(p2 && p2.style.display !== 'none') { p2.classList.remove('anim-pop-bet'); void p2.offsetWidth; p2.classList.add('anim-pop-bet'); }
+    }
+
     function updateMyBalance(data, didWin = false) {
         let tc = formatTC(data.credits);
         let ptc = formatTC(data.playable || 0);
@@ -1478,10 +1518,17 @@
         
         let statsHtml = ``;
         if (data.stats.total > 0) {
-            if (data.game === 'd20' || data.game === 'blackjack') {
+            if (data.game === 'd20' || data.game === 'coinflip' || data.game === 'blackjack') {
                 let winP = ((data.stats.Win / data.stats.total) * 100).toFixed(1);
                 let loseP = ((data.stats.Lose / data.stats.total) * 100).toFixed(1);
-                statsHtml = `<span><span style="color:var(--success); font-weight:800;">WIN: ${winP}%</span></span><span><span style="color:var(--danger); font-weight:800;">LOSE: ${loseP}%</span></span>`;
+                
+                if(data.game === 'coinflip') {
+                    let headsP = ((data.stats.Heads / data.stats.total) * 100).toFixed(1);
+                    let tailsP = ((data.stats.Tails / data.stats.total) * 100).toFixed(1);
+                    statsHtml = `<span><span style="color:#ffb400; font-weight:800;">HEADS: ${headsP}%</span></span><span><span style="color:#e2e8f0; font-weight:800;">TAILS: ${tailsP}%</span></span>`;
+                } else {
+                    statsHtml = `<span><span style="color:var(--success); font-weight:800;">WIN: ${winP}%</span></span><span><span style="color:var(--danger); font-weight:800;">LOSE: ${loseP}%</span></span>`;
+                }
             } else {
                 Object.keys(data.stats).forEach(key => {
                     if (key !== 'total') {
@@ -1663,24 +1710,18 @@
           icn.className = `fas fa-dice-d20 dice-icon anim-shake`;
           let animCycle = setInterval(() => { sfx.tick(); }, 80);
           
-          await delay(1200); clearInterval(animCycle);
+          await delay(600); clearInterval(animCycle);
           
           icn.style.display = 'none'; nd.style.display = 'block'; nd.innerText = res.roll;
           nd.style.color = res.payout > 0 ? "var(--success)" : "var(--danger)";
           
-          await delay(300);
           showEndBox(mb, res.bet, res.payout, res.resStr, res.newBalance);
           logHistory('d20', formatTC(res.bet) + ' TC', res.resStr, res.payout > res.bet ? res.payout - res.bet : 0, res.payout === 0 ? res.bet : 0, true);
           
-          await delay(1500); 
+          await delay(500); 
           icn.className = 'fas fa-dice-d20 dice-icon';
           icn.style.display = 'block'; nd.style.display = 'none'; 
           btn.disabled = false;
-          
-          document.querySelectorAll('.d20-toggle.has-bet').forEach(b => {
-             b.classList.remove('has-bet'); b.style.borderColor = ''; b.style.color = '';
-          });
-          // Note: betEl.value is intentionally NOT cleared here so players don't have to re-type it.
       });
       
       socket.on('localGameError', (data) => { if(data.game==='d20') { showLocalFlash('d20', data.msg, "error"); btn.disabled=false; } });
@@ -1791,9 +1832,7 @@
                 else { histStr = `PLAYER (${dS} TO ${pS})`; }
 
                 showEndBox(document.getElementById('bj-msg'), bjSt.bet, data.payout, histStr, data.newBalance);
-                let wProf = data.payout > bjSt.bet ? data.payout - bjSt.bet : 0;
-                let lBet = data.payout === 0 ? bjSt.bet : 0;
-                logHistory('blackjack', formatTC(bjSt.bet) + ' TC', histStr, wProf, lBet, true);
+                logHistory('blackjack', formatTC(bjSt.bet) + ' TC', histStr, data.payout > bjSt.bet ? data.payout - bjSt.bet : 0, data.payout === 0 ? bjSt.bet : 0, true);
                 
                 setTimeout(() => { 
                     document.getElementById('btn-bj-deal').disabled = false; 
@@ -1838,9 +1877,7 @@
             
             await delay(300); 
             showEndBox(document.getElementById('bj-msg'), bjSt.bet, data.payout, data.resStr, data.newBalance);
-            let wProf = data.payout > bjSt.bet ? data.payout - bjSt.bet : 0;
-            let lBet = data.payout === 0 ? bjSt.bet : 0;
-            logHistory('blackjack', formatTC(bjSt.bet) + ' TC', data.resStr, wProf, lBet, true);
+            logHistory('blackjack', formatTC(bjSt.bet) + ' TC', data.resStr, data.payout > bjSt.bet ? data.payout - bjSt.bet : 0, data.payout === 0 ? bjSt.bet : 0, true);
             
             setTimeout(() => { document.getElementById('btn-bj-deal').disabled = false; }, 2500);
         }
@@ -2014,7 +2051,7 @@
             </div>
             <div id="bac-action-text" style="height: 24px; color: var(--ps-glow); font-weight: 800; text-align: center; margin-top: 40px; letter-spacing: 1px; text-transform: uppercase; font-size: 1.1rem; text-shadow: 0 0 10px rgba(0,162,255,0.5);"></div>`; 
           
-          let cg = document.getElementById('sg-controls-container'); 
+         let cg = document.getElementById('sg-controls-container'); 
           if (cg) cg.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: flex-end; width: 100%; max-width: 600px; margin: 0 auto 15px auto; grid-column:span 2;">
                 <div style="display: flex; gap: 10px; align-items: stretch;">
@@ -2248,6 +2285,9 @@
       if(myPlayable >= a) { myPlayable -= a; } 
       else { let rem = a - myPlayable; myPlayable = 0; myCredits -= rem; }
       updateMyBalance({credits: myCredits, playable: myPlayable});
+
+      // Trigger pop animation for wallets when betting on shared tables
+      triggerBetAnim();
 
       if (!mySBets[c]) mySBets[c] = 0; mySBets[c] += a; 
       mySBetsStack.push({ choice: c, amount: a });
