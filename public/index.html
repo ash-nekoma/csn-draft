@@ -210,7 +210,7 @@
 
         @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         @keyframes popBalance { 0% { transform: scale(1); } 50% { transform: scale(1.1); background: rgba(0, 230, 118, 0.3); border-color: var(--success); } 100% { transform: scale(1); } } .anim-pop { animation: popBalance 0.6s ease-out; }
-        @keyframes popBet { 0% { transform: scale(1); } 50% { transform: scale(0.95); background: rgba(255, 255, 255, 0.1); } 100% { transform: scale(1); } } .anim-pop-bet { animation: popBet 0.3s ease-out; }
+        @keyframes popBet { 0% { transform: scale(1); } 50% { transform: scale(0.95); background: rgba(255, 255, 255, 0.1); border-color: rgba(255,255,255,0.5); } 100% { transform: scale(1); } } .anim-pop-bet { animation: popBet 0.3s ease-out; }
         @keyframes shake { 0% { transform: rotate(0deg); } 25% { transform: rotate(-15deg); } 50% { transform: rotate(15deg); } 75% { transform: rotate(-15deg); } 100% { transform: rotate(0deg); } } .anim-shake { animation: shake 0.3s infinite; }
 
         /* STRICT CENTERED MAIN WRAPPER */
@@ -621,7 +621,7 @@
                         <div class="game-img"><i class="fas fa-dice-d20"></i></div>
                         <div class="game-info">
                             <div class="game-title">D20 ROLL</div>
-                            <div class="game-desc">Guess High/Low, or Odd/Even.</div>
+                            <div class="game-desc">Guess Exact, High/Low, or Odd/Even.</div>
                         </div>
                     </div>
 
@@ -1518,17 +1518,14 @@
         
         let statsHtml = ``;
         if (data.stats.total > 0) {
-            if (data.game === 'd20' || data.game === 'coinflip' || data.game === 'blackjack') {
+            if (data.game === 'd20' || data.game === 'blackjack') {
                 let winP = ((data.stats.Win / data.stats.total) * 100).toFixed(1);
                 let loseP = ((data.stats.Lose / data.stats.total) * 100).toFixed(1);
-                
-                if(data.game === 'coinflip') {
-                    let headsP = ((data.stats.Heads / data.stats.total) * 100).toFixed(1);
-                    let tailsP = ((data.stats.Tails / data.stats.total) * 100).toFixed(1);
-                    statsHtml = `<span><span style="color:#ffb400; font-weight:800;">HEADS: ${headsP}%</span></span><span><span style="color:#e2e8f0; font-weight:800;">TAILS: ${tailsP}%</span></span>`;
-                } else {
-                    statsHtml = `<span><span style="color:var(--success); font-weight:800;">WIN: ${winP}%</span></span><span><span style="color:var(--danger); font-weight:800;">LOSE: ${loseP}%</span></span>`;
-                }
+                statsHtml = `<span><span style="color:var(--success); font-weight:800;">WIN: ${winP}%</span></span><span><span style="color:var(--danger); font-weight:800;">LOSE: ${loseP}%</span></span>`;
+            } else if(data.game === 'coinflip') {
+                let headsP = ((data.stats.Heads / data.stats.total) * 100).toFixed(1);
+                let tailsP = ((data.stats.Tails / data.stats.total) * 100).toFixed(1);
+                statsHtml = `<span><span style="color:#ffb400; font-weight:800;">HEADS: ${headsP}%</span></span><span><span style="color:#e2e8f0; font-weight:800;">TAILS: ${tailsP}%</span></span>`;
             } else {
                 Object.keys(data.stats).forEach(key => {
                     if (key !== 'total') {
@@ -1661,14 +1658,14 @@
             if (payout > bet) sfx.win();
             else if (payout === 0) sfx.lose();
             
+            updateMyBalance(newBalance, payout > bet);
+
             clearTimeout(soloResultTimeout);
             soloResultTimeout = setTimeout(() => {
                 box.classList.remove('show');
                 setTimeout(() => { box.style.display = 'none'; }, 400);
-            }, 3500);
+            }, 2500);
         });
-
-        setTimeout(() => { updateMyBalance(newBalance, payout > bet); }, 1500);
     }
 
     function toggleD20Bet(btn) {
@@ -1701,30 +1698,50 @@
       if (totalBetAmt > 50000) { showLocalFlash('d20', "Max Total Bet is 50K TC", "error"); return; }
       if (totalBetAmt > (myCredits + myPlayable)) { showLocalFlash('d20', "Insufficient TC", "error"); return; }
       
+      if(myPlayable >= totalBetAmt) { myPlayable -= totalBetAmt; } 
+      else { let rem = totalBetAmt - myPlayable; myPlayable = 0; myCredits -= rem; }
+      updateMyBalance({credits: myCredits, playable: myPlayable});
+      triggerBetAnim();
+
       const btn = document.getElementById('btn-d20'), icn = document.getElementById('d20-icon'), nd = document.getElementById('d20-num'), mb = document.getElementById('d20-msg');
-      btn.disabled = true; mb.style.display = 'none'; mb.classList.remove('show');
-      icn.style.display = 'block'; nd.style.display = 'none';
+      btn.disabled = true; 
+      mb.style.display = 'none'; mb.classList.remove('show');
+      
+      icn.style.display = 'block'; 
+      nd.style.display = 'none';
+      icn.className = `fas fa-dice-d20 dice-icon anim-shake`;
+      
+      let animCycle = setInterval(() => { sfx.tick(); }, 80);
       
       socket.once('d20Result', async (res) => {
           mySoloRounds.d20++;
-          icn.className = `fas fa-dice-d20 dice-icon anim-shake`;
-          let animCycle = setInterval(() => { sfx.tick(); }, 80);
           
-          await delay(600); clearInterval(animCycle);
+          await delay(1000); 
+          clearInterval(animCycle);
           
-          icn.style.display = 'none'; nd.style.display = 'block'; nd.innerText = res.roll;
+          icn.style.display = 'none'; 
+          nd.style.display = 'block'; 
+          nd.innerText = res.roll;
           nd.style.color = res.payout > 0 ? "var(--success)" : "var(--danger)";
           
+          await delay(300);
           showEndBox(mb, res.bet, res.payout, res.resStr, res.newBalance);
           logHistory('d20', formatTC(res.bet) + ' TC', res.resStr, res.payout > res.bet ? res.payout - res.bet : 0, res.payout === 0 ? res.bet : 0, true);
           
-          await delay(500); 
+          await delay(800); 
           icn.className = 'fas fa-dice-d20 dice-icon';
-          icn.style.display = 'block'; nd.style.display = 'none'; 
           btn.disabled = false;
       });
       
-      socket.on('localGameError', (data) => { if(data.game==='d20') { showLocalFlash('d20', data.msg, "error"); btn.disabled=false; } });
+      socket.on('localGameError', (data) => { 
+          if(data.game==='d20') { 
+              clearInterval(animCycle);
+              icn.className = 'fas fa-dice-d20 dice-icon';
+              showLocalFlash('d20', data.msg, "error"); 
+              btn.disabled=false; 
+              socket.emit('requestBalanceRefresh');
+          } 
+      });
       socket.emit('playSolo', { game: 'd20', bets: activeBets, bet: totalBetAmt });
     }
 
@@ -1736,33 +1753,45 @@
       if (bet > 50000) { showLocalFlash('coinflip', "Max Bet is 50K TC", "error"); return; }
       if (bet > (myCredits + myPlayable)) { showLocalFlash('coinflip', "Insufficient TC", "error"); return; }
       
+      if(myPlayable >= bet) { myPlayable -= bet; } 
+      else { let rem = bet - myPlayable; myPlayable = 0; myCredits -= rem; }
+      updateMyBalance({credits: myCredits, playable: myPlayable});
+      triggerBetAnim();
+
       const cw = document.getElementById('coin-wrapper'), co = document.getElementById('coin-obj'), mb = document.getElementById('coin-msg');
       document.getElementById('btn-heads').disabled = true; document.getElementById('btn-tails').disabled = true;
       mb.style.display = 'none'; mb.classList.remove('show');
       
+      cw.classList.add('tossing');
+      sfx.coin();
+
       socket.once('coinResult', async (res) => {
           mySoloRounds.coinflip++;
-          sfx.coin(); cw.classList.add('tossing');
-          let isHeads = res.result === 'Heads';
           
+          let isHeads = res.result === 'Heads';
           currentCoinRot += 1800;
           if (isHeads && currentCoinRot % 360 !== 0) currentCoinRot += 180;
           if (!isHeads && currentCoinRot % 360 === 0) currentCoinRot += 180;
-          
           co.style.transform = `rotateY(${currentCoinRot}deg)`;
           
-          await delay(2000); cw.classList.remove('tossing');
+          await delay(2000); 
+          cw.classList.remove('tossing');
           
-          await delay(300);
-          let historyMsg = res.resStr;
-          showEndBox(mb, res.bet, res.payout, historyMsg, res.newBalance);
+          showEndBox(mb, res.bet, res.payout, res.resStr, res.newBalance);
           logHistory('coinflip', choice.toUpperCase(), res.resStr, res.payout > res.bet ? res.payout - res.bet : 0, res.payout === 0 ? res.bet : 0, true);
           
-          await delay(1200);
+          await delay(800);
           document.getElementById('btn-heads').disabled = false; document.getElementById('btn-tails').disabled = false;
       });
 
-      socket.on('localGameError', (data) => { if(data.game==='coinflip') { showLocalFlash('coinflip', data.msg, "error"); document.getElementById('btn-heads').disabled = false; document.getElementById('btn-tails').disabled = false; } });
+      socket.on('localGameError', (data) => { 
+          if(data.game==='coinflip') { 
+              cw.classList.remove('tossing');
+              showLocalFlash('coinflip', data.msg, "error"); 
+              document.getElementById('btn-heads').disabled = false; document.getElementById('btn-tails').disabled = false; 
+              socket.emit('requestBalanceRefresh');
+          } 
+      });
       socket.emit('playSolo', { game: 'coinflip', bet: bet, choice: choice });
     }
 
@@ -1775,6 +1804,11 @@
       if (bet > 50000) { showLocalFlash('blackjack', "Max Bet is 50K TC", "error"); return; }
       if (bet > (myCredits + myPlayable)) { showLocalFlash('blackjack', "Insufficient TC", "error"); return; }
       
+      if(myPlayable >= bet) { myPlayable -= bet; } 
+      else { let rem = bet - myPlayable; myPlayable = 0; myCredits -= rem; }
+      updateMyBalance({credits: myCredits, playable: myPlayable});
+      triggerBetAnim();
+
       bjSt.bet = bet; bjSt.active = true; 
       document.getElementById('btn-bj-deal').disabled = true;
       document.getElementById('bj-msg').style.display = 'none'; document.getElementById('bj-msg').classList.remove('show');
@@ -1784,7 +1818,15 @@
       document.getElementById('bj-p-hand').innerHTML = ''; document.getElementById('bj-d-hand').innerHTML = '';
       document.getElementById('bj-p-score').innerText = '0'; document.getElementById('bj-d-score').innerText = '0';
       
-      socket.on('localGameError', (data) => { if(data.game==='blackjack') { showLocalFlash('blackjack', data.msg, "error"); bjSt.active = false; document.getElementById('btn-bj-deal').disabled = false; document.getElementById('bj-start-controls').classList.remove('hidden'); } });
+      socket.on('localGameError', (data) => { 
+          if(data.game==='blackjack') { 
+              showLocalFlash('blackjack', data.msg, "error"); 
+              bjSt.active = false; 
+              document.getElementById('btn-bj-deal').disabled = false; 
+              document.getElementById('bj-start-controls').classList.remove('hidden'); 
+              socket.emit('requestBalanceRefresh');
+          } 
+      });
       socket.emit('playSolo', { game: 'blackjack', action: 'start', bet: bet });
     }
     
@@ -1837,7 +1879,7 @@
                 setTimeout(() => { 
                     document.getElementById('btn-bj-deal').disabled = false; 
                     document.getElementById('bj-start-controls').classList.remove('hidden'); 
-                }, 2500);
+                }, 1500);
                 bjSt.active = false;
             } else {
                 document.getElementById('bj-action-controls').classList.remove('hidden');
@@ -1879,7 +1921,7 @@
             showEndBox(document.getElementById('bj-msg'), bjSt.bet, data.payout, data.resStr, data.newBalance);
             logHistory('blackjack', formatTC(bjSt.bet) + ' TC', data.resStr, data.payout > bjSt.bet ? data.payout - bjSt.bet : 0, data.payout === 0 ? bjSt.bet : 0, true);
             
-            setTimeout(() => { document.getElementById('btn-bj-deal').disabled = false; }, 2500);
+            setTimeout(() => { document.getElementById('btn-bj-deal').disabled = false; }, 1500);
         }
     });
 
@@ -2051,7 +2093,7 @@
             </div>
             <div id="bac-action-text" style="height: 24px; color: var(--ps-glow); font-weight: 800; text-align: center; margin-top: 40px; letter-spacing: 1px; text-transform: uppercase; font-size: 1.1rem; text-shadow: 0 0 10px rgba(0,162,255,0.5);"></div>`; 
           
-         let cg = document.getElementById('sg-controls-container'); 
+          let cg = document.getElementById('sg-controls-container'); 
           if (cg) cg.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: flex-end; width: 100%; max-width: 600px; margin: 0 auto 15px auto; grid-column:span 2;">
                 <div style="display: flex; gap: 10px; align-items: stretch;">
