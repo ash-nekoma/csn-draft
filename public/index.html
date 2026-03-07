@@ -125,7 +125,8 @@
         .wallet-main i { color: var(--credits); font-size: 1.1rem; }
         #nav-credits { color: var(--credits); font-weight: 900; font-size: 1.1rem; }
         .wallet-unit { color: var(--text-muted); font-size: 0.8rem; font-weight: 800; }
-        #nav-playable { font-size: 0.75rem; color: var(--playable); font-weight: 900; line-height: 1; text-shadow: 0 0 5px rgba(179, 102, 255, 0.5); margin-top: 2px;}
+        #nav-playable { font-size: 0.75rem; color: var(--playable); font-weight: 900; line-height: 1; text-shadow: 0 0 5px rgba(179, 102, 255, 0.5); margin-top: 2px; padding: 2px 5px; border-radius: 4px; transition: 0.2s;}
+        #nav-playable:hover { background: rgba(179, 102, 255, 0.15); transform: scale(1.05); }
 
         .topbar-actions { display: flex; flex-direction: row; align-items: center; gap: 15px; background: rgba(0,0,0,0.8); padding: 8px 20px; border-radius: 50px; border: 1px solid var(--glass-border); width: fit-content; position: relative;}
         .top-icon-btn { position: relative; cursor: pointer; background: transparent; border: none; font-size: 1.15rem; transition: 0.2s; display: flex; align-items: center; justify-content: center; color: white; width: 20px; }
@@ -329,8 +330,8 @@
         tbody td { white-space: nowrap; }
 
         /* DAILY REWARD */
-        .dr-days { display: flex; gap: 10px; justify-content: center; align-items: flex-end; margin-bottom: 25px; height: 160px; }
-        .dr-day { flex: 1; background: linear-gradient(180deg, #1a2a6c 0%, #001f4d 100%); border: 2px solid rgba(255,255,255,0.2); border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 10px 5px; height: 130px; transition: 0.3s; position: relative; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .dr-days { display: flex; gap: 10px; justify-content: center; align-items: flex-end; margin-bottom: 25px; height: 180px; flex-wrap: wrap;}
+        .dr-day { flex: 1; background: linear-gradient(180deg, #1a2a6c 0%, #001f4d 100%); border: 2px solid rgba(255,255,255,0.2); border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 15px 5px; height: 150px; min-width: 80px; transition: 0.3s; position: relative; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
         .dr-day::before { content: ''; position: absolute; inset: -50%; background: repeating-conic-gradient(rgba(255,255,255,0.08) 0 15deg, transparent 15deg 30deg); z-index: 0; opacity: 0.8; animation: rotateBurst 20s linear infinite; }
         @keyframes rotateBurst { 100% { transform: rotate(360deg); } }
 
@@ -338,7 +339,7 @@
         .dr-day.claimed { background: rgba(255,255,255,0.05); filter: grayscale(1); opacity: 0.6; border-color: var(--glass-border); box-shadow: none;}
         .dr-day.claimed::before { display: none; }
 
-        .dr-day.active { background: linear-gradient(180deg, #ffcc00 0%, #ff9900 100%); border: 2px solid #fff; transform: scale(1.1); opacity: 1; z-index: 5; box-shadow: 0 10px 25px rgba(255, 204, 0, 0.4); height: 150px; color: black; }
+        .dr-day.active { background: linear-gradient(180deg, #ffcc00 0%, #ff9900 100%); border: 2px solid #fff; transform: scale(1.1); opacity: 1; z-index: 5; box-shadow: 0 10px 25px rgba(255, 204, 0, 0.4); height: 170px; color: black; }
         .dr-day.active::before { background: repeating-conic-gradient(rgba(255,255,255,0.3) 0 15deg, transparent 15deg 30deg); opacity: 0.6; display: block;}
         .dr-day.active .dr-title, .dr-day.active .dr-coin { color: #000; text-shadow: none; }
         
@@ -346,8 +347,8 @@
         .dr-day.active.active-claimed .dr-title, .dr-day.active.active-claimed .dr-coin { color: white; text-shadow: 0 1px 3px rgba(0,0,0,0.5); }
         .dr-day.active.active-claimed::before { display: none; }
 
-        .dr-title { font-size: 0.9rem; text-transform: uppercase; font-weight: 900; margin-top: 5px; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.5); text-align: center;}
-        .dr-coin { font-size: 1rem; font-weight: 900; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.5); text-align: center; margin-bottom: 5px;}
+        .dr-title { font-size: 0.95rem; text-transform: uppercase; font-weight: 900; margin-top: 5px; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.5); text-align: center;}
+        .dr-coin { font-size: 1.2rem; font-weight: 900; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.5); text-align: center; margin-bottom: 5px;}
 
         .dr-claim-btn { width: 100%; max-width: 250px; margin: 0 auto; background: #ffcc00; color: #000; font-size: 1.2rem; border: 2px solid #fff; box-shadow: 0 5px 15px rgba(255,204,0,0.4); }
         .dr-claim-btn:hover:not(:disabled) { background: #ff9900; color: #000; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255,204,0,0.6);}
@@ -510,7 +511,7 @@
                     <span id="nav-credits">0.0</span>
                     <span class="wallet-unit">TC</span>
                 </div>
-                <div id="nav-playable" style="display: none;">+ 0.0 P</div>
+                <div id="nav-playable" style="display: none; cursor:pointer;" onclick="event.stopPropagation(); openModal('playable-info-modal')">+ 0.0 P</div>
             </div>
             
             <div class="topbar-actions">
@@ -701,28 +702,17 @@
                     </div>
                     <div class="controls-grid" style="display:flex; flex-direction:column; align-items:center; gap:10px; padding: 15px;">
                         
-                        <div style="display:flex; gap:10px; width:100%; max-width: 350px;">
-                            <select id="d20-guess-type" class="input-control" onchange="updateD20Inputs()">
-                                <option value="exact">Exact Number (18x)</option>
-                                <option value="highlow">High/Low (1.95x)</option>
-                                <option value="oddeven">Odd/Even (1.95x)</option>
-                            </select>
-                        </div>
-                        
                         <div id="d20-inputs-container" style="width:100%; max-width:350px;">
-                            <input type="number" id="d20-guess-exact" class="input-control" placeholder="Guess 1-20" min="1" max="20">
-                            <select id="d20-guess-highlow" class="input-control hidden">
-                                <option value="low">Low (1-10)</option>
-                                <option value="high">High (11-20)</option>
-                            </select>
-                            <select id="d20-guess-oddeven" class="input-control hidden">
-                                <option value="odd">Odd Number</option>
-                                <option value="even">Even Number</option>
-                            </select>
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                                <button class="bet-btn d20-toggle" data-type="highlow" data-val="high" style="--tile-color: var(--danger); min-height: 40px; font-size: 1rem;" onclick="toggleD20Bet(this)">HIGH (11-20)</button>
+                                <button class="bet-btn d20-toggle" data-type="highlow" data-val="low" style="--tile-color: var(--ps-glow); min-height: 40px; font-size: 1rem;" onclick="toggleD20Bet(this)">LOW (1-10)</button>
+                                <button class="bet-btn d20-toggle" data-type="oddeven" data-val="odd" style="--tile-color: var(--playable); min-height: 40px; font-size: 1rem;" onclick="toggleD20Bet(this)">ODD</button>
+                                <button class="bet-btn d20-toggle" data-type="oddeven" data-val="even" style="--tile-color: var(--credits); min-height: 40px; font-size: 1rem;" onclick="toggleD20Bet(this)">EVEN</button>
+                            </div>
                         </div>
 
-                        <div class="input-group" style="margin:0; width: 100%; max-width:350px;">
-                            <input type="number" id="d20-bet" class="input-control bet-input" placeholder="Bet Amount (TC)">
+                        <div class="input-group" style="margin:10px 0 0 0; width: 100%; max-width:350px;">
+                            <input type="number" id="d20-bet" class="input-control bet-input" placeholder="Bet Per Selection (TC)">
                         </div>
                         <button class="btn-play" id="btn-d20" onclick="playD20()" style="width: 100%; max-width: 350px; background: #ff3366; border: none;">ROLL D20</button>
                     </div>
@@ -848,7 +838,7 @@
                     <div class="glass-header">
                         <div>LIVE CHAT</div>
                         <div style="display:flex; align-items:center; gap:10px; font-size: 0.95rem; font-weight:800;">
-                            <div style="display:flex; align-items:center; gap:6px; color:var(--success);"><i class="fas fa-users"></i> <span id="sg-active-players">0</span></div>
+                            <div style="display:flex; align-items:center; gap:6px; color:var(--success); cursor: pointer;" onclick="fetchActivePlayers()"><i class="fas fa-users"></i> <span id="sg-active-players">0</span></div>
                             <button style="background:transparent; border:none; color:white; font-size:1.2rem; display:none;" id="chat-close-btn" onclick="toggleMobileChat()"><i class="fas fa-times"></i></button>
                         </div>
                     </div>
@@ -870,7 +860,7 @@
 
   <div id="history-popover" class="custom-dropdown hidden" style="width: 450px; padding: 0; overflow: hidden; cursor: default; z-index: 2500;" onclick="event.stopPropagation()">
         <div style="background:rgba(0,0,0,0.5); border-bottom:1px solid var(--glass-border); padding:15px; text-align:center;">
-            <div style="font-weight:900; color:white; font-size:1.1rem; margin-bottom:5px;">GLOBAL TOTAL ROUNDS: <span id="stat-total-rounds" style="color:var(--credits);">0</span></div>
+            <div style="font-weight:900; color:white; font-size:1.1rem; margin-bottom:5px;">TOTAL ROUNDS: <span id="stat-total-rounds" style="color:var(--credits);">0</span></div>
             <div id="stat-percentages" style="display:flex; flex-wrap:nowrap; justify-content:center; align-items:center; gap:8px; font-size:0.95rem; font-weight:800;"></div>
         </div>
         <div style="display:grid; grid-template-columns: 2fr 1fr 1fr 1fr; padding:12px 15px; border-bottom:1px solid rgba(255,255,255,0.1); font-size:0.85rem; font-weight:900; color:var(--text-muted); text-align:center; text-transform:uppercase; background: rgba(0,0,0,0.4);">
@@ -883,6 +873,32 @@
   <div id="rules-popover" class="custom-dropdown hidden" style="width: 350px; padding: 20px; cursor: default; z-index: 2500;" onclick="event.stopPropagation()">
         <div style="font-weight:900; color:white; text-transform:uppercase; margin-bottom:15px; font-size:1.1rem; text-align:center; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px;" id="rules-title">How to Play</div>
         <div id="rules-body" class="rules-text"></div>
+  </div>
+
+  <div id="playable-info-modal" class="modal-overlay hidden" style="display: none;" onclick="if(event.target===this) closeModal('playable-info-modal')">
+    <div class="modal-content" style="width: 400px; text-align: center; border-top-color: var(--playable);">
+        <i class="fas fa-times modal-close-icon" onclick="closeModal('playable-info-modal')"></i>
+        <h3 style="color: var(--playable); border-bottom: none; margin-bottom: 5px;">Playable Credits</h3>
+        <p style="color: var(--text-muted); margin-bottom: 25px; font-weight: 600;">How your bonus balance works</p>
+        <div style="text-align: left; color: white; font-size: 0.95rem; line-height: 1.5; background: rgba(0,0,0,0.4); padding: 20px; border-radius: 8px; border: 1px solid var(--glass-border);">
+            <ul style="margin-left: 20px;">
+                <li style="margin-bottom: 10px;"><strong>Playable Credits (P)</strong> are bonus funds earned from Daily Rewards and Promo Codes.</li>
+                <li style="margin-bottom: 10px;">When placing a bet, your Playable Credits are <strong>always used first</strong> before your Main TC Balance.</li>
+                <li style="margin-bottom: 10px;">Any winnings earned using Playable Credits are paid directly into your Main TC Balance.</li>
+                <li>Playable Credits <strong>cannot</strong> be withdrawn in the Cashier.</li>
+            </ul>
+        </div>
+    </div>
+  </div>
+
+  <div id="active-players-modal" class="modal-overlay hidden" style="display: none;" onclick="if(event.target===this) closeModal('active-players-modal')">
+    <div class="modal-content" style="width: 350px; text-align: center;">
+        <i class="fas fa-times modal-close-icon" onclick="closeModal('active-players-modal')"></i>
+        <h3 style="color: var(--success); border-bottom: none; margin-bottom: 5px;">Active Players</h3>
+        <p style="color: var(--text-muted); margin-bottom: 15px; font-weight: 600;">Currently in this room</p>
+        <div id="ap-list-container" class="custom-scroll" style="max-height: 300px; overflow-y: auto; text-align: left;">
+            </div>
+    </div>
   </div>
 
   <div id="admin-confirm-modal" class="modal-overlay hidden" style="display: none;" onclick="if(event.target===this) closeModal('admin-confirm-modal')">
@@ -916,7 +932,6 @@
       <div class="current-balance-section" id="cashier-balance-header" style="text-align: center; margin-bottom: 20px;">
           <div style="font-size: 0.8rem; color: var(--text-muted);">CURRENT BALANCE</div>
           <div style="font-size: 2.5rem; color: var(--credits); font-weight: 900;" class="cashier-balance-display">0.0 TC</div>
-          <div style="font-size: 1rem; color: var(--playable); font-weight: 800;" class="cashier-playable-display">+ 0.0 P</div>
       </div>
 
       <div class="bank-tabs" id="cashier-tabs-nav">
@@ -1011,11 +1026,10 @@
     let myCredits = 0;
     let myPlayable = 0;
     
-    // myGameHistory tracks strictly what you've played while online
     let myGameHistory = { d20: [], coinflip: [], baccarat: [], blackjack: [], perya: [], dt: [], sicbo: [] };
-    // globalFallback tracks the last 5 results of every game from the server
     let globalFallback = { baccarat: [], perya: [], dt: [], sicbo: [] };
     
+    let mySoloRounds = { d20: 0, coinflip: 0, blackjack: 0 };
     let myNotifications = [];
     
     window.activeSharedGame = null;
@@ -1098,7 +1112,6 @@
         if(id === 'gift-dropdown') document.getElementById('promo-response').innerText = '';
     }
 
-    // CURRENT BETS POPOVER LOGIC
     function toggleCurrentBets(e) {
         toggleCustomDropdown('current-bets-popover', e);
     }
@@ -1156,6 +1169,10 @@
                 let cleanRes = gRes[i].result.replace(' WINS!', '').replace(' WINS', '');
                 merged.push({ result: cleanRes, bet: '-', wonProfit: 0, lostBet: 0, didBet: false });
             }
+        }
+        
+        if (id === 'd20' || id === 'coinflip' || id === 'blackjack') {
+            document.getElementById('stat-total-rounds').innerText = mySoloRounds[id] || 0;
         }
         
         if(merged.length === 0) { 
@@ -1359,10 +1376,6 @@
         else { pDisp.style.display = 'none'; }
         
         document.querySelectorAll('.cashier-balance-display').forEach(el => el.innerText = tc + ' TC');
-        document.querySelectorAll('.cashier-playable-display').forEach(el => {
-            if (myPlayable > 0) { el.style.display = 'block'; el.innerText = `+ ${ptc} P`; }
-            else { el.style.display = 'none'; }
-        });
     }
 
     socket.on('balanceUpdateData', (newBalance) => { updateMyBalance(newBalance, true); });
@@ -1370,7 +1383,7 @@
     function setupDailyRewardUI(dailyData) {
         const container = document.getElementById('dr-days-container');
         container.innerHTML = '';
-        const rewards = [25, 50, 100, 200, 500, 750, 1000];
+        const rewards = [100, 250, 500, 750, 1000, 1500, 2000];
         
         for(let i=1; i<=7; i++) {
             let statClass = ''; let boxTitle = `Day ${i}`;
@@ -1415,7 +1428,7 @@
     }
 
     const gameInfoMap = {
-      'd20': { title: "D20", body: "<ul><li>Enter your bet amount and select your guess type.</li><li><strong>Exact Number:</strong> 1 in 20 chance. Pays <strong>18x</strong>.</li><li><strong>High/Low:</strong> Low (1-10) or High (11-20). Pays <strong>1.95x</strong>.</li><li><strong>Odd/Even:</strong> Pays <strong>1.95x</strong>.</li></ul>" },
+      'd20': { title: "D20", body: "<ul><li>Select multiple bets to increase your coverage.</li><li><strong>High/Low:</strong> Low (1-10) or High (11-20). Pays <strong>1.95x</strong>.</li><li><strong>Odd/Even:</strong> Pays <strong>1.95x</strong>.</li></ul>" },
       'coinflip': { title: "Coin Flip", body: "<ul><li>Enter your bet and choose <strong>Heads</strong> or <strong>Tails</strong>.</li><li>Winning pays <strong>1.95x</strong> your bet.</li><li>Playable Bonus is used before Main TC.</li></ul>" },
       'baccarat': { title: "Baccarat", body: "<ul><li>Bet on Player, Banker, or Tie. Closest to <strong>9</strong> wins.</li><li>Player pays <strong>2x</strong>. Banker pays <strong>1.95x</strong>.</li><li>Tie pays <strong>9x</strong>. Player/Banker bets push.</li></ul>" },
       'blackjack': { title: "Blackjack", body: "<ul><li>Beat the dealer without going over 21.</li><li>Dealer must stand on <strong>17 or higher</strong>.</li><li>Natural Blackjack pays <strong>2.5x</strong>. Standard wins pay <strong>2x</strong>. Ties push.</li></ul>" },
@@ -1442,11 +1455,11 @@
     socket.on('globalResultsData', data => {
         if (data.game === 'baccarat' || data.game === 'perya' || data.game === 'dt' || data.game === 'sicbo') {
             globalFallback[data.game] = data.results;
+            if(data.game === currentHistoryGame) document.getElementById('stat-total-rounds').innerText = data.stats.total;
         }
         
         if(data.game !== currentHistoryGame) return;
         
-        document.getElementById('stat-total-rounds').innerText = data.stats.total;
         let statsHtml = ``;
         if (data.stats.total > 0) {
             if (data.game === 'd20' || data.game === 'coinflip' || data.game === 'blackjack') {
@@ -1532,6 +1545,7 @@
         socket.emit('joinRoom', id);
         if (sConf[id] && sConf[id].setupUI) sConf[id].setupUI();
         document.getElementById('sg-title').innerText = sConf[id].title;
+        document.getElementById('sg-chat').innerHTML = '<div class="chat-msg chat-sys">Connected to server.</div>';
         switchView('shared-game');
     }
 
@@ -1594,31 +1608,42 @@
         setTimeout(() => { updateMyBalance(newBalance, payout > bet); }, 1500);
     }
 
-    function updateD20Inputs() {
-        let t = document.getElementById('d20-guess-type').value;
-        document.getElementById('d20-guess-exact').classList.add('hidden');
-        document.getElementById('d20-guess-highlow').classList.add('hidden');
-        document.getElementById('d20-guess-oddeven').classList.add('hidden');
-        document.getElementById('d20-guess-' + t).classList.remove('hidden');
+    function toggleD20Bet(btn) {
+        btn.classList.toggle('has-bet');
+        if(btn.classList.contains('has-bet')) {
+            btn.style.borderColor = 'var(--ps-glow)';
+            btn.style.color = 'var(--ps-glow)';
+            sfx.tick();
+        } else {
+            btn.style.borderColor = '';
+            btn.style.color = '';
+            sfx.tick();
+        }
     }
 
     function playD20() {
       let betEl = document.getElementById('d20-bet');
-      let bet = parseFloat(betEl.value);
+      let betAmt = parseFloat(betEl.value);
       
-      let type = document.getElementById('d20-guess-type').value;
-      let val = document.getElementById('d20-guess-' + type).value;
-
-      if (isNaN(bet) || bet < 10) { showLocalFlash('d20', "Min Bet is 10 TC", "error"); return; }
-      if (bet > 50000) { showLocalFlash('d20', "Max Bet is 50K TC", "error"); return; }
-      if (bet > (myCredits + myPlayable)) { showLocalFlash('d20', "Insufficient TC", "error"); return; }
-      if (type === 'exact' && (isNaN(val) || val < 1 || val > 20)) { showLocalFlash('d20', "Guess 1-20", "error"); return; }
+      if (isNaN(betAmt) || betAmt < 10) { showLocalFlash('d20', "Min Bet is 10 TC per selection", "error"); return; }
+      
+      let activeBets = [];
+      document.querySelectorAll('.d20-toggle.has-bet').forEach(btn => {
+          activeBets.push({ guessType: btn.dataset.type, guessValue: btn.dataset.val, amount: betAmt });
+      });
+      
+      if (activeBets.length === 0) { showLocalFlash('d20', "Select at least one bet", "error"); return; }
+      
+      let totalBetAmt = betAmt * activeBets.length;
+      if (totalBetAmt > 50000) { showLocalFlash('d20', "Max Total Bet is 50K TC", "error"); return; }
+      if (totalBetAmt > (myCredits + myPlayable)) { showLocalFlash('d20', "Insufficient TC", "error"); return; }
       
       const btn = document.getElementById('btn-d20'), icn = document.getElementById('d20-icon'), nd = document.getElementById('d20-num'), mb = document.getElementById('d20-msg');
       btn.disabled = true; mb.style.display = 'none'; mb.classList.remove('show');
       icn.style.display = 'block'; nd.style.display = 'none';
       
       socket.once('d20Result', async (res) => {
+          mySoloRounds.d20++;
           icn.className = `fas fa-dice-d20 dice-icon anim-shake`;
           let animCycle = setInterval(() => { sfx.tick(); }, 80);
           
@@ -1628,18 +1653,22 @@
           nd.style.color = res.payout > 0 ? "var(--success)" : "var(--danger)";
           
           await delay(300);
-          let historyMsg = res.resStr;
-          showEndBox(mb, res.bet, res.payout, historyMsg, res.newBalance);
+          showEndBox(mb, res.bet, res.payout, res.resStr, res.newBalance);
           logHistory('d20', formatTC(res.bet) + ' TC', res.resStr, res.payout > res.bet ? res.payout - res.bet : 0, res.payout === 0 ? res.bet : 0, true);
           
           await delay(1500); 
           icn.className = 'fas fa-dice-d20 dice-icon';
           icn.style.display = 'block'; nd.style.display = 'none'; 
           btn.disabled = false;
+          
+          document.querySelectorAll('.d20-toggle.has-bet').forEach(b => {
+             b.classList.remove('has-bet'); b.style.borderColor = ''; b.style.color = '';
+          });
+          betEl.value = '';
       });
       
       socket.on('localGameError', (data) => { if(data.game==='d20') { showLocalFlash('d20', data.msg, "error"); btn.disabled=false; } });
-      socket.emit('playSolo', { game: 'd20', bet: bet, guessType: type, guessValue: val });
+      socket.emit('playSolo', { game: 'd20', bets: activeBets, bet: totalBetAmt });
     }
 
     let currentCoinRot = 0;
@@ -1655,6 +1684,7 @@
       mb.style.display = 'none'; mb.classList.remove('show');
       
       socket.once('coinResult', async (res) => {
+          mySoloRounds.coinflip++;
           sfx.coin(); cw.classList.add('tossing');
           let isHeads = res.result === 'Heads';
           
@@ -1728,6 +1758,7 @@
             await appendCard('bj-d-hand', 'bj-d-score', data.dHand[1], data.dHand, true); 
             
             if (data.naturalBJ) {
+                mySoloRounds.blackjack++;
                 await delay(500);
                 let hidden = document.getElementById('hidden-card');
                 if (hidden) {
@@ -1764,6 +1795,7 @@
             document.getElementById('btn-bj-hit').disabled = false;
         }
         else if (data.event === 'resolved') {
+            mySoloRounds.blackjack++;
             bjSt.active = false;
             document.getElementById('bj-action-controls').classList.add('hidden');
             document.getElementById('bj-start-controls').classList.remove('hidden');
@@ -1789,20 +1821,10 @@
             }
             
             await delay(300); 
-            
-            let pS = getBJScore(data.pHand);
-            let dS = getBJScore(data.dHand);
-            let histStr = "";
-            if (pS > 21) { histStr = `PLAYER BUSTS! (${pS})`; } 
-            else if (dS > 21) { histStr = `DEALER BUSTS! (${dS} TO ${pS})`; } 
-            else if (data.msg === 'Push') { histStr = `TIE (${dS} TO ${pS})`; } 
-            else if (data.msg === 'You Win!' || data.msg === 'Blackjack!') { histStr = `PLAYER (${dS} TO ${pS})`; } 
-            else { histStr = `DEALER (${dS} TO ${pS})`; }
-            
-            showEndBox(document.getElementById('bj-msg'), bjSt.bet, data.payout, histStr, data.newBalance);
+            showEndBox(document.getElementById('bj-msg'), bjSt.bet, data.payout, data.resStr, data.newBalance);
             let wProf = data.payout > bjSt.bet ? data.payout - bjSt.bet : 0;
             let lBet = data.payout === 0 ? bjSt.bet : 0;
-            logHistory('blackjack', formatTC(bjSt.bet) + ' TC', histStr, wProf, lBet, true);
+            logHistory('blackjack', formatTC(bjSt.bet) + ' TC', data.resStr, wProf, lBet, true);
             
             setTimeout(() => { document.getElementById('btn-bj-deal').disabled = false; }, 2500);
         }
@@ -1831,6 +1853,21 @@
         });
         const sgCount = document.getElementById('sg-active-players');
         if(sgCount && window.activeSharedGame) sgCount.innerText = counts[window.activeSharedGame] || 0;
+    });
+    
+    function fetchActivePlayers() {
+        if(!window.activeSharedGame) return;
+        socket.emit('getRoomPlayers', window.activeSharedGame);
+    }
+    
+    socket.on('roomPlayersList', (players) => {
+        const container = document.getElementById('ap-list-container');
+        if (players.length === 0) {
+            container.innerHTML = '<div style="color:var(--text-muted); font-style:italic; padding:10px;">Room is empty.</div>';
+        } else {
+            container.innerHTML = players.map(p => `<div style="padding:12px; background:rgba(255,255,255,0.05); margin-bottom:5px; border-radius:6px; font-weight:800; color:white;">${p}</div>`).join('');
+        }
+        openModal('active-players-modal');
     });
 
     function undoSharedBet() {
@@ -2332,10 +2369,6 @@
       if (audioCtx.state === 'suspended') audioCtx.resume();
       sfx.click();
       document.querySelectorAll('.cashier-balance-display').forEach(el => el.innerText = formatTC(myCredits) + ' TC');
-      document.querySelectorAll('.cashier-playable-display').forEach(el => {
-          if (myPlayable > 0) { el.style.display = 'block'; el.innerText = `+ ${formatTC(myPlayable)} P`; }
-          else { el.style.display = 'none'; }
-      });
       switchSupportCenterTab('deposit', document.querySelectorAll('#cashier-tabs-nav .bank-tab')[0]);
       openModal('support-center-modal');
     }
