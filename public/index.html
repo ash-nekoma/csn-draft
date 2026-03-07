@@ -1225,9 +1225,19 @@
         } 
         
         merged.slice(0,5).forEach(h => {
-            let winVal = h.didBet ? (h.wonProfit > 0 ? `<span style="color:var(--success)">+${formatTC(h.wonProfit)}</span>` : '-') : '-';
-            let lossVal = h.didBet ? (h.lostBet > 0 ? `<span style="color:var(--danger)">-${formatTC(h.lostBet)}</span>` : '-') : '-';
-            if (h.didBet && h.wonProfit === 0 && h.lostBet === 0) { winVal = '<span style="color:white">PUSH</span>'; lossVal = '-'; }
+            let net = formatTC(h.wonProfit - h.lostBet);
+            let winVal = '-';
+            let lossVal = '-';
+            
+            if (h.didBet) {
+                if (net > 0) {
+                    winVal = `<span style="color:var(--success)">+${net}</span>`;
+                } else if (net < 0) {
+                    lossVal = `<span style="color:var(--danger)">-${Math.abs(net)}</span>`;
+                } else {
+                    winVal = '<span style="color:white; font-weight: 900;">PUSH</span>';
+                }
+            }
             
             let bHtml = formatBetHistory(id, h.bet); 
             let rHtml = h.result;
@@ -1583,9 +1593,12 @@
       if(resBox) { resBox.style.display = 'none'; resBox.classList.remove('show'); resBox.style.opacity = '0'; }
       
       if(id === 'd20') {
+          clearInterval(window.d20AnimCycle);
           document.getElementById('d20-icon').className = 'fas fa-dice-d20 dice-icon';
           document.getElementById('d20-icon').style.display='block'; document.getElementById('d20-num').style.display='none';
           document.getElementById('btn-d20').disabled = false;
+          document.getElementById('d20-bet').disabled = false;
+          document.querySelectorAll('.d20-toggle').forEach(b => b.disabled = false);
       }
       if(id === 'coinflip') {
           document.getElementById('btn-heads').disabled = false; document.getElementById('btn-tails').disabled = false;
@@ -1632,33 +1645,54 @@
     }
     function backToCasino() { switchView('casino'); }
 
+    // Global Error Handler for Solo Games
+    socket.on('localGameError', (data) => { 
+        showLocalFlash(data.game, data.msg, "error"); 
+        socket.emit('requestBalanceRefresh');
+        
+        if (data.game === 'd20') {
+            clearInterval(window.d20AnimCycle);
+            document.getElementById('d20-icon').className = 'fas fa-dice-d20 dice-icon';
+            document.getElementById('btn-d20').disabled = false;
+            document.getElementById('d20-bet').disabled = false;
+            document.querySelectorAll('.d20-toggle').forEach(b => b.disabled = false);
+        } else if (data.game === 'coinflip') {
+            document.getElementById('coin-wrapper').classList.remove('tossing');
+            document.getElementById('btn-heads').disabled = false; 
+            document.getElementById('btn-tails').disabled = false;
+        } else if (data.game === 'blackjack') {
+            bjSt.active = false; 
+            document.getElementById('btn-bj-deal').disabled = false; 
+            document.getElementById('bj-start-controls').classList.remove('hidden');
+        }
+    });
+
     // --- SOLO GAMES ENGINE ---
     
     let soloResultTimeout;
     function showEndBox(box, bet, payout, msg, newBalance) {
-        let pft = payout > bet ? payout - bet : 0; 
-        let loss = payout === 0 ? bet : 0;
+        let net = formatTC(payout - bet);
         
         let h = `<div class="res-title" style="color:white;">${msg}</div>`; 
-        if (payout > bet) { 
-            h += `<div class="res-payout" style="color:var(--success)">WON +${formatTC(pft)} TC</div>`; 
+        if (net > 0) { 
+            h += `<div class="res-payout" style="color:var(--success)">WON +${net} TC</div>`; 
             box.className = "result-box win"; 
-        } else if (payout === bet) { 
+        } else if (net < 0) { 
+            h += `<div class="res-payout" style="color:var(--danger)">LOST -${Math.abs(net)} TC</div>`; 
+            box.className = "result-box lose"; 
+        } else { 
             h += `<div class="res-payout" style="color:white">PUSH - BET RETURNED</div>`; 
             box.className = "result-box push"; 
-        } else { 
-            h += `<div class="res-payout" style="color:var(--danger)">LOST -${formatTC(loss)} TC</div>`; 
-            box.className = "result-box lose"; 
         } 
         
         box.innerHTML = h; box.style.display = 'flex'; box.style.opacity = '0'; 
         
         requestAnimationFrame(() => { 
             box.style.opacity = '1'; box.classList.add('show'); 
-            if (payout > bet) sfx.win();
-            else if (payout === 0) sfx.lose();
+            if (net > 0) sfx.win();
+            else if (net < 0) sfx.lose();
             
-            updateMyBalance(newBalance, payout > bet);
+            updateMyBalance(newBalance, net > 0);
 
             clearTimeout(soloResultTimeout);
             soloResultTimeout = setTimeout(() => {
@@ -1669,6 +1703,7 @@
     }
 
     function toggleD20Bet(btn) {
+        if (btn.disabled) return;
         btn.classList.toggle('has-bet');
         if(btn.classList.contains('has-bet')) {
             btn.style.borderColor = 'var(--ps-glow)';
@@ -1704,44 +1739,47 @@
       triggerBetAnim();
 
       const btn = document.getElementById('btn-d20'), icn = document.getElementById('d20-icon'), nd = document.getElementById('d20-num'), mb = document.getElementById('d20-msg');
+      const toggleBtns = document.querySelectorAll('.d20-toggle');
+      
       btn.disabled = true; 
+      betEl.disabled = true; 
+      toggleBtns.forEach(b => b.disabled = true); 
+      
       mb.style.display = 'none'; mb.classList.remove('show');
       
       icn.style.display = 'block'; 
       nd.style.display = 'none';
       icn.className = `fas fa-dice-d20 dice-icon anim-shake`;
       
-      let animCycle = setInterval(() => { sfx.tick(); }, 80);
+      window.d20AnimCycle = setInterval(() => { sfx.tick(); }, 80);
       
-      socket.once('d20Result', async (res) => {
+      const successHandler = async (res) => {
           mySoloRounds.d20++;
           
-          await delay(1000); 
-          clearInterval(animCycle);
+          await delay(600); 
+          clearInterval(window.d20AnimCycle);
           
           icn.style.display = 'none'; 
           nd.style.display = 'block'; 
           nd.innerText = res.roll;
           nd.style.color = res.payout > 0 ? "var(--success)" : "var(--danger)";
           
-          await delay(300);
           showEndBox(mb, res.bet, res.payout, res.resStr, res.newBalance);
-          logHistory('d20', formatTC(res.bet) + ' TC', res.resStr, res.payout > res.bet ? res.payout - res.bet : 0, res.payout === 0 ? res.bet : 0, true);
+          
+          let net = formatTC(res.payout - res.bet);
+          let wP = net > 0 ? net : 0;
+          let lB = net < 0 ? Math.abs(net) : 0;
+          logHistory('d20', formatTC(betAmt) + ' TC/ea', res.resStr, wP, lB, true);
           
           await delay(800); 
           icn.className = 'fas fa-dice-d20 dice-icon';
+          
           btn.disabled = false;
-      });
-      
-      socket.on('localGameError', (data) => { 
-          if(data.game==='d20') { 
-              clearInterval(animCycle);
-              icn.className = 'fas fa-dice-d20 dice-icon';
-              showLocalFlash('d20', data.msg, "error"); 
-              btn.disabled=false; 
-              socket.emit('requestBalanceRefresh');
-          } 
-      });
+          betEl.disabled = false;
+          toggleBtns.forEach(b => b.disabled = false);
+      };
+
+      socket.once('d20Result', successHandler);
       socket.emit('playSolo', { game: 'd20', bets: activeBets, bet: totalBetAmt });
     }
 
@@ -1778,20 +1816,14 @@
           cw.classList.remove('tossing');
           
           showEndBox(mb, res.bet, res.payout, res.resStr, res.newBalance);
-          logHistory('coinflip', choice.toUpperCase(), res.resStr, res.payout > res.bet ? res.payout - res.bet : 0, res.payout === 0 ? res.bet : 0, true);
+          
+          let net = formatTC(res.payout - res.bet);
+          logHistory('coinflip', choice.toUpperCase(), res.resStr, net > 0 ? net : 0, net < 0 ? Math.abs(net) : 0, true);
           
           await delay(800);
           document.getElementById('btn-heads').disabled = false; document.getElementById('btn-tails').disabled = false;
       });
 
-      socket.on('localGameError', (data) => { 
-          if(data.game==='coinflip') { 
-              cw.classList.remove('tossing');
-              showLocalFlash('coinflip', data.msg, "error"); 
-              document.getElementById('btn-heads').disabled = false; document.getElementById('btn-tails').disabled = false; 
-              socket.emit('requestBalanceRefresh');
-          } 
-      });
       socket.emit('playSolo', { game: 'coinflip', bet: bet, choice: choice });
     }
 
@@ -1818,15 +1850,6 @@
       document.getElementById('bj-p-hand').innerHTML = ''; document.getElementById('bj-d-hand').innerHTML = '';
       document.getElementById('bj-p-score').innerText = '0'; document.getElementById('bj-d-score').innerText = '0';
       
-      socket.on('localGameError', (data) => { 
-          if(data.game==='blackjack') { 
-              showLocalFlash('blackjack', data.msg, "error"); 
-              bjSt.active = false; 
-              document.getElementById('btn-bj-deal').disabled = false; 
-              document.getElementById('bj-start-controls').classList.remove('hidden'); 
-              socket.emit('requestBalanceRefresh');
-          } 
-      });
       socket.emit('playSolo', { game: 'blackjack', action: 'start', bet: bet });
     }
     
@@ -1874,7 +1897,8 @@
                 else { histStr = `PLAYER (${dS} TO ${pS})`; }
 
                 showEndBox(document.getElementById('bj-msg'), bjSt.bet, data.payout, histStr, data.newBalance);
-                logHistory('blackjack', formatTC(bjSt.bet) + ' TC', histStr, data.payout > bjSt.bet ? data.payout - bjSt.bet : 0, data.payout === 0 ? bjSt.bet : 0, true);
+                let net = formatTC(data.payout - bjSt.bet);
+                logHistory('blackjack', formatTC(bjSt.bet) + ' TC', histStr, net > 0 ? net : 0, net < 0 ? Math.abs(net) : 0, true);
                 
                 setTimeout(() => { 
                     document.getElementById('btn-bj-deal').disabled = false; 
@@ -1919,7 +1943,8 @@
             
             await delay(300); 
             showEndBox(document.getElementById('bj-msg'), bjSt.bet, data.payout, data.resStr, data.newBalance);
-            logHistory('blackjack', formatTC(bjSt.bet) + ' TC', data.resStr, data.payout > bjSt.bet ? data.payout - bjSt.bet : 0, data.payout === 0 ? bjSt.bet : 0, true);
+            let net2 = formatTC(data.payout - bjSt.bet);
+            logHistory('blackjack', formatTC(bjSt.bet) + ' TC', data.resStr, net2 > 0 ? net2 : 0, net2 < 0 ? Math.abs(net2) : 0, true);
             
             setTimeout(() => { document.getElementById('btn-bj-deal').disabled = false; }, 1500);
         }
@@ -2365,16 +2390,16 @@
 
       if(resStr === "") resStr = msg; 
 
-      let net = wonProfit - lostBet;
+      let net = formatTC(wonProfit - lostBet);
       let h = `<div class="res-title" style="color:white;">${msg}</div>`; 
 
       if (tba > 0) {
           if (net > 0) {
               box.className = "result-overlay-shared win";
-          } else if (net === 0) {
-              box.className = "result-overlay-shared push";
-          } else {
+          } else if (net < 0) {
               box.className = "result-overlay-shared lose";
+          } else {
+              box.className = "result-overlay-shared push";
           }
       } else {
           box.className = "result-overlay-shared push";
@@ -2386,9 +2411,9 @@
           if (t) t.innerHTML = msg; 
           if (tba > 0 && b) { 
             b.style.display = 'block'; 
-            if (net > 0) { b.innerHTML = `WON <span style="color:var(--success)">+${formatTC(net)} TC</span>`; b.style.color = "white"; } 
-            else if (net === 0) { b.innerHTML = `PUSH <span style="color:var(--text-muted)">RETURNED</span>`; b.style.color = "white"; } 
-            else { b.innerHTML = `LOST <span style="color:var(--danger)">-${formatTC(Math.abs(net))} TC</span>`; b.style.color = "white"; } 
+            if (net > 0) { b.innerHTML = `WON <span style="color:var(--success)">+${net} TC</span>`; b.style.color = "white"; } 
+            else if (net < 0) { b.innerHTML = `LOST <span style="color:var(--danger)">-${Math.abs(net)} TC</span>`; b.style.color = "white"; } 
+            else { b.innerHTML = `PUSH <span style="color:var(--text-muted)">RETURNED</span>`; b.style.color = "white"; } 
           } else if (b) {
               b.style.display = 'none'; 
           } 
@@ -2641,6 +2666,14 @@
             socket.emit('requestBalanceRefresh');
         } else { 
             respDiv.innerHTML = `<span style="color:var(--danger)">${res.msg}</span>`; 
+        }
+    });
+
+    socket.on('maintenanceToggle', (isMain) => {
+        if(isMain && myUsername !== 'admin') {
+            document.body.innerHTML = `<div style="height:100vh;width:100vw;display:flex;flex-direction:column;justify-content:center;align-items:center;background:#00050d;color:white;text-align:center;padding:20px;"><i class="fas fa-tools" style="font-size:5rem;color:var(--danger);margin-bottom:20px;animation:pulseRed 2s infinite;"></i><h1 style="font-weight:900;font-size:2.5rem;text-transform:uppercase;letter-spacing:2px;margin-bottom:10px;">System Maintenance</h1><p style="color:var(--text-muted);font-size:1.1rem;max-width:400px;line-height:1.5;">The casino vault is currently closed for upgrades and routine security checks. Please check our Discord for updates.</p></div>`;
+        } else if (!isMain && document.body.innerHTML.includes('System Maintenance')) {
+            location.reload();
         }
     });
 
