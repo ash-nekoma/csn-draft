@@ -32,18 +32,18 @@
 
         /* AUTHENTICATION */
         #auth-container { position: fixed; inset: 0; display: flex; justify-content: center; align-items: center; z-index: 999999; background: #00050d; }
-        .auth-box { width: 380px; background: var(--glass-bg); padding: 2.5rem; border-radius: 16px; border: 1px solid var(--glass-border); text-align: center; box-shadow: 0 15px 50px rgba(0,0,0,0.8); backdrop-filter: blur(20px);}
+        .auth-box { width: 380px; background: var(--glass-bg); padding: 2.5rem; border-radius: 16px; border: 1px solid var(--glass-border); text-align: center; box-shadow: 0 15px 50px rgba(0,0,0,0.8); position: relative; z-index: 10; backdrop-filter: blur(20px);}
         .auth-title { font-size: 1.8rem; font-weight: 900; color: white; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 2px;}
-        .auth-sub { color: var(--danger); font-weight: 800; font-size: 0.9rem; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 25px; }
+        .auth-sub { color: var(--danger); font-weight: 800; font-size: 0.85rem; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 25px; }
         
         .input-group { margin-bottom: 15px; text-align: left; width: 100%; }
         .input-group label { display: block; color: var(--text-muted); font-size: 0.75rem; font-weight: 800; margin-bottom: 6px; text-transform: uppercase; }
-        .input-control { width: 100%; padding: 10px 12px; background: rgba(0,0,0,0.5); border: 1px solid var(--glass-border); color: white; border-radius: 6px; font-size: 0.95rem; font-weight: 600; transition: 0.2s; }
+        .input-control { width: 100%; padding: 12px 15px; background: rgba(0,0,0,0.5); border: 1px solid var(--glass-border); color: white; border-radius: 8px; font-size: 0.95rem; font-weight: 600; transition: 0.2s; pointer-events: auto; }
         .input-control:focus { border-color: var(--ps-glow); background: rgba(0,0,0,0.7); box-shadow: 0 0 15px rgba(0,162,255,0.2); }
         
         select.input-control, .filter-bar select { appearance: none; background-image: url('data:image/svg+xml;utf8,<svg fill="white" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>'); background-repeat: no-repeat; background-position: right 10px center; padding-right: 35px !important; cursor: pointer; }
 
-        .btn-primary { background: rgba(0, 162, 255, 0.15); color: var(--ps-glow); border: 1px solid var(--ps-glow); padding: 12px; width: 100%; border-radius: 6px; font-size: 0.95rem; font-weight: 900; cursor: pointer; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 1px; }
+        .btn-primary { background: rgba(0, 162, 255, 0.15); color: var(--ps-glow); border: 1px solid var(--ps-glow); padding: 14px; width: 100%; border-radius: 8px; font-size: 0.95rem; font-weight: 900; cursor: pointer; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 1px; pointer-events: auto; }
         .btn-primary:hover { background: var(--ps-glow); color: black; transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0, 162, 255, 0.4); }
         .auth-msg { font-size: 0.85rem; font-weight: 800; min-height: 20px; margin-bottom: 15px; text-align: center; color: var(--danger); }
 
@@ -71,38 +71,39 @@
         .topbar { padding: 15px 30px; border-bottom: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); flex-shrink: 0;}
         .topbar h1 { font-weight: 900; font-size: 1.4rem; text-transform: uppercase; letter-spacing: 1px; margin: 0; }
         
-        .sys-health { display: flex; gap: 15px; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); align-items: center;}
-        .health-item { display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); }
-        .health-val { color: var(--ps-glow); font-weight: 900; }
-        .ghost-tag { color: var(--ps-light-blue); display: flex; align-items: center; gap: 8px; border: 1px solid var(--ps-light-blue); padding: 4px 10px; border-radius: 6px; background: rgba(0, 112, 204, 0.1); text-shadow: 0 0 5px rgba(0, 112, 204, 0.5);}
+        .sys-health { display: flex; gap: 15px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); align-items: center;}
+        .health-item { display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.05); padding: 6px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); }
+        .health-val { color: var(--ps-glow); font-weight: 900; font-size: 0.85rem;}
+        .ghost-tag { color: var(--ps-light-blue); display: flex; align-items: center; gap: 8px; border: 1px solid var(--ps-light-blue); padding: 6px 12px; border-radius: 6px; background: rgba(0, 112, 204, 0.1); text-shadow: 0 0 5px rgba(0, 112, 204, 0.5);}
 
         .content-area { padding: 25px 30px; flex: 1; width: 100%; display: flex; flex-direction: column; overflow: hidden; position: relative;}
         .tab-view { flex: 1; display: flex; flex-direction: row; overflow: hidden; gap: 20px;}
 
-        /* REAL BENTO DASHBOARD */
+        /* TRUE BENTO DASHBOARD */
         .bento-container { flex: 3; display: flex; flex-direction: column; overflow-y: auto; padding: 5px; }
         .bento-grid { 
             display: grid; 
             grid-template-columns: repeat(4, 1fr); 
-            grid-auto-rows: 140px;
-            gap: 15px; 
+            grid-auto-rows: 150px;
+            grid-auto-flow: dense;
+            gap: 20px; 
             width: 100%; 
         }
         
-        .bento-item { background: rgba(0, 15, 35, 0.6); border: 1px solid var(--glass-border); border-radius: 12px; display: flex; flex-direction: column; justify-content: center; padding: 20px 25px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); backdrop-filter: blur(5px); transition: all 0.2s ease; cursor: pointer; overflow: hidden; position: relative;}
+        .bento-item { background: rgba(0, 15, 35, 0.6); border: 1px solid var(--glass-border); border-radius: 12px; display: flex; flex-direction: column; justify-content: center; padding: 25px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); backdrop-filter: blur(5px); transition: all 0.2s ease; cursor: pointer; position: relative;}
         .bento-item:hover { border-color: var(--ps-glow); box-shadow: inset 0 0 20px rgba(0,162,255,0.15), 0 8px 20px rgba(0,0,0,0.8); transform: translateY(-2px); }
         
         .bento-span-2x2 { grid-column: span 2; grid-row: span 2; }
         .bento-span-2x1 { grid-column: span 2; grid-row: span 1; }
         .bento-span-1x1 { grid-column: span 1; grid-row: span 1; }
 
-        .bento-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-        .bento-icon { font-size: 1.5rem; color: var(--text-muted); }
+        .bento-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+        .bento-icon { font-size: 1.6rem; color: var(--text-muted); }
         .bento-title { color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; font-weight: 800; letter-spacing: 1px;}
         .bento-value { font-size: 2.2rem; font-weight: 900; color: white; line-height: 1; }
         
         .bento-span-2x2 .bento-icon { font-size: 2.5rem; margin-bottom: 15px;}
-        .bento-span-2x2 .bento-title { font-size: 1.1rem; margin-bottom: 10px;}
+        .bento-span-2x2 .bento-title { font-size: 1.1rem; margin-bottom: 15px;}
         .bento-span-2x2 .bento-value { font-size: 3.5rem; }
 
         .glow-neon { text-shadow: 0 0 15px var(--ps-glow); color: var(--ps-glow); }
@@ -111,10 +112,10 @@
 
         /* LIVE PULSE SIDEBAR */
         .live-pulse-panel { flex: 1; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 12px; display: flex; flex-direction: column; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); min-width: 280px; max-width: 320px;}
-        .pulse-header { font-weight: 900; font-size: 1rem; text-transform: uppercase; color: white; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px; }
-        .pulse-dot { width: 8px; height: 8px; background: var(--success); border-radius: 50%; animation: pulseRed 1.5s infinite; }
+        .pulse-header { font-weight: 900; font-size: 1rem; text-transform: uppercase; color: white; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--glass-border); padding-bottom: 15px; }
+        .pulse-dot { width: 10px; height: 10px; background: var(--success); border-radius: 50%; animation: pulseRed 1.5s infinite; }
         .pulse-feed { display: flex; flex-direction: column; gap: 8px; overflow-y: auto; flex: 1; padding-right: 5px; }
-        .pulse-item { background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; border-left: 3px solid transparent; animation: slideInPulse 0.3s ease-out; }
+        .pulse-item { background: rgba(255,255,255,0.05); padding: 10px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; border-left: 3px solid transparent; animation: slideInPulse 0.3s ease-out; }
         .pulse-item.info { border-left-color: var(--ps-glow); }
         .pulse-item.success { border-left-color: var(--success); }
         .pulse-item.alert { border-left-color: var(--danger); }
@@ -123,20 +124,22 @@
 
         /* DATA TABLES & PANELS */
         .panel { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; flex: 1; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 100%;}
-        .panel-header { padding: 15px 20px; border-bottom: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.5); flex-shrink: 0;}
+        .panel-header { padding: 18px 25px; border-bottom: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.5); flex-shrink: 0;}
         .panel-header h3 { font-weight: 900; font-size: 1.1rem; text-transform: uppercase; margin: 0; letter-spacing: 1px; display: flex; align-items: center; gap: 8px;}
         
         .table-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
         table { width: 100%; border-collapse: collapse; text-align: left; }
-        th, td { padding: 10px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        th, td { padding: 12px 25px; border-bottom: 1px solid rgba(255,255,255,0.05); }
         thead { background: #000a1f; position: sticky; top: 0; z-index: 10; }
-        thead th { color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; border-bottom: 1px solid var(--glass-border); padding: 12px 20px;}
+        thead th { color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; border-bottom: 1px solid var(--glass-border); padding: 15px 25px;}
         td { font-weight: 600; font-size: 0.95rem; color: white; white-space: nowrap;}
 
-        .pagination { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; border-top: 1px solid var(--glass-border); background: rgba(0,0,0,0.5); flex-shrink: 0; }
-        .pagination button { background: rgba(255,255,255,0.1); border: none; color: white; padding: 6px 12px; border-radius: 6px; font-weight:800; font-size: 0.85rem; cursor: pointer; text-transform: uppercase; transition: 0.2s;}
+        .pagination { display: flex; justify-content: space-between; align-items: center; padding: 15px 25px; border-top: 1px solid var(--glass-border); background: rgba(0,0,0,0.5); flex-shrink: 0; }
+        .pagination button { background: rgba(255,255,255,0.1); border: none; color: white; padding: 8px 15px; border-radius: 6px; font-weight:800; font-size: 0.85rem; cursor: pointer; text-transform: uppercase; transition: 0.2s;}
         .pagination button:hover:not(:disabled) { background: var(--ps-glow); color: black; }
         .pagination button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .center-col { text-align: center; justify-content: center; }
 
         /* MINIMAL STATUS DOTS */
         .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; border: 1px solid rgba(255,255,255,0.2); flex-shrink: 0;}
@@ -149,7 +152,7 @@
         .badge.approved, .badge.active { background: rgba(0, 230, 118, 0.15); color: var(--success); border: 1px solid rgba(0, 230, 118, 0.3); }
         .badge.rejected, .badge.banned { background: rgba(255, 51, 102, 0.15); color: var(--danger); border: 1px solid rgba(255, 51, 102, 0.3); }
 
-        .btn-sm { padding: 6px 10px; border: none; border-radius: 6px; font-weight: 800; font-size: 0.75rem; cursor: pointer; text-transform: uppercase; color: white; letter-spacing: 1px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: 0.2s;}
+        .btn-sm { padding: 8px 12px; border: none; border-radius: 6px; font-weight: 800; font-size: 0.75rem; cursor: pointer; text-transform: uppercase; color: white; letter-spacing: 1px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s;}
         .btn-edit { background: rgba(0, 162, 255, 0.15); color: var(--ps-glow); border: 1px solid rgba(0, 162, 255, 0.3); } .btn-edit:hover { background: var(--ps-glow); color: black; }
         .btn-approve { background: rgba(0, 230, 118, 0.15); color: var(--success); border: 1px solid rgba(0, 230, 118, 0.3); } .btn-approve:hover { background: var(--success); color: black; }
         .btn-reject { background: rgba(255, 51, 102, 0.15); color: var(--danger); border: 1px solid rgba(255, 51, 102, 0.3); } .btn-reject:hover { background: var(--danger); color: white; }
@@ -161,35 +164,35 @@
         .clickable-row:hover { background-color: rgba(255, 255, 255, 0.05); border-left: 3px solid var(--ps-glow); }
 
         /* CENTER POPOVER MODALS */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 100000; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(8px); }
-        .modal-content { background: var(--glass-bg); width: 450px; padding: 25px 30px; border-radius: 12px; border: 1px solid var(--glass-border); position: relative; box-shadow: 0 25px 80px rgba(0,0,0,0.9); pointer-events: auto; display: flex; flex-direction: column;}
-        .modal-content.wide { width: 650px; max-width: 95vw; max-height: 85vh;}
-        .modal-close { position: absolute; top: 15px; right: 20px; font-size: 1.5rem; color: var(--text-muted); cursor: pointer; background: none; border: none; transition: 0.2s; outline: none; z-index: 10;}
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 100000; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(8px); pointer-events: auto;}
+        .modal-content { background: var(--glass-bg); width: 420px; padding: 30px; border-radius: 12px; border: 1px solid var(--glass-border); position: relative; box-shadow: 0 25px 80px rgba(0,0,0,0.9); display: flex; flex-direction: column;}
+        .modal-content.wide { width: 700px; max-width: 95vw; max-height: 85vh;}
+        .modal-close { position: absolute; top: 20px; right: 20px; font-size: 1.5rem; color: var(--text-muted); cursor: pointer; background: none; border: none; transition: 0.2s; outline: none; z-index: 10;}
         .modal-close:hover { color: var(--danger); transform: scale(1.1); }
-        .modal-title { font-size: 1.3rem; font-weight: 900; text-transform: uppercase; margin-bottom: 15px; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px; text-align: left; flex-shrink:0; display: flex; align-items: center; gap: 10px;}
+        .modal-title { font-size: 1.4rem; font-weight: 900; text-transform: uppercase; margin-bottom: 20px; border-bottom: 1px solid var(--glass-border); padding-bottom: 15px; text-align: left; flex-shrink:0; display: flex; align-items: center; gap: 12px;}
 
-        .filter-bar { display: flex; gap: 10px; background: rgba(0,0,0,0.4); padding: 10px 20px; border-bottom: 1px solid var(--glass-border); align-items: center; flex-shrink: 0;}
-        .filter-bar input, .filter-bar select { padding: 8px 12px; background: rgba(0,0,0,0.6); border: 1px solid var(--glass-border); color: white; border-radius: 6px; font-size: 0.85rem; font-weight: 600; outline: none; }
+        .filter-bar { display: flex; gap: 15px; background: rgba(0,0,0,0.4); padding: 15px 25px; border-bottom: 1px solid var(--glass-border); align-items: center; flex-shrink: 0;}
+        .filter-bar input, .filter-bar select { padding: 10px 15px; background: rgba(0,0,0,0.6); border: 1px solid var(--glass-border); color: white; border-radius: 6px; font-size: 0.85rem; font-weight: 600; outline: none; }
         
         .confirm-btn-container { display: flex; gap: 15px; margin-top: 20px; }
         .confirm-btn-container button { flex: 1; padding: 12px; font-size: 0.95rem; }
         .modal-error-text { color: var(--danger); font-size: 0.85rem; font-weight: bold; text-align: center; margin-bottom: 10px; min-height: 16px; }
 
         #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999999; display: flex; flex-direction: column; gap: 10px; pointer-events: none;}
-        .toast { background: rgba(0,0,0,0.9); border-left: 4px solid var(--ps-glow); color: white; padding: 12px 20px; border-radius: 6px; font-weight: 800; text-transform: uppercase; font-size: 0.85rem; box-shadow: 0 10px 30px rgba(0,0,0,0.5); animation: toastIn 0.3s forwards, toastOut 0.3s forwards 3s; pointer-events: auto;}
+        .toast { background: rgba(0,0,0,0.9); border-left: 4px solid var(--ps-glow); color: white; padding: 15px 25px; border-radius: 8px; font-weight: 800; text-transform: uppercase; font-size: 0.85rem; box-shadow: 0 10px 30px rgba(0,0,0,0.5); animation: toastIn 0.3s forwards, toastOut 0.3s forwards 3s; pointer-events: auto;}
         .toast.success { border-left-color: var(--success); color: var(--success); }
         .toast.error { border-left-color: var(--danger); color: var(--danger); }
         @keyframes toastIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes toastOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
 
-        /* PLAYER DETAIL MODAL SPECIFICS */
-        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;}
-        .info-box { background: rgba(0,0,0,0.4); padding: 12px 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); }
-        .info-label { font-size: 0.7rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;}
-        .info-val { font-size: 1.1rem; font-weight: 900; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
-        
-        .smurf-icon { color: var(--danger); margin-left: 8px; cursor: pointer; font-size: 1rem; animation: pulseRed 2s infinite; position: relative; display: inline-flex;}
+        .smurf-icon { color: var(--danger); margin-left: 10px; font-size: 1rem; animation: pulseRed 2s infinite; }
         @keyframes pulseRed { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+
+        /* MODAL INFO GRIDS */
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;}
+        .info-box { background: rgba(0,0,0,0.4); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); }
+        .info-label { font-size: 0.75rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px;}
+        .info-val { font-size: 1.2rem; font-weight: 900; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
     </style>
 </head>
 <body>
@@ -319,8 +322,8 @@
                 <div id="view-users" class="tab-view hidden" style="flex-direction: column;">
                     <div class="panel">
                         <div class="panel-header">
-                            <h3><i class="fas fa-users" style="margin-right:8px; color:var(--ps-glow)"></i> Player Database</h3>
-                            <button class="btn-sm" style="background: rgba(255,180,0,0.15); color: var(--credits); border: 1px solid rgba(255,180,0,0.3); padding: 8px 15px;" onclick="openModal('direct-gift-modal')">
+                            <h3><i class="fas fa-users" style="margin-right:10px; color:var(--ps-glow)"></i> Player Database</h3>
+                            <button class="btn-sm" style="background: rgba(255,180,0,0.15); color: var(--credits); border: 1px solid rgba(255,180,0,0.3); padding: 10px 18px;" onclick="openModal('direct-gift-modal')">
                                 <i class="fas fa-gift"></i> Mass / Direct Gift
                             </button>
                         </div>
@@ -347,9 +350,8 @@
                             <table>
                                 <thead>
                                     <tr>
-                                        <th style="width: 30px;"></th>
-                                        <th>USERNAME</th>
-                                        <th>CREDITS (TC)</th>
+                                        <th>USER & STATUS</th>
+                                        <th>TOTAL ASSETS (TC + P)</th>
                                         <th>ROLE</th>
                                     </tr>
                                 </thead>
@@ -401,8 +403,8 @@
                 <div id="view-promos" class="tab-view hidden" style="flex-direction: column;">
                     <div class="panel">
                         <div class="panel-header">
-                            <h3><i class="fas fa-gift" style="margin-right:8px; color:var(--playable)"></i> Active Gift Codes</h3>
-                            <button class="btn-sm btn-approve" onclick="openModal('create-promo-modal')" style="padding: 8px 15px; font-size: 0.85rem;"><i class="fas fa-plus"></i> Generate Codes</button>
+                            <h3><i class="fas fa-gift" style="margin-right:10px; color:var(--playable)"></i> Active Gift Codes</h3>
+                            <button class="btn-sm btn-approve" onclick="openModal('create-promo-modal')" style="padding: 10px 18px;"><i class="fas fa-plus"></i> Generate Codes</button>
                         </div>
                         <div class="filter-bar">
                             <i class="fas fa-search" style="color:var(--text-muted)"></i>
@@ -436,7 +438,7 @@
                                 <div class="stat-icon" style="color: var(--ps-glow);"><i class="fas fa-bullhorn"></i></div>
                                 <div class="stat-info">
                                     <h3>Communication</h3>
-                                    <div class="value" style="font-size: 1.4rem;">Send Broadcast</div>
+                                    <div class="value" style="font-size: 1.6rem;">Send Broadcast</div>
                                 </div>
                             </div>
                             
@@ -444,7 +446,7 @@
                                 <div class="stat-icon" style="color: var(--danger);" id="maintenance-icon"><i class="fas fa-power-off"></i></div>
                                 <div class="stat-info">
                                     <h3 style="color: var(--danger);">Deep Killswitch</h3>
-                                    <div class="value" style="font-size: 1.4rem; color: var(--danger);" id="maintenance-text">Maintenance: OFF</div>
+                                    <div class="value" style="font-size: 1.6rem; color: var(--danger);" id="maintenance-text">Maintenance: OFF</div>
                                 </div>
                             </div>
 
@@ -477,12 +479,12 @@
     </div>
 
     <div id="player-detail-modal" class="modal-overlay hidden" onclick="if(event.target===this) closeModal('player-detail-modal')">
-        <div class="modal-content" style="width: 450px;">
+        <div class="modal-content" style="width: 420px;">
             <button class="modal-close" onclick="closeModal('player-detail-modal')"><i class="fas fa-times"></i></button>
             
-            <div class="modal-title" id="pd-title-container">
-                <div id="pd-status-dot" class="status-dot"></div>
-                <span id="pd-username">Username</span>
+            <div class="modal-title" style="justify-content: flex-start; gap: 12px; font-size: 1.6rem;">
+                <div id="pd-status-dot" class="status-dot" style="width:14px;height:14px; margin:0;"></div>
+                <span id="pd-username">User</span>
             </div>
             
             <div class="info-grid">
@@ -494,28 +496,31 @@
                     <div class="info-label">Role</div>
                     <div class="info-val" id="pd-role">-</div>
                 </div>
-                <div class="info-box">
-                    <div class="info-label">Main TC</div>
-                    <div class="info-val" id="pd-main-tc" style="color:var(--credits);">-</div>
+            </div>
+
+            <div class="info-box" style="background: rgba(0,0,0,0.5); margin-bottom: 20px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                    <span class="info-label" style="margin:0;">MAIN TC</span>
+                    <span id="pd-main-tc" style="color:var(--credits); font-weight:900; font-size:1.3rem;"></span>
                 </div>
-                <div class="info-box">
-                    <div class="info-label">Playable P</div>
-                    <div class="info-val" id="pd-play-tc" style="color:var(--playable);">-</div>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span class="info-label" style="margin:0;">PLAYABLE P</span>
+                    <span id="pd-play-tc" style="color:var(--playable); font-weight:900; font-size:1.1rem;"></span>
                 </div>
             </div>
             
             <div class="info-box" style="margin-bottom: 25px; display:flex; justify-content:space-between; align-items:center;">
                 <div style="flex:1;">
                     <div class="info-label">IP Address / Network</div>
-                    <div class="info-val" id="pd-ip" style="font-family:monospace; font-size:1rem; display:flex; align-items:center;">-</div>
+                    <div id="pd-ip" style="font-family:monospace; font-size:1rem; font-weight:900; display:flex; align-items:center;">-</div>
                 </div>
-                <button class="btn-sm" style="background:rgba(255,255,255,0.1); padding:8px 12px; font-size:0.8rem;" onclick="copyPDIP()"><i class="fas fa-copy"></i> Copy</button>
+                <button class="btn-sm" style="background:rgba(255,255,255,0.1); padding:10px; font-size:0.9rem;" onclick="copyPDIP()"><i class="fas fa-copy"></i></button>
             </div>
             
             <div style="display:flex; flex-direction:column; gap:12px;">
-                <button class="btn-primary" style="background:rgba(0,162,255,0.1); color:var(--ps-glow); border-color:var(--ps-glow); padding:10px;" onclick="openEditUserFromPD()"><i class="fas fa-pen"></i> Adjust Balances & Role</button>
-                <button class="btn-primary" style="background:rgba(255,255,255,0.1); color:white; border-color:var(--text-muted); padding:10px;" onclick="viewPlayerLogsFromPD()"><i class="fas fa-list"></i> View Activity Logs</button>
-                <button class="btn-primary" id="pd-ban-btn" style="background:rgba(255,51,102,0.1); color:var(--danger); border-color:var(--danger); padding:10px;" onclick="toggleBanFromPD()"><i class="fas fa-ban"></i> Ban Player</button>
+                <button class="btn-primary" style="background:rgba(0,162,255,0.1); color:var(--ps-glow); border-color:var(--ps-glow); padding:12px;" onclick="openEditUserFromPD()"><i class="fas fa-pen"></i> Adjust Balances</button>
+                <button class="btn-primary" style="background:rgba(255,255,255,0.1); color:white; border-color:var(--text-muted); padding:12px;" onclick="viewPlayerLogsFromPD()"><i class="fas fa-list"></i> View Activity Logs</button>
+                <button class="btn-primary" id="pd-ban-btn" style="background:rgba(255,51,102,0.1); color:var(--danger); border-color:var(--danger); padding:12px;" onclick="toggleBanFromPD()"><i class="fas fa-ban"></i> Ban Player</button>
             </div>
         </div>
     </div>
@@ -525,7 +530,7 @@
             <button class="modal-close" onclick="closeModal('stat-log-modal')"><i class="fas fa-times"></i></button>
             <h3 class="modal-title" id="stat-log-title" style="justify-content:center;">LOGS</h3>
             
-            <div id="stat-log-breakdown" style="display:none; flex-direction:column; gap:10px; font-size:0.95rem; font-weight:800; background:rgba(0,0,0,0.4); padding:15px; border-radius:8px; border:1px solid var(--glass-border); margin-bottom:15px;"></div>
+            <div id="stat-log-breakdown" style="display:none; flex-direction:column; gap:10px; font-size:1rem; font-weight:800; background:rgba(0,0,0,0.5); padding:20px; border-radius:8px; border:1px solid var(--glass-border); margin-bottom:15px;"></div>
             
             <div class="table-wrapper" style="max-height: 400px;" id="stat-log-table-container">
                 <table>
@@ -542,7 +547,7 @@
             <button class="modal-close" onclick="closeModal('player-logs-modal')"><i class="fas fa-times"></i></button>
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom: 1px solid var(--glass-border); padding-bottom:10px;">
                 <h3 class="modal-title" id="pl-title" style="border:none; margin:0; padding:0;">PLAYER LOGS</h3>
-                <button class="btn-sm btn-reject" onclick="clearPlayerLogs()" style="padding: 8px 15px;"><i class="fas fa-trash"></i> Erase Logs</button>
+                <button class="btn-sm btn-reject" onclick="clearPlayerLogs()" style="padding: 10px 18px;"><i class="fas fa-trash"></i> Erase Logs</button>
             </div>
             <div class="table-wrapper" style="max-height: 400px;">
                 <table>
@@ -557,32 +562,32 @@
     </div>
 
     <div id="inspector-modal" class="modal-overlay hidden" onclick="if(event.target===this) closeModal('inspector-modal')">
-        <div class="modal-content" style="border-top: 4px solid var(--ps-glow);">
+        <div class="modal-content" style="width: 420px; border-top: 4px solid var(--ps-glow);">
             <button class="modal-close" onclick="closeModal('inspector-modal')"><i class="fas fa-times"></i></button>
-            <h3 class="modal-title" style="border: none; margin-bottom: 5px;">INSPECT REQUEST</h3>
+            <h3 class="modal-title" style="border: none; margin-bottom: 10px; justify-content:center;">INSPECT REQUEST</h3>
             
-            <div style="background: rgba(0,0,0,0.5); padding: 15px; border-radius: 8px; border: 1px solid var(--glass-border); margin-bottom: 15px;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                    <span style="color: var(--text-muted); font-weight: 800;">TYPE:</span>
+            <div style="background: rgba(0,0,0,0.5); padding: 20px; border-radius: 8px; border: 1px solid var(--glass-border); margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 12px; align-items:center;">
+                    <span style="color: var(--text-muted); font-weight: 800; font-size:0.8rem;">TYPE</span>
                     <span id="inspector-type" style="font-weight: 900; color: white;">DEPOSIT</span>
                 </div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                    <span style="color: var(--text-muted); font-weight: 800;">USER:</span>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 12px; align-items:center;">
+                    <span style="color: var(--text-muted); font-weight: 800; font-size:0.8rem;">USER</span>
                     <span id="inspector-user" style="font-weight: 900; color: white;"></span>
                 </div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                    <span style="color: var(--text-muted); font-weight: 800;">AMOUNT:</span>
-                    <span id="inspector-amt" style="font-weight: 900; color: var(--credits); font-size: 1.1rem;">0 TC</span>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 15px; align-items:center;">
+                    <span style="color: var(--text-muted); font-weight: 800; font-size:0.8rem;">AMOUNT</span>
+                    <span id="inspector-amt" style="font-weight: 900; color: var(--credits); font-size: 1.3rem;">0 TC</span>
                 </div>
-                <div style="display: flex; flex-direction: column; margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(255,255,255,0.2);">
-                    <span style="color: var(--text-muted); font-weight: 800; margin-bottom: 10px;">PLAYER DETAILS:</span>
+                <div style="display: flex; flex-direction: column; margin-top: 20px; padding-top: 15px; border-top: 1px dashed rgba(255,255,255,0.2);">
+                    <span style="color: var(--text-muted); font-weight: 800; margin-bottom: 15px; font-size:0.8rem;">PLAYER DETAILS</span>
                     <div id="inspector-proof-container"></div>
                 </div>
             </div>
 
             <div class="confirm-btn-container" id="inspector-action-container">
-                <button class="btn-primary" style="background: rgba(255, 51, 102, 0.15); color: var(--danger); border-color: var(--danger); padding:10px;" id="btn-reject-tx">REJECT</button>
-                <button class="btn-primary" style="background: rgba(0, 230, 118, 0.15); color: var(--success); border-color: var(--success); padding:10px;" id="btn-approve-tx">APPROVE</button>
+                <button class="btn-primary" style="background: rgba(255, 51, 102, 0.15); color: var(--danger); border-color: var(--danger); padding:12px;" id="btn-reject-tx">REJECT</button>
+                <button class="btn-primary" style="background: rgba(0, 230, 118, 0.15); color: var(--success); border-color: var(--success); padding:12px;" id="btn-approve-tx">APPROVE</button>
             </div>
         </div>
     </div>
@@ -590,7 +595,7 @@
     <div id="edit-user-modal" class="modal-overlay hidden" onclick="if(event.target===this) closeModal('edit-user-modal')">
         <div class="modal-content">
             <button class="modal-close" onclick="closeModal('edit-user-modal')"><i class="fas fa-times"></i></button>
-            <h3 class="modal-title">Edit Balances</h3>
+            <h3 class="modal-title" style="justify-content:center;">Edit Balances</h3>
             <div id="edit-user-err" class="modal-error-text"></div>
             <input type="hidden" id="edit-u-id">
             
@@ -606,7 +611,7 @@
                 <label>Playable Bonus P</label>
                 <input type="number" id="edit-u-playable" class="input-control" step="0.1">
             </div>
-            <div class="input-group" style="margin-bottom: 20px;">
+            <div class="input-group" style="margin-bottom: 25px;">
                 <label>Account Role</label>
                 <select id="edit-u-role" class="input-control">
                     <option value="Player">Player</option>
@@ -619,11 +624,11 @@
 
     <div id="snt-confirm-modal" class="modal-overlay hidden" onclick="if(event.target===this) closeConfirmModal()">
         <div class="modal-content" style="width: 350px; text-align: center;">
-            <h3 class="modal-title" id="confirm-title" style="color: var(--danger); font-size: 1.2rem; border:none; padding:0; margin-bottom:5px; justify-content:center;">WARNING</h3>
-            <p id="confirm-msg" style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 20px;">Are you sure?</p>
+            <h3 class="modal-title" id="confirm-title" style="color: var(--danger); font-size: 1.3rem; border:none; padding:0; margin-bottom:10px; justify-content:center;">WARNING</h3>
+            <p id="confirm-msg" style="font-size: 1rem; color: white; margin-bottom: 25px;">Are you sure?</p>
             <div class="confirm-btn-container" style="margin-top:0;">
-                <button class="btn-primary" style="background: transparent; color: white; border-color: var(--text-muted); padding:10px;" onclick="closeConfirmModal()">CANCEL</button>
-                <button class="btn-primary" id="confirm-action-btn" style="background: var(--danger); border-color: var(--danger); color: white; padding:10px;">PROCEED</button>
+                <button class="btn-primary" style="background: transparent; color: white; border-color: var(--text-muted); padding:12px;" onclick="closeConfirmModal()">CANCEL</button>
+                <button class="btn-primary" id="confirm-action-btn" style="background: var(--danger); border-color: var(--danger); color: white; padding:12px;">PROCEED</button>
             </div>
         </div>
     </div>
@@ -631,8 +636,8 @@
     <div id="global-update-modal" class="modal-overlay hidden" onclick="if(event.target===this) closeModal('global-update-modal')">
         <div class="modal-content">
             <button class="modal-close" onclick="closeModal('global-update-modal')"><i class="fas fa-times"></i></button>
-            <h3 class="modal-title">Global Broadcast</h3>
-            <div class="input-group" style="margin-bottom: 20px;">
+            <h3 class="modal-title" style="justify-content:center;">Global Broadcast</h3>
+            <div class="input-group" style="margin-bottom: 25px;">
                 <label>Message (Notifies all online players)</label>
                 <input type="text" id="tool-msg" class="input-control" placeholder="Maintenance in 5 minutes...">
             </div>
@@ -643,7 +648,7 @@
     <div id="direct-gift-modal" class="modal-overlay hidden" onclick="if(event.target===this) closeModal('direct-gift-modal')">
         <div class="modal-content">
             <button class="modal-close" onclick="closeModal('direct-gift-modal')"><i class="fas fa-times"></i></button>
-            <h3 class="modal-title" style="color:var(--credits)"><i class="fas fa-gift"></i> Direct Gift</h3>
+            <h3 class="modal-title" style="color:var(--credits); justify-content:center;"><i class="fas fa-gift"></i> Direct Gift</h3>
             <div class="input-group">
                 <label>Target Group</label>
                 <select id="tool-target-type" class="input-control" onchange="toggleGiftTarget()">
@@ -663,7 +668,7 @@
                 <label>Amount</label>
                 <input type="number" id="tool-amt" class="input-control" placeholder="1000" min="1" max="500000">
             </div>
-            <div class="input-group" style="margin-bottom: 20px;">
+            <div class="input-group" style="margin-bottom: 25px;">
                 <label>Credit Type</label>
                 <select id="tool-credit-type" class="input-control">
                     <option value="playable">Playable Bonus (P)</option>
@@ -677,7 +682,7 @@
     <div id="create-promo-modal" class="modal-overlay hidden" onclick="if(event.target===this) closeModal('create-promo-modal')">
         <div class="modal-content">
             <button class="modal-close" onclick="closeModal('create-promo-modal')"><i class="fas fa-times"></i></button>
-            <h3 class="modal-title">Generate Codes</h3>
+            <h3 class="modal-title" style="justify-content:center;">Generate Codes</h3>
             <div id="promo-err" class="modal-error-text"></div>
             <div class="input-group">
                 <label>Value Per Code</label>
@@ -687,7 +692,7 @@
                 <label>Quantity to Generate</label>
                 <input type="number" id="promo-count" class="input-control" placeholder="e.g. 10">
             </div>
-            <div class="input-group" style="margin-bottom: 20px;">
+            <div class="input-group" style="margin-bottom: 25px;">
                 <label>Credit Type</label>
                 <select id="promo-type" class="input-control">
                     <option value="playable">Playable Bonus</option>
@@ -703,7 +708,7 @@
             <button class="modal-close" onclick="closeModal('view-batch-modal')"><i class="fas fa-times"></i></button>
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom: 1px solid var(--glass-border); padding-bottom:10px;">
                 <h3 class="modal-title" id="vb-title" style="border:none; margin:0; padding:0;">BATCH DETAILS</h3>
-                <button class="btn-sm btn-edit" onclick="copyAllCodes()" style="padding: 8px 15px;"><i class="fas fa-copy"></i> Copy All Codes</button>
+                <button class="btn-sm btn-edit" onclick="copyAllCodes()" style="padding: 10px 18px;"><i class="fas fa-copy"></i> Copy All Codes</button>
             </div>
             <div class="table-wrapper" style="max-height: 400px;">
                 <table>
@@ -723,6 +728,7 @@
 
     <script>
         const socket = io();
+        
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         let lastPendingCount = 0;
 
@@ -746,7 +752,7 @@
             setTimeout(() => { if(t.parentElement) t.remove(); }, 3500);
         }
 
-        // Custom Formatter: Removes .0
+        // Decimal formatting: removes .0
         const formatNum = (amount) => { 
             let num = Math.round((amount || 0) * 10) / 10; 
             return num % 1 === 0 ? num.toLocaleString('en-US') : num.toLocaleString('en-US', {minimumFractionDigits: 1, maximumFractionDigits: 1}); 
@@ -780,7 +786,6 @@
         let activePlayerLogs = []; let pgPL = 1;
         let activeBatchCodes = []; let pgVB = 1;
         
-        // Stat Modals
         let statData = []; let pgStat = 1; let currentStatType = '';
         
         let currentLogUsername = '';
@@ -847,6 +852,35 @@
 
             const titles = { 'dashboard': 'Dashboard Overview', 'users': 'Player Database', 'cashier': 'Economy & Cashier', 'promos': 'Promos & Rewards', 'tools': 'System Tools', 'audit': 'Security Audit' };
             document.getElementById('page-title').innerText = titles[tabId];
+        }
+
+        function openModal(id) { 
+            document.querySelectorAll('.modal-error-text').forEach(el => el.innerText = '');
+            document.getElementById(id).classList.remove('hidden'); 
+        }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        let confirmActionCallback = null;
+        function showSNTConfirm(title, message, callback) {
+            document.getElementById('confirm-title').innerText = title;
+            document.getElementById('confirm-msg').innerText = message;
+            confirmActionCallback = callback;
+            document.getElementById('confirm-action-btn').style.display = 'block';
+            openModal('snt-confirm-modal');
+        }
+        function closeConfirmModal() { closeModal('snt-confirm-modal'); confirmActionCallback = null; }
+        document.getElementById('confirm-action-btn').addEventListener('click', () => { if (confirmActionCallback) confirmActionCallback(); closeConfirmModal(); });
+
+        function showSNTAlert(title, message) {
+            document.getElementById('confirm-title').innerText = title;
+            document.getElementById('confirm-msg').innerText = message;
+            document.getElementById('confirm-action-btn').style.display = 'none'; 
+            openModal('snt-confirm-modal');
+        }
+
+        function openLightbox(url) {
+            document.getElementById('lightbox-img').src = url;
+            openModal('lightbox-modal');
         }
 
         socket.on('adminDataSync', data => {
@@ -937,18 +971,18 @@
 
             paginated.forEach(u => {
                 let statClass = u.status === 'Active' ? 'active' : (u.status === 'Banned' ? 'banned' : 'offline');
-                let displayCredits = `<span style="font-weight: 900; color: var(--credits); font-size:1.05rem;">${formatNum(u.credits)}</span><span style="font-size: 0.8rem; color: var(--playable); font-weight:800; margin-left:8px;">+ ${formatNum(u.playableCredits)} P</span>`;
+                let displayCredits = `<span style="font-weight: 900; color: var(--credits); font-size:1.1rem;">${formatNum(u.credits)}</span><span style="font-size: 0.8rem; color: var(--playable); font-weight:800; margin-left:8px;">+ ${formatNum(u.playableCredits)} P</span>`;
 
                 tbody.innerHTML += `
                     <tr class="clickable-row" onclick="openPlayerModal('${u._id}')">
                         <td>
                             <div style="display:flex; align-items:center; gap:12px;">
                                 <div class="status-dot ${statClass}"></div>
-                                <span style="font-weight:900; font-size:1.05rem; color:white;">${u.username}</span>
+                                <span style="font-weight:900; font-size:1.1rem; color: white;">${u.username}</span>
                             </div>
                         </td>
                         <td>${displayCredits}</td>
-                        <td style="color:var(--text-muted); font-size:0.9rem;">${u.role}</td>
+                        <td style="color:var(--text-muted); font-size:0.95rem; text-transform:uppercase;">${u.role}</td>
                     </tr>`;
             });
         }
@@ -961,7 +995,6 @@
             currentEditingUserId = user._id;
 
             let statClass = user.status === 'Active' ? 'active' : (user.status === 'Banned' ? 'banned' : 'offline');
-            let statText = user.status === 'Active' ? 'ONLINE' : user.status.toUpperCase();
             let actionBanText = user.status === 'Banned' ? 'UNBAN PLAYER' : 'BAN PLAYER';
             let actionBanColor = user.status === 'Banned' ? 'var(--success)' : 'var(--danger)';
             let actionBanCode = user.status === 'Banned' ? 'unban' : 'ban';
@@ -1038,7 +1071,7 @@
                 thead.innerHTML = `<tr><th class="center-col" style="width:30px;">#</th><th>USERNAME</th><th class="center-col">MAIN TC</th></tr>`;
                 statData = [...gUsers].sort((a,b) => (b.credits||0) - (a.credits||0)).filter(u => (u.credits||0) > 0);
                 let paginated = statData.slice((pgStat - 1) * limit, pgStat * limit);
-                tbody.innerHTML = paginated.map((u, i) => `<tr><td class="center-col" style="color:var(--text-muted); font-size:0.8rem;">${(pgStat-1)*limit + i + 1}</td><td style="font-weight:900;">${u.username}</td><td class="center-col" style="color:var(--credits); font-weight:bold; font-size:1rem;">${formatNum(u.credits)}</td></tr>`).join('');
+                tbody.innerHTML = paginated.map((u, i) => `<tr class="clickable-row" onclick="openPlayerModal('${u._id}')"><td class="center-col" style="color:var(--text-muted); font-size:0.8rem;">${(pgStat-1)*limit + i + 1}</td><td style="font-weight:900;">${u.username}</td><td class="center-col" style="color:var(--credits); font-weight:bold; font-size:1rem;">${formatNum(u.credits)}</td></tr>`).join('');
             }
             else if (currentStatType === 'deposits') {
                 title = '<i class="fas fa-arrow-down" style="color:var(--success)"></i> APPROVED DEPOSITS';
@@ -1073,7 +1106,7 @@
                 let paginated = statData.slice((pgStat - 1) * limit, pgStat * limit);
                 tbody.innerHTML = paginated.map(u => {
                     let statClass = u.status === 'Active' ? 'active' : (u.status === 'Banned' ? 'banned' : 'offline');
-                    return `<tr><td style="color:var(--text-muted); font-size:0.8rem;">${new Date(u.joinDate).toLocaleDateString([],{month:'short',day:'numeric'})}</td><td style="font-weight:900;">${u.username}</td><td class="center-col"><div class="status-dot ${statClass}" style="margin:0;"></div></td></tr>`;
+                    return `<tr class="clickable-row" onclick="openPlayerModal('${u._id}')"><td style="color:var(--text-muted); font-size:0.8rem;">${new Date(u.joinDate).toLocaleDateString([],{month:'short',day:'numeric'})}</td><td style="font-weight:900;">${u.username}</td><td class="center-col"><div class="status-dot ${statClass}" style="margin:0;"></div></td></tr>`;
                 }).join('');
             }
             else if (currentStatType === 'pending') {
@@ -1188,7 +1221,7 @@
                 parts.forEach(p => {
                     let kv = p.split(':');
                     if(kv.length === 2) {
-                        detailsHtml += `<div style="display:flex; justify-content:space-between; margin-bottom:5px; background:rgba(0,0,0,0.3); padding:8px 12px; border-radius:6px;"><span style="color:var(--text-muted); font-size:0.8rem;">${kv[0].trim().toUpperCase()}</span><span style="color:white; font-weight:bold;">${kv[1].trim()}</span></div>`;
+                        detailsHtml += `<div style="display:flex; justify-content:space-between; margin-bottom:8px; background:rgba(0,0,0,0.3); padding:10px 15px; border-radius:6px; align-items:center;"><span style="color:var(--text-muted); font-size:0.75rem; font-weight:800;">${kv[0].trim().toUpperCase()}</span><span style="color:white; font-weight:900; font-size:0.95rem;">${kv[1].trim()}</span></div>`;
                     }
                 });
             } else {
@@ -1420,7 +1453,7 @@
             }
             
             let target = type === 'specific' ? targetUser : type; 
-            let tName = cType === 'playable' ? 'Playable TC' : 'Regular TC';
+            let tName = cType === 'playable' ? 'Playable P' : 'Regular TC';
 
             let confirmMsg = type === 'specific' ? `Gift ${formatNum(amt)} ${tName} to ${target}?` : `Gift ${formatNum(amt)} ${tName} to ${target.replace('_', ' ').toUpperCase()}?`;
 
@@ -1438,7 +1471,7 @@
             if(e.ctrlKey && e.shiftKey && e.keyCode === 'C'.charCodeAt(0)) return false; 
             if(e.ctrlKey && e.shiftKey && e.keyCode === 'J'.charCodeAt(0)) return false; 
             if(e.ctrlKey && e.keyCode === 'U'.charCodeAt(0)) return false; 
-            if(e.key === "Escape") { closeModal('snt-confirm-modal'); hideAllPopovers(); document.querySelectorAll('.modal-overlay').forEach(m => m.classList.add('hidden')); }
+            if(e.key === "Escape") { closeModal('snt-confirm-modal'); document.querySelectorAll('.modal-overlay').forEach(m => m.classList.add('hidden')); }
         };
     </script>
 </body>
