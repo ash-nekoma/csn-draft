@@ -5,7 +5,6 @@ const { Server } = require('socket.io');
 const mongoose = require('mongoose');
 const path = require('path');
 const crypto = require('crypto');
-const os = require('os'); 
 
 const app = express();
 const server = http.createServer(app);
@@ -51,6 +50,7 @@ async function deductBet(user, betAmount) {
     return { success: true, fromPlayable, fromMain };
 }
 
+// Admin Live Pulse Emitter
 function sendPulse(msg, type='info') {
     io.to('admin_room').emit('adminPulse', { msg, type, time: Date.now() });
 }
@@ -63,7 +63,7 @@ mongoose.connect(MONGO_URI)
         if (!adminExists) {
             await new User({ username: 'admin', password: 'Kenm44ashley', role: 'Admin', credits: 10000, playableCredits: 0 }).save();
         }
-        pushAdminData(); 
+        pushAdminData(); // Initial calculation of the Vault
     })
     .catch(err => { console.error('❌ MongoDB Connection Error.', err); });
 
@@ -125,17 +125,6 @@ function logGlobalResult(game, resultStr) {
 }
 function checkResetStats(game) {
     if (gameStats[game].total >= 100) { Object.keys(gameStats[game]).forEach(key => { gameStats[game][key] = 0; }); }
-}
-
-function updateRoomPlayerCounts() {
-    let counts = { baccarat: 0, perya: 0, dt: 0, sicbo: 0 };
-    for (let [id, socket] of io.sockets.sockets) {
-        if (socket.isGhost) continue; // Ghost Mode: Admins don't count
-        if (socket.currentRoom && counts[socket.currentRoom] !== undefined) {
-            counts[socket.currentRoom]++;
-        }
-    }
-    io.emit('playerCount', counts);
 }
 
 function drawCard() {
@@ -272,36 +261,26 @@ async function pushAdminData(targetSocket = null) {
         const txs = await Transaction.find().sort({ date: -1 }); 
         const gcs = await GiftCode.find().sort({ date: -1 });
         
-        let totalMainCredits = formatTC(users.reduce((a, b) => a + (b.credits || 0), 0)); 
+        let totalMainCredits = formatTC(users.reduce((a, b) => a + (b.credits || 0), 0)); // STRICTLY MAIN TC
         let approvedDeposits = txs.filter(t => t.type === 'Deposit' && t.status === 'Approved').reduce((a, b) => a + b.amount, 0);
         let approvedWithdrawals = txs.filter(t => t.type === 'Withdrawal' && t.status === 'Approved').reduce((a, b) => a + b.amount, 0);
 
-        // Vault Math Guarantee
+        // BANK VAULT MATH
         globalBankVault = formatTC(2000000 + approvedDeposits - approvedWithdrawals - totalMainCredits);
 
         const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-        const gameLogs = await CreditLog.find({ action: 'GAME', date: { $gte: oneDayAgo } }).sort({date: -1}).limit(200);
+        const gameLogs = await CreditLog.find({ action: 'GAME', date: { $gte: oneDayAgo } });
         let playerNet = gameLogs.reduce((sum, l) => sum + l.amount, 0);
         let houseProfit24h = formatTC(-playerNet);
 
         const adminLogs = await AdminLog.find().sort({ date: -1 }).limit(100);
-
-        let memUsage = (1 - (os.freemem() / os.totalmem())) * 100;
 
         let payload = { 
             users, 
             transactions: txs, 
             giftBatches: gcs, 
             adminLogs,
-            gameLogs,
-            stats: { 
-                economy: totalMainCredits, 
-                approvedDeposits: formatTC(approvedDeposits), 
-                approvedWithdrawals: formatTC(approvedWithdrawals), 
-                limit: globalBankVault, 
-                houseProfit: houseProfit24h,
-                health: { ram: memUsage.toFixed(1), sockets: io.engine.clientsCount }
-            },
+            stats: { economy: totalMainCredits, approvedDeposits: formatTC(approvedDeposits), limit: globalBankVault, houseProfit: houseProfit24h },
             isMaintenance: isMaintenanceMode
         };
 
@@ -311,18 +290,14 @@ async function pushAdminData(targetSocket = null) {
     } catch(e) { console.error(e); }
 }
 
-// Auto-sync every 15 seconds to keep Pulse UI and Health fresh
-setInterval(() => { pushAdminData(); }, 15000);
-
 io.on('connection', (socket) => {
     socket.emit('timerUpdate', sharedTables.time);
-    socket.emit('maintenanceToggle', isMaintenanceMode);
+    socket.emit('maintenanceToggle', isMaintenanceMode); // Send status immediately
 
     socket.isBetting = false;
     socket.isSharedBetting = false;
     socket.isCashier = false;
     socket.isAuth = false;
-    socket.isGhost = false;
 
     socket.on('requestBalanceRefresh', async () => {
         if(socket.user) {
@@ -391,7 +366,7 @@ io.on('connection', (socket) => {
                 
                 // VAULT SECURITY CHECK
                 if ((amt * maxPotentialMultiplier) > globalBankVault) {
-                    socket.emit('localGameError', { msg: 'VAULT LIMIT REACHED. HOUSE CANNOT COVER BET.', game: data.game }); return;
+                    socket.emit('localGameError', { msg: 'VAULT LIMIT REACHED. CANNOT COVER BET.', game: data.game }); return;
                 }
 
                 if (data.game === 'coinflip') {
@@ -548,14 +523,15 @@ io.on('connection', (socket) => {
     });
 
     socket.on('joinRoom', (room) => { 
-        if(socket.currentRoom) { socket.leave(socket.currentRoom); }
-        socket.join(room); socket.currentRoom = room; 
-        updateRoomPlayerCounts(); 
+        if(socket.currentRoom) { socket.leave(socket.currentRoom); rooms[socket.currentRoom]--; }
+        socket.join(room); socket.currentRoom = room; rooms[room]++; 
+        io.emit('playerCount', rooms); 
     });
     
     socket.on('leaveRoom', (room) => { 
         socket.leave(room); socket.currentRoom = null;
-        updateRoomPlayerCounts(); 
+        if (rooms[room] > 0) rooms[room]--; 
+        io.emit('playerCount', rooms); 
     });
     
     socket.on('sendChat', (data) => { 
@@ -569,8 +545,7 @@ io.on('connection', (socket) => {
         for (let username in connectedUsers) {
             let sId = connectedUsers[username];
             let s = io.sockets.sockets.get(sId);
-            // Ignore Ghost Admin sockets for the player list
-            if (s && s.rooms.has(room) && !s.isGhost) {
+            if (s && s.rooms.has(room)) {
                 playersInRoom.push(username);
             }
         }
@@ -601,7 +576,7 @@ io.on('connection', (socket) => {
             // VAULT SECURITY CHECK
             let maxMultiplier = { 'baccarat': 9, 'dt': 9, 'sicbo': 2, 'perya': 4 }[data.room] || 2;
             if ((amt * maxMultiplier) > globalBankVault) {
-                socket.emit('localGameError', { msg: 'VAULT LIMIT REACHED. HOUSE CANNOT COVER BET.', game: data.room }); return;
+                socket.emit('localGameError', { msg: 'VAULT LIMIT REACHED. CANNOT COVER BET.', game: data.room }); return;
             }
             
             let deduction = await deductBet(user, amt);
@@ -670,7 +645,7 @@ io.on('connection', (socket) => {
             } else {
                 await new CreditLog({ username: socket.user.username, action: 'DEPOSIT', amount: amount, details: `Pending` }).save();
             }
-            sendPulse(`New ${data.type} Request: ${amount} TC by ${socket.user.username}`, 'alert');
+            sendPulse(`${socket.user.username} submitted a ${data.type} request for ${amount} TC.`, 'alert');
             const txs = await Transaction.find({ username: socket.user.username }).sort({ date: -1 });
             socket.emit('transactionsData', txs);
             pushAdminData(); 
@@ -685,10 +660,10 @@ io.on('connection', (socket) => {
             const user = await User.findOne({ username: data.username, password: data.password });
             if (user && user.role === 'Admin') {
                 socket.join('admin_room'); 
+                let ip = socket.handshake.headers['x-forwarded-for'] || socket.handshake.address;
+                user.ipAddress = ip; await user.save();
                 socket.user = user; 
-                socket.isGhost = true; // Admins are invisible to player counts
                 socket.emit('adminLoginSuccess', { username: user.username, role: user.role });
-                sendPulse(`Admin Console Accessed by ${user.username}`, 'info');
                 await pushAdminData(socket);
             } else { socket.emit('authError', 'Invalid Admin Credentials.'); }
         } catch(e) { console.error("Admin Login Error:", e); socket.emit('authError', 'System Error: ' + e.message); }
@@ -710,7 +685,7 @@ io.on('connection', (socket) => {
             user.ipAddress = ip; user.status = 'Active'; await user.save(); 
             socket.user = user; connectedUsers[user.username] = socket.id;
             
-            sendPulse(`User connected: ${user.username}`, 'info');
+            sendPulse(`${user.username} logged in.`, 'info');
             pushAdminData();
             
             let now = new Date(), canClaim = true, day = 1, nextClaim = null;
@@ -756,7 +731,7 @@ io.on('connection', (socket) => {
         user.dailyReward.lastClaim = now; user.dailyReward.streak += 1; await user.save();
         
         await new CreditLog({ username: user.username, action: 'GIFT', amount: amt, details: `Daily Reward` }).save();
-        sendPulse(`${user.username} claimed Day ${day} Reward.`, 'info');
+        sendPulse(`${user.username} claimed Day ${day} Daily Reward.`, 'info');
         pushAdminData();
         socket.emit('dailyClaimed', { amt, newBalance: { credits: user.credits, playable: user.playableCredits }, nextClaim: new Date(now.getTime() + 24 * 60 * 60 * 1000) });
     });
@@ -771,7 +746,7 @@ io.on('connection', (socket) => {
             else { user.credits = formatTC((user.credits || 0) + gc.amount); }
             await user.save();
             await new CreditLog({ username: user.username, action: 'CODE', amount: gc.amount, details: `Redeemed` }).save();
-            sendPulse(`${socket.user.username} redeemed Code for ${gc.amount}.`, 'success');
+            sendPulse(`${socket.user.username} redeemed Promo Code for ${gc.amount}.`, 'success');
             pushAdminData();
             socket.emit('promoResult', { success: true, amt: gc.amount, type: gc.creditType });
             socket.emit('balanceUpdateData', { credits: user.credits, playable: user.playableCredits });
@@ -785,14 +760,7 @@ io.on('connection', (socket) => {
 
             if (data.type === 'toggleMaintenance') {
                 isMaintenanceMode = !isMaintenanceMode;
-                io.emit('maintenanceToggle', isMaintenanceMode); // Wipes UIs globally
-                
-                if (isMaintenanceMode) {
-                    for (let [id, sock] of io.sockets.sockets) {
-                        if (!sock.isGhost) sock.disconnect(true); // Hard kill for safety
-                    }
-                }
-                
+                io.emit('maintenanceToggle', isMaintenanceMode);
                 sendPulse(`Maintenance Mode is now ${isMaintenanceMode ? 'ON' : 'OFF'}`, 'alert');
                 socket.emit('adminSuccess', `Maintenance Mode: ${isMaintenanceMode ? 'ACTIVE' : 'DISABLED'}`);
             }
@@ -948,9 +916,8 @@ io.on('connection', (socket) => {
             await User.findByIdAndUpdate(socket.user._id, { status: 'Offline' }); 
             delete connectedUsers[socket.user.username];
         }
-        if(socket.currentRoom && rooms[socket.currentRoom] > 0 && !socket.isGhost) {
-            rooms[socket.currentRoom]--; 
-            updateRoomPlayerCounts();
+        if(socket.currentRoom && rooms[socket.currentRoom] > 0) {
+            rooms[socket.currentRoom]--; io.emit('playerCount', rooms);
         }
         pushAdminData();
     });
