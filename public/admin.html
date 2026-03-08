@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stick N' Trade | Master Terminal</title>
+    <title>Stick N' Trade | Master Admin</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,178 +21,173 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; outline: none; }
+        
         body { background: linear-gradient(135deg, #000a1f 0%, #00122e 100%); color: var(--text-main); min-height: 100vh; width: 100vw; display: flex; overflow: hidden; }
 
+        /* Custom Glass Scrollbars */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(0, 162, 255, 0.2); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(0, 162, 255, 0.5); }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(0, 162, 255, 0.5); box-shadow: 0 0 10px var(--ps-glow); }
 
         .hidden { display: none !important; opacity: 0; pointer-events: none; }
 
         /* AUTHENTICATION */
-        #auth-container { position: fixed; inset: 0; display: flex; justify-content: center; align-items: center; z-index: 999999; background: #00050d; }
-        .auth-box { width: 380px; background: var(--glass-bg); padding: 2.5rem; border-radius: 16px; border: 1px solid var(--glass-border); text-align: center; box-shadow: 0 15px 50px rgba(0,0,0,0.8); position: relative; z-index: 10; backdrop-filter: blur(20px);}
-        .auth-title { font-size: 1.8rem; font-weight: 900; color: white; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 2px;}
-        .auth-sub { color: var(--danger); font-weight: 800; font-size: 0.85rem; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 25px; }
+        #auth-container { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; z-index: 999999; background: #00050d; }
+        .auth-box { width: 420px; background: var(--glass-bg); padding: 3rem; border-radius: 16px; border: 1px solid var(--glass-border); text-align: center; box-shadow: 0 15px 50px rgba(0,0,0,0.8); position: relative; z-index: 10; }
+        .auth-title { font-size: 2.2rem; font-weight: 900; color: white; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 2px;}
+        .auth-sub { color: var(--danger); font-weight: 800; font-size: 1rem; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 30px; }
         
         .input-group { margin-bottom: 15px; text-align: left; width: 100%; }
-        .input-group label { display: block; color: var(--text-muted); font-size: 0.75rem; font-weight: 800; margin-bottom: 6px; text-transform: uppercase; }
-        .input-control { width: 100%; padding: 12px 15px; background: rgba(0,0,0,0.5); border: 1px solid var(--glass-border); color: white; border-radius: 8px; font-size: 0.95rem; font-weight: 600; transition: 0.2s; pointer-events: auto; }
+        .input-group label { display: block; color: var(--text-muted); font-size: 0.85rem; font-weight: 800; margin-bottom: 8px; text-transform: uppercase; }
+        .input-control { width: 100%; padding: 15px; background: rgba(0,0,0,0.5); border: 1px solid var(--glass-border); color: white; border-radius: 8px; font-size: 1.1rem; font-weight: 600; transition: 0.2s; pointer-events: auto; cursor: text; }
         .input-control:focus { border-color: var(--ps-glow); background: rgba(0,0,0,0.7); box-shadow: 0 0 15px rgba(0,162,255,0.2); }
         
-        select.input-control, .filter-bar select { appearance: none; background-image: url('data:image/svg+xml;utf8,<svg fill="white" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>'); background-repeat: no-repeat; background-position: right 10px center; padding-right: 35px !important; cursor: pointer; }
+        select.input-control, .filter-bar select {
+            appearance: none;
+            background-image: url('data:image/svg+xml;utf8,<svg fill="white" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+            background-repeat: no-repeat; background-position: right 12px center; padding-right: 40px !important; cursor: pointer;
+        }
 
-        .btn-primary { background: rgba(0, 162, 255, 0.15); color: var(--ps-glow); border: 1px solid var(--ps-glow); padding: 14px; width: 100%; border-radius: 8px; font-size: 0.95rem; font-weight: 900; cursor: pointer; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 1px; pointer-events: auto; }
+        .btn-primary { background: rgba(0, 162, 255, 0.15); color: var(--ps-glow); border: 1px solid var(--ps-glow); padding: 15px; width: 100%; border-radius: 8px; font-size: 1.1rem; font-weight: 900; cursor: pointer; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 1px; pointer-events: auto; }
         .btn-primary:hover { background: var(--ps-glow); color: black; transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0, 162, 255, 0.4); }
-        .auth-msg { font-size: 0.85rem; font-weight: 800; min-height: 20px; margin-bottom: 15px; text-align: center; color: var(--danger); }
+        .auth-msg { font-size: 0.95rem; font-weight: 800; min-height: 20px; margin-bottom: 15px; text-align: center; color: var(--danger); }
 
         #admin-app { display: none; width: 100%; height: 100vh; position: relative; z-index: 1;}
         
         /* SIDEBAR */
-        .sidebar { width: 250px; background: rgba(0, 5, 15, 0.95); border-right: 1px solid var(--glass-border); display: flex; flex-direction: column; flex-shrink: 0;}
-        .sidebar-header { padding: 25px 20px; border-bottom: 1px solid var(--glass-border); text-align: center; }
-        .sidebar-header h2 { font-weight: 900; font-size: 1.4rem; color: white; letter-spacing: 1px; line-height: 1.1;}
-        .sidebar-header span { color: var(--danger); font-weight: 800; font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; }
+        .sidebar { width: 280px; background: rgba(0, 5, 15, 0.95); border-right: 1px solid var(--glass-border); display: flex; flex-direction: column; flex-shrink: 0;}
+        .sidebar-header { padding: 30px 25px; border-bottom: 1px solid var(--glass-border); text-align: center; }
+        .sidebar-header h2 { font-weight: 900; font-size: 1.6rem; color: white; letter-spacing: 1px; line-height: 1.1;}
+        .sidebar-header span { color: var(--danger); font-weight: 800; font-size: 0.85rem; letter-spacing: 2px; text-transform: uppercase; }
         
-        .nav-menu { padding: 15px 0; display: flex; flex-direction: column; gap: 5px; flex: 1; }
-        .nav-item { padding: 12px 20px; color: var(--text-muted); font-weight: 800; font-size: 0.95rem; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 15px; border-left: 4px solid transparent; }
-        .nav-item i { width: 20px; text-align: center; font-size: 1rem; }
+        .nav-menu { padding: 20px 0; display: flex; flex-direction: column; gap: 5px; flex: 1; }
+        .nav-item { padding: 18px 25px; color: var(--text-muted); font-weight: 800; font-size: 1.1rem; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 15px; border-left: 4px solid transparent; }
+        .nav-item i { width: 25px; text-align: center; font-size: 1.2rem; }
         .nav-item:hover { background: rgba(255,255,255,0.05); color: white; }
         .nav-item.active { background: rgba(0, 162, 255, 0.1); color: var(--ps-glow); border-left-color: var(--ps-glow); }
         
-        .logout-btn { padding: 15px; text-align: center; border-top: 1px solid var(--glass-border); cursor: pointer; color: white; font-weight: 800; transition: 0.2s; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; background: rgba(255,255,255,0.05);}
+        .logout-btn { padding: 20px; text-align: center; border-top: 1px solid var(--glass-border); cursor: pointer; color: white; font-weight: 800; transition: 0.2s; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px; background: rgba(255,255,255,0.05);}
         .logout-btn:hover { background: rgba(255,255,255,0.15); color: var(--danger); }
 
-        .notif-badge-menu { background: var(--danger); color: white; font-size: 0.75rem; font-weight: 900; padding: 2px 6px; border-radius: 50px; margin-left: auto; display: none; box-shadow: 0 0 10px var(--danger); animation: pulseRed 1.5s infinite;}
-
-        /* MAIN CONTENT & TOPBAR */
-        .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: transparent; position: relative;}
-        .topbar { padding: 15px 30px; border-bottom: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); flex-shrink: 0;}
-        .topbar h1 { font-weight: 900; font-size: 1.4rem; text-transform: uppercase; letter-spacing: 1px; margin: 0; }
+        /* MAIN CONTENT & BENTO */
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: transparent; }
+        .topbar { padding: 25px 40px; border-bottom: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); flex-shrink: 0;}
+        .topbar h1 { font-weight: 900; font-size: 2rem; text-transform: uppercase; letter-spacing: 1px; margin: 0; }
         
-        .sys-health { display: flex; gap: 15px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); align-items: center;}
-        .health-item { display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.05); padding: 6px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); }
-        .health-val { color: var(--ps-glow); font-weight: 900; font-size: 0.85rem;}
-        .ghost-tag { color: var(--ps-light-blue); display: flex; align-items: center; gap: 8px; border: 1px solid var(--ps-light-blue); padding: 6px 12px; border-radius: 6px; background: rgba(0, 112, 204, 0.1); text-shadow: 0 0 5px rgba(0, 112, 204, 0.5);}
-
-        .content-area { padding: 25px 30px; flex: 1; width: 100%; display: flex; flex-direction: column; overflow: hidden; position: relative;}
+        .content-area { padding: 30px; flex: 1; width: 100%; display: flex; flex-direction: column; overflow: hidden; }
         .tab-view { flex: 1; display: flex; flex-direction: row; overflow: hidden; gap: 20px;}
 
-        /* TRUE BENTO DASHBOARD */
-        .bento-container { flex: 3; display: flex; flex-direction: column; overflow-y: auto; padding: 5px; }
-        .bento-grid { 
-            display: grid; 
-            grid-template-columns: repeat(4, 1fr); 
-            grid-auto-rows: 150px;
-            grid-auto-flow: dense;
-            gap: 20px; 
-            width: 100%; 
-        }
+        /* TRUE BENTO GRID (User Provided Base) */
+        .bento-container { flex: 3; display: flex; flex-direction: column; overflow-y: auto; padding: 10px; }
+        .bento-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; width: 100%; }
         
-        .bento-item { background: rgba(0, 15, 35, 0.6); border: 1px solid var(--glass-border); border-radius: 12px; display: flex; flex-direction: column; justify-content: center; padding: 25px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); backdrop-filter: blur(5px); transition: all 0.2s ease; cursor: pointer; position: relative;}
-        .bento-item:hover { border-color: var(--ps-glow); box-shadow: inset 0 0 20px rgba(0,162,255,0.15), 0 8px 20px rgba(0,0,0,0.8); transform: translateY(-2px); }
+        .bento-item { background: rgba(0, 15, 35, 0.6); border: 1px solid var(--glass-border); padding: 30px; border-radius: 12px; display: flex; align-items: center; gap: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.7); backdrop-filter: blur(5px); transition: all 0.3s ease; cursor: pointer; position: relative;}
+        .bento-item:hover { transform: translateY(-5px); border-color: transparent; box-shadow: inset 0 0 25px rgba(0,162,255,0.3), 0 10px 30px rgba(0,0,0,0.8); }
         
-        .bento-span-2x2 { grid-column: span 2; grid-row: span 2; }
-        .bento-span-2x1 { grid-column: span 2; grid-row: span 1; }
-        .bento-span-1x1 { grid-column: span 1; grid-row: span 1; }
-
-        .bento-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-        .bento-icon { font-size: 1.6rem; color: var(--text-muted); }
-        .bento-title { color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; font-weight: 800; letter-spacing: 1px;}
-        .bento-value { font-size: 2.2rem; font-weight: 900; color: white; line-height: 1; }
+        .bento-span-2 { grid-column: span 2; }
+        .bento-span-row-2 { grid-row: span 2; flex-direction: column; align-items: flex-start; justify-content: center; }
         
-        .bento-span-2x2 .bento-icon { font-size: 2.5rem; margin-bottom: 15px;}
-        .bento-span-2x2 .bento-title { font-size: 1.1rem; margin-bottom: 15px;}
-        .bento-span-2x2 .bento-value { font-size: 3.5rem; }
-
+        .stat-icon { width: 70px; height: 70px; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 2.2rem; background: rgba(255,255,255,0.05); box-shadow: inset 0 0 15px rgba(255,255,255,0.02); flex-shrink:0;}
+        .stat-info h3 { color: var(--text-muted); font-size: 0.95rem; text-transform: uppercase; font-weight: 800; margin-bottom: 5px; letter-spacing: 1px;}
+        .stat-info .value { font-size: 2.5rem; font-weight: 900; color: white; line-height: 1; }
         .glow-neon { text-shadow: 0 0 15px var(--ps-glow); color: var(--ps-glow); }
         .glow-success { text-shadow: 0 0 15px var(--success); color: var(--success); }
-        .glow-danger { text-shadow: 0 0 15px var(--danger); color: var(--danger); }
 
         /* LIVE PULSE SIDEBAR */
-        .live-pulse-panel { flex: 1; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 12px; display: flex; flex-direction: column; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); min-width: 280px; max-width: 320px;}
-        .pulse-header { font-weight: 900; font-size: 1rem; text-transform: uppercase; color: white; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--glass-border); padding-bottom: 15px; }
+        .live-pulse-panel { flex: 1; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 12px; display: flex; flex-direction: column; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); min-width: 300px; max-width: 400px;}
+        .pulse-header { font-weight: 900; font-size: 1.2rem; text-transform: uppercase; color: white; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--glass-border); padding-bottom: 15px; }
         .pulse-dot { width: 10px; height: 10px; background: var(--success); border-radius: 50%; animation: pulseRed 1.5s infinite; }
-        .pulse-feed { display: flex; flex-direction: column; gap: 8px; overflow-y: auto; flex: 1; padding-right: 5px; }
-        .pulse-item { background: rgba(255,255,255,0.05); padding: 10px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; border-left: 3px solid transparent; animation: slideInPulse 0.3s ease-out; }
+        .pulse-feed { display: flex; flex-direction: column; gap: 10px; overflow-y: auto; flex: 1; padding-right: 5px; }
+        .pulse-item { background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; border-left: 3px solid transparent; animation: slideInPulse 0.3s ease-out; }
         .pulse-item.info { border-left-color: var(--ps-glow); }
         .pulse-item.success { border-left-color: var(--success); }
         .pulse-item.alert { border-left-color: var(--danger); }
         .pulse-item.bet { border-left-color: var(--credits); }
         @keyframes slideInPulse { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes pulseRed { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
 
-        /* DATA TABLES & PANELS */
-        .panel { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; flex: 1; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 100%;}
+        /* COMPACT PANELS & DATA TABLES */
+        .panel { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 12px; display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 100%; flex: 0 1 auto; overflow: hidden; max-height: 100%;}
         .panel-header { padding: 18px 25px; border-bottom: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.5); flex-shrink: 0;}
-        .panel-header h3 { font-weight: 900; font-size: 1.1rem; text-transform: uppercase; margin: 0; letter-spacing: 1px; display: flex; align-items: center; gap: 8px;}
+        .panel-header h3 { font-weight: 900; font-size: 1.2rem; text-transform: uppercase; margin: 0; letter-spacing: 1px;}
         
-        .table-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .table-wrapper { flex: 0 1 auto; overflow-y: auto; }
         table { width: 100%; border-collapse: collapse; text-align: left; }
-        th, td { padding: 12px 25px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        th, td { padding: 12px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); }
         thead { background: #000a1f; position: sticky; top: 0; z-index: 10; }
-        thead th { color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; border-bottom: 1px solid var(--glass-border); padding: 15px 25px;}
-        td { font-weight: 600; font-size: 0.95rem; color: white; white-space: nowrap;}
+        thead th { color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; border-bottom: 1px solid var(--glass-border); padding: 15px 20px;}
+        td { font-weight: 600; font-size: 1rem; color: white; white-space: nowrap;}
 
-        .pagination { display: flex; justify-content: space-between; align-items: center; padding: 15px 25px; border-top: 1px solid var(--glass-border); background: rgba(0,0,0,0.5); flex-shrink: 0; }
-        .pagination button { background: rgba(255,255,255,0.1); border: none; color: white; padding: 8px 15px; border-radius: 6px; font-weight:800; font-size: 0.85rem; cursor: pointer; text-transform: uppercase; transition: 0.2s;}
+        .pagination { display: flex; justify-content: space-between; align-items: center; padding: 12px 25px; border-top: 1px solid var(--glass-border); background: rgba(0,0,0,0.5); flex-shrink: 0; }
+        .pagination button { background: rgba(255,255,255,0.1); border: none; color: white; padding: 8px 15px; border-radius: 6px; font-weight:800; cursor: pointer; transition: 0.2s; text-transform: uppercase; font-size: 0.85rem;}
         .pagination button:hover:not(:disabled) { background: var(--ps-glow); color: black; }
         .pagination button:disabled { opacity: 0.5; cursor: not-allowed; }
 
         .center-col { text-align: center; justify-content: center; }
 
-        /* MINIMAL STATUS DOTS */
-        .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; border: 1px solid rgba(255,255,255,0.2); flex-shrink: 0;}
-        .status-dot.active { background: var(--success); box-shadow: 0 0 8px var(--success); border-color: var(--success); }
+        /* HUD PILLS & STATUS DOTS */
+        .status-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; border: 1px solid rgba(255,255,255,0.2); flex-shrink: 0;}
+        .status-dot.active { background: var(--success); box-shadow: 0 0 10px var(--success); border-color: var(--success); }
         .status-dot.offline { background: rgba(255,255,255,0.2); }
-        .status-dot.banned { background: var(--danger); box-shadow: 0 0 8px var(--danger); border-color: var(--danger); }
+        .status-dot.banned { background: var(--danger); box-shadow: 0 0 10px var(--danger); border-color: var(--danger); }
 
-        .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; display: inline-block; }
+        .role-pill { padding: 4px 12px; border-radius: 50px; font-size: 0.75rem; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; display: inline-block; }
+        .role-pill.admin { background: rgba(255, 51, 102, 0.15); color: var(--danger); border: 1px solid rgba(255, 51, 102, 0.3); }
+        .role-pill.player { background: rgba(0, 162, 255, 0.15); color: var(--ps-glow); border: 1px solid rgba(0, 162, 255, 0.3); }
+        .role-pill.vip { background: rgba(255, 180, 0, 0.15); color: var(--credits); border: 1px solid rgba(255, 180, 0, 0.3); }
+        .role-pill.moderator { background: rgba(0, 230, 118, 0.15); color: var(--success); border: 1px solid rgba(0, 230, 118, 0.3); }
+
+        .badge { padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; display: inline-block; }
         .badge.pending { background: rgba(255, 180, 0, 0.15); color: var(--credits); border: 1px solid rgba(255, 180, 0, 0.3); }
-        .badge.approved, .badge.active { background: rgba(0, 230, 118, 0.15); color: var(--success); border: 1px solid rgba(0, 230, 118, 0.3); }
-        .badge.rejected, .badge.banned { background: rgba(255, 51, 102, 0.15); color: var(--danger); border: 1px solid rgba(255, 51, 102, 0.3); }
+        .badge.approved { background: rgba(0, 230, 118, 0.15); color: var(--success); border: 1px solid rgba(0, 230, 118, 0.3); }
+        .badge.rejected { background: rgba(255, 51, 102, 0.15); color: var(--danger); border: 1px solid rgba(255, 51, 102, 0.3); }
 
-        .btn-sm { padding: 8px 12px; border: none; border-radius: 6px; font-weight: 800; font-size: 0.75rem; cursor: pointer; text-transform: uppercase; color: white; letter-spacing: 1px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s;}
+        .btn-sm { padding: 8px 15px; border: none; border-radius: 6px; font-weight: 800; font-size: 0.85rem; cursor: pointer; text-transform: uppercase; transition: 0.2s; color: white; letter-spacing: 1px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;}
         .btn-edit { background: rgba(0, 162, 255, 0.15); color: var(--ps-glow); border: 1px solid rgba(0, 162, 255, 0.3); } .btn-edit:hover { background: var(--ps-glow); color: black; }
         .btn-approve { background: rgba(0, 230, 118, 0.15); color: var(--success); border: 1px solid rgba(0, 230, 118, 0.3); } .btn-approve:hover { background: var(--success); color: black; }
         .btn-reject { background: rgba(255, 51, 102, 0.15); color: var(--danger); border: 1px solid rgba(255, 51, 102, 0.3); } .btn-reject:hover { background: var(--danger); color: white; }
 
         .split-screen { display: flex; gap: 20px; width: 100%; flex: 1; align-items: stretch; overflow: hidden;}
-        .split-col { flex: 1; display: flex; flex-direction: column; overflow: hidden; width: 50%; }
+        .split-col { flex: 1; display: flex; flex-direction: column; overflow: hidden; width: 50%; max-height: 100%;}
 
-        .clickable-row { cursor: pointer; border-left: 3px solid transparent; transition: background-color 0.2s ease; }
+        .clickable-row { cursor: pointer; transition: background-color 0.2s ease; border-left: 3px solid transparent; }
         .clickable-row:hover { background-color: rgba(255, 255, 255, 0.05); border-left: 3px solid var(--ps-glow); }
 
-        /* CENTER POPOVER MODALS */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 100000; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(8px); pointer-events: auto;}
-        .modal-content { background: var(--glass-bg); width: 420px; padding: 30px; border-radius: 12px; border: 1px solid var(--glass-border); position: relative; box-shadow: 0 25px 80px rgba(0,0,0,0.9); display: flex; flex-direction: column;}
-        .modal-content.wide { width: 700px; max-width: 95vw; max-height: 85vh;}
+        /* CENTER MODALS & POPOVERS */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 100000; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
+        .modal-content { background: var(--glass-bg); width: 450px; padding: 30px; border-radius: 12px; border: 1px solid var(--glass-border); position: relative; box-shadow: 0 25px 80px rgba(0,0,0,0.9); pointer-events: auto; display: flex; flex-direction: column;}
+        .modal-content.wide { width: 700px; max-width: 95vw; max-height: 90vh;}
         .modal-close { position: absolute; top: 20px; right: 20px; font-size: 1.5rem; color: var(--text-muted); cursor: pointer; background: none; border: none; transition: 0.2s; outline: none; z-index: 10;}
         .modal-close:hover { color: var(--danger); transform: scale(1.1); }
-        .modal-title { font-size: 1.4rem; font-weight: 900; text-transform: uppercase; margin-bottom: 20px; border-bottom: 1px solid var(--glass-border); padding-bottom: 15px; text-align: left; flex-shrink:0; display: flex; align-items: center; gap: 12px;}
+        .modal-title { font-size: 1.5rem; font-weight: 900; text-transform: uppercase; margin-bottom: 20px; border-bottom: 1px solid var(--glass-border); padding-bottom: 15px; text-align: left; display:flex; align-items:center; gap:10px; flex-shrink:0;}
 
         .filter-bar { display: flex; gap: 15px; background: rgba(0,0,0,0.4); padding: 15px 25px; border-bottom: 1px solid var(--glass-border); align-items: center; flex-shrink: 0;}
-        .filter-bar input, .filter-bar select { padding: 10px 15px; background: rgba(0,0,0,0.6); border: 1px solid var(--glass-border); color: white; border-radius: 6px; font-size: 0.85rem; font-weight: 600; outline: none; }
+        .filter-bar input, .filter-bar select { padding: 10px 15px; background: rgba(0,0,0,0.6); border: 1px solid var(--glass-border); color: white; border-radius: 6px; font-size: 0.95rem; font-weight: 600; outline: none; }
+        .filter-bar input:focus, .filter-bar select:focus { border-color: var(--ps-glow); }
         
-        .confirm-btn-container { display: flex; gap: 15px; margin-top: 20px; }
-        .confirm-btn-container button { flex: 1; padding: 12px; font-size: 0.95rem; }
-        .modal-error-text { color: var(--danger); font-size: 0.85rem; font-weight: bold; text-align: center; margin-bottom: 10px; min-height: 16px; }
+        .confirm-btn-container { display: flex; gap: 15px; margin-top: 25px; }
+        .confirm-btn-container button { flex: 1; padding: 12px; font-size: 1.05rem; }
+        .modal-error-text { color: var(--danger); font-size: 0.9rem; font-weight: bold; text-align: center; margin-bottom: 15px; min-height: 20px; }
 
+        /* LIVE TOAST NOTIFICATIONS */
         #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999999; display: flex; flex-direction: column; gap: 10px; pointer-events: none;}
-        .toast { background: rgba(0,0,0,0.9); border-left: 4px solid var(--ps-glow); color: white; padding: 15px 25px; border-radius: 8px; font-weight: 800; text-transform: uppercase; font-size: 0.85rem; box-shadow: 0 10px 30px rgba(0,0,0,0.5); animation: toastIn 0.3s forwards, toastOut 0.3s forwards 3s; pointer-events: auto;}
+        .toast { background: rgba(0,0,0,0.9); border-left: 4px solid var(--ps-glow); color: white; padding: 15px 25px; border-radius: 8px; font-weight: 800; text-transform: uppercase; font-size: 0.9rem; box-shadow: 0 10px 30px rgba(0,0,0,0.5); animation: toastIn 0.3s forwards, toastOut 0.3s forwards 3s; pointer-events: auto;}
         .toast.success { border-left-color: var(--success); color: var(--success); }
         .toast.error { border-left-color: var(--danger); color: var(--danger); }
         @keyframes toastIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes toastOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
 
-        .smurf-icon { color: var(--danger); margin-left: 10px; font-size: 1rem; animation: pulseRed 2s infinite; }
-        @keyframes pulseRed { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+        .smurf-icon { color: var(--danger); margin-left: 8px; cursor: help; font-size: 1.1rem; animation: pulseRed 2s infinite; }
 
-        /* MODAL INFO GRIDS */
-        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;}
-        .info-box { background: rgba(0,0,0,0.4); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); }
-        .info-label { font-size: 0.75rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px;}
-        .info-val { font-size: 1.2rem; font-weight: 900; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+        /* INLINE EDIT ROWS */
+        .edit-row { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.4); padding: 10px 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 10px;}
+        .edit-label { color: var(--text-muted); font-weight: 800; font-size: 0.8rem; text-transform: uppercase; width: 100px; flex-shrink: 0;}
+        .edit-input-wrapper { display: flex; gap: 10px; flex: 1; align-items: center; }
+        .edit-input-wrapper input, .edit-input-wrapper select { flex: 1; padding: 8px 12px; border-radius: 6px; border: 1px solid var(--glass-border); background: rgba(0,0,0,0.6); color: white; font-weight: bold; font-size: 1rem; outline: none; }
+        .edit-input-wrapper input:focus, .edit-input-wrapper select:focus { border-color: var(--ps-glow); }
+        .btn-inline-save { background: rgba(0,230,118,0.2); color: var(--success); border: 1px solid var(--success); border-radius: 6px; padding: 8px 15px; cursor: pointer; transition: 0.2s; font-weight: bold; }
+        .btn-inline-save:hover { background: var(--success); color: black; }
     </style>
 </head>
 <body>
@@ -212,7 +207,7 @@
                 <input type="password" id="admin-pass" class="input-control" placeholder="Enter password">
             </div>
             <div id="auth-msg" class="auth-msg auth-error"></div>
-            <button class="btn-primary" onclick="loginAdmin()"><i class="fas fa-lock-open" style="margin-right:8px;"></i> INITIALIZE DASHBOARD</button>
+            <button class="btn-primary" onclick="loginAdmin()">INITIALIZE DASHBOARD</button>
         </div>
     </div>
 
@@ -220,101 +215,78 @@
         <div class="sidebar">
             <div class="sidebar-header">
                 <h2>STICK N' TRADE</h2>
-                <span>Command Center</span>
+                <span>Master Admin</span>
             </div>
             <div class="nav-menu">
                 <div class="nav-item active" onclick="switchTab('dashboard')"><i class="fas fa-chart-pie"></i> Dashboard Overview</div>
-                <div class="nav-item" onclick="switchTab('users')"><i class="fas fa-users"></i> Player Database</div>
+                <div class="nav-item" onclick="switchTab('users')"><i class="fas fa-users"></i> Player Management</div>
                 <div class="nav-item" onclick="switchTab('cashier')">
                     <i class="fas fa-money-bill-transfer"></i> Economy & Cashier
                     <span id="nav-badge-pending" class="notif-badge-menu">0</span>
                 </div>
                 <div class="nav-item" onclick="switchTab('promos')"><i class="fas fa-gift"></i> Promos & Rewards</div>
                 <div class="nav-item" onclick="switchTab('tools')"><i class="fas fa-wrench"></i> System Tools</div>
-                <div class="nav-item" onclick="switchTab('audit')"><i class="fas fa-shield-alt"></i> Security Audit</div>
+                <div class="nav-item" onclick="switchTab('audit')"><i class="fas fa-shield-alt"></i> Security & Audit Logs</div>
             </div>
             <div class="logout-btn" onclick="confirmLogout()">
-                <i class="fas fa-sign-out-alt"></i> Disconnect Terminal
+                <i class="fas fa-arrow-left"></i> Back to Casino
             </div>
         </div>
 
         <div class="main-content">
             <div class="topbar">
                 <h1 id="page-title">Dashboard Overview</h1>
-                <div class="sys-health">
-                    <div class="health-item" title="Server Memory Usage"><i class="fas fa-microchip"></i> RAM: <span id="health-ram" class="health-val">0%</span></div>
-                    <div class="health-item" title="Total Connected Users"><i class="fas fa-network-wired"></i> Sockets: <span id="health-sockets" class="health-val">0</span></div>
-                    <div class="ghost-tag" title="You are hidden from player counts"><i class="fas fa-ghost"></i> Ghost Mode Active</div>
+                <div style="font-weight: 800; color: var(--ps-glow); display: flex; align-items: center; gap: 10px; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px;">
+                    <i class="fas fa-shield-alt"></i> Terminal Connected
                 </div>
             </div>
 
             <div class="content-area">
                 
                 <div id="view-dashboard" class="tab-view">
-                    <div class="bento-container custom-scroll">
+                    <div class="bento-container">
                         <div class="bento-grid">
-                            <div class="bento-item bento-span-2x2" onclick="openStatModal('vault')">
-                                <div class="bento-header">
-                                    <i class="fas fa-university bento-icon"></i>
-                                    <div class="bento-title">Bank Vault Limit</div>
+                            <div class="bento-item bento-span-2 bento-span-row-2" onclick="openStatModal('vault')">
+                                <div style="display:flex; align-items:center; gap:20px;">
+                                    <div class="stat-icon" style="color: var(--text-muted); font-size:3rem; width:80px; height:80px;"><i class="fas fa-university"></i></div>
+                                    <div class="stat-info">
+                                        <h3 style="font-size:1.1rem;">Bank Vault Limit</h3>
+                                        <div class="value" id="stat-limit" style="font-size:3.5rem; text-shadow:0 0 15px rgba(255,255,255,0.3);">2,000,000</div>
+                                    </div>
                                 </div>
-                                <div class="bento-value glow-neon" id="stat-limit">2,000,000</div>
-                            </div>
-                            
-                            <div class="bento-item bento-span-2x1" onclick="openStatModal('profit')">
-                                <div class="bento-header">
-                                    <i class="fas fa-chart-line bento-icon" style="color:var(--success);"></i>
-                                    <div class="bento-title">House Profit (24H)</div>
-                                </div>
-                                <div class="bento-value glow-success" id="stat-profit">0</div>
-                            </div>
-                            
-                            <div class="bento-item bento-span-2x1" onclick="openStatModal('economy')">
-                                <div class="bento-header">
-                                    <i class="fas fa-coins bento-icon" style="color:var(--credits);"></i>
-                                    <div class="bento-title">Player Assets (Main TC)</div>
-                                </div>
-                                <div class="bento-value" id="stat-economy" style="color:var(--credits);">0</div>
                             </div>
 
-                            <div class="bento-item bento-span-1x1" onclick="openStatModal('deposits')">
-                                <div class="bento-header">
-                                    <i class="fas fa-arrow-down bento-icon" style="color:var(--success);"></i>
-                                    <div class="bento-title">Deposits</div>
-                                </div>
-                                <div class="bento-value" id="stat-deposits" style="font-size:1.8rem;">0</div>
-                            </div>
-                            
-                            <div class="bento-item bento-span-1x1" onclick="openStatModal('withdrawals')">
-                                <div class="bento-header">
-                                    <i class="fas fa-arrow-up bento-icon" style="color:var(--danger);"></i>
-                                    <div class="bento-title">Withd.</div>
-                                </div>
-                                <div class="bento-value" id="stat-withdrawals" style="color:var(--danger); font-size:1.8rem;">0</div>
-                            </div>
-                            
-                            <div class="bento-item bento-span-1x1" onclick="openStatModal('users')">
-                                <div class="bento-header">
-                                    <i class="fas fa-users bento-icon" style="color:var(--ps-glow);"></i>
-                                    <div class="bento-title">Players</div>
-                                </div>
-                                <div class="bento-value" id="stat-users" style="font-size:1.8rem;">0</div>
+                            <div class="bento-item bento-span-2" onclick="openStatModal('economy')">
+                                <div class="stat-icon" style="color: var(--credits);"><i class="fas fa-coins"></i></div>
+                                <div class="stat-info"><h3>Total Player Assets (TC)</h3><div class="value glow-neon" id="stat-economy" style="color:var(--credits);">0</div></div>
                             </div>
 
-                            <div class="bento-item bento-span-1x1" onclick="switchTab('cashier')">
-                                <div class="bento-header">
-                                    <i class="fas fa-clock bento-icon" style="color:var(--credits);"></i>
-                                    <div class="bento-title">Pending</div>
-                                </div>
-                                <div class="bento-value" id="stat-pending" style="color:white; font-size:1.8rem;">0</div>
+                            <div class="bento-item" onclick="openStatModal('deposits')">
+                                <div class="stat-icon" style="color: var(--success);"><i class="fas fa-arrow-down"></i></div>
+                                <div class="stat-info"><h3>Approved Deposits</h3><div class="value" id="stat-deposits" style="color:var(--success);">0</div></div>
+                            </div>
+
+                            <div class="bento-item" onclick="switchTab('cashier')">
+                                <div class="stat-icon" style="color: var(--danger);"><i class="fas fa-clock"></i></div>
+                                <div class="stat-info"><h3>Pending Requests</h3><div class="value" id="stat-pending">0</div></div>
+                            </div>
+
+                            <div class="bento-item bento-span-2" onclick="openStatModal('profit')">
+                                <div class="stat-icon" style="color: var(--success);"><i class="fas fa-chart-line"></i></div>
+                                <div class="stat-info"><h3>House Profit (24H)</h3><div class="value" id="stat-profit" style="color:var(--success);">0</div></div>
+                            </div>
+                            
+                            <div class="bento-item bento-span-2" onclick="openStatModal('users')">
+                                <div class="stat-icon" style="color: var(--ps-glow);"><i class="fas fa-users"></i></div>
+                                <div class="stat-info"><h3>Registered Players</h3><div class="value" id="stat-users">0</div></div>
                             </div>
                         </div>
                     </div>
                     
                     <div class="live-pulse-panel">
-                        <div class="pulse-header"><div class="pulse-dot"></div> Live Action Pulse</div>
+                        <div class="pulse-header"><div class="pulse-dot"></div> Live Pulse</div>
                         <div class="pulse-feed custom-scroll" id="live-pulse-container">
-                            <div style="color:var(--text-muted); font-style:italic; text-align:center; padding: 20px;">Waiting for events...</div>
+                            <div style="color:var(--text-muted); font-style:italic; text-align:center; padding: 20px;">Listening for events...</div>
                         </div>
                     </div>
                 </div>
@@ -322,37 +294,28 @@
                 <div id="view-users" class="tab-view hidden" style="flex-direction: column;">
                     <div class="panel">
                         <div class="panel-header">
-                            <h3><i class="fas fa-users" style="margin-right:10px; color:var(--ps-glow)"></i> Player Database</h3>
-                            <button class="btn-sm" style="background: rgba(255,180,0,0.15); color: var(--credits); border: 1px solid rgba(255,180,0,0.3); padding: 10px 18px;" onclick="openModal('direct-gift-modal')">
-                                <i class="fas fa-gift"></i> Mass / Direct Gift
+                            <h3><i class="fas fa-users" style="color:var(--ps-glow); margin-right:8px;"></i> Player Database</h3>
+                            <button class="btn-sm btn-approve" onclick="openModal('direct-gift-modal')">
+                                <i class="fas fa-gift"></i> Direct Gift Credits
                             </button>
                         </div>
                         <div class="filter-bar">
                             <i class="fas fa-search" style="color:var(--text-muted)"></i>
-                            <input type="text" id="filter-search" placeholder="Search username..." style="flex:1;" onkeyup="pgUsers=1; renderUsers()">
+                            <input type="text" id="filter-search" placeholder="Search by username..." style="flex:1;" onkeyup="pgUsers=1; renderUsers()">
                             <select id="filter-role" onchange="pgUsers=1; renderUsers()">
-                                <option value="All">All Roles</option>
-                                <option value="Player">Player</option>
-                                <option value="Admin">Admin</option>
+                                <option value="All">All Roles</option><option value="Player">Player</option><option value="Admin">Admin</option>
                             </select>
                             <select id="filter-status" onchange="pgUsers=1; renderUsers()">
-                                <option value="All">All Statuses</option>
-                                <option value="Active">Active</option>
-                                <option value="Offline">Offline</option>
-                                <option value="Banned">Banned</option>
-                            </select>
-                            <select id="filter-sort" onchange="pgUsers=1; renderUsers()">
-                                <option value="desc">Assets: High to Low</option>
-                                <option value="asc">Assets: Low to High</option>
+                                <option value="All">All Statuses</option><option value="Active">Active</option><option value="Offline">Offline</option><option value="Banned">Banned</option>
                             </select>
                         </div>
                         <div class="table-wrapper">
                             <table>
                                 <thead>
                                     <tr>
-                                        <th>USER & STATUS</th>
-                                        <th>TOTAL ASSETS (TC + P)</th>
-                                        <th>ROLE</th>
+                                        <th>USERNAME</th>
+                                        <th class="center-col">CREDITS (TC)</th>
+                                        <th class="center-col">ROLE</th>
                                     </tr>
                                 </thead>
                                 <tbody id="users-tbody"></tbody>
@@ -365,12 +328,11 @@
                 <div id="view-cashier" class="tab-view hidden" style="flex-direction: column;">
                     <div class="split-screen">
                         <div class="panel split-col">
-                            <div class="panel-header"><h3 style="color: var(--credits);"><i class="fas fa-clock"></i> Pending Action Queue</h3></div>
+                            <div class="panel-header"><h3 style="color: var(--credits);"><i class="fas fa-clock"></i> Pending Requests</h3></div>
                             <div class="filter-bar">
                                 <input type="text" id="filter-pend-search" placeholder="Search user or ref..." style="flex:1;" onkeyup="pgPend=1; renderTransactions()">
                                 <select id="filter-pend-sort" onchange="pgPend=1; renderTransactions()">
-                                    <option value="newest">Newest First</option>
-                                    <option value="oldest">Oldest First</option>
+                                    <option value="newest">Newest First</option><option value="oldest">Oldest First</option>
                                 </select>
                             </div>
                             <div class="table-wrapper">
@@ -383,11 +345,15 @@
                         </div>
 
                         <div class="panel split-col">
-                            <div class="panel-header"><h3><i class="fas fa-history"></i> Processed History</h3></div>
+                            <div class="panel-header"><h3><i class="fas fa-history"></i> Transaction History</h3></div>
                             <div class="filter-bar">
-                                <input type="text" id="filter-hist-search" placeholder="Search user..." style="flex:1;" onkeyup="pgHist=1; renderTransactions()">
-                                <select id="filter-hist-type" onchange="pgHist=1; renderTransactions()"><option value="All">All</option><option value="Deposit">Deposit</option><option value="Withdrawal">Withd.</option></select>
-                                <select id="filter-hist-status" onchange="pgHist=1; renderTransactions()"><option value="All">All Status</option><option value="Approved">Approved</option><option value="Rejected">Rejected</option></select>
+                                <input type="text" id="filter-hist-search" placeholder="Search..." style="flex:1;" onkeyup="pgHist=1; renderTransactions()">
+                                <select id="filter-hist-type" onchange="pgHist=1; renderTransactions()">
+                                    <option value="All">All</option><option value="Deposit">Deposit</option><option value="Withdrawal">Withd.</option>
+                                </select>
+                                <select id="filter-hist-status" onchange="pgHist=1; renderTransactions()">
+                                    <option value="All">All</option><option value="Approved">Approved</option><option value="Rejected">Rejected</option>
+                                </select>
                             </div>
                             <div class="table-wrapper">
                                 <table>
@@ -403,22 +369,22 @@
                 <div id="view-promos" class="tab-view hidden" style="flex-direction: column;">
                     <div class="panel">
                         <div class="panel-header">
-                            <h3><i class="fas fa-gift" style="margin-right:10px; color:var(--playable)"></i> Active Gift Codes</h3>
-                            <button class="btn-sm btn-approve" onclick="openModal('create-promo-modal')" style="padding: 10px 18px;"><i class="fas fa-plus"></i> Generate Codes</button>
+                            <h3><i class="fas fa-gift" style="color:var(--playable); margin-right:8px;"></i> Active Gift Codes</h3>
+                            <button class="btn-sm btn-approve" onclick="openModal('create-promo-modal')"><i class="fas fa-plus"></i> Generate Codes</button>
                         </div>
                         <div class="filter-bar">
                             <i class="fas fa-search" style="color:var(--text-muted)"></i>
                             <input type="text" id="filter-promo-search" placeholder="Search batch ID..." style="flex:1;" onkeyup="pgPromos=1; renderPromos()">
-                            <select id="filter-promo-type" onchange="pgPromos=1; renderPromos()"><option value="All">All Types</option><option value="playable">Playable Bonus</option><option value="regular">Regular TC</option></select>
+                            <select id="filter-promo-type" onchange="pgPromos=1; renderPromos()"><option value="All">All</option><option value="playable">Playable</option><option value="regular">Regular</option></select>
                         </div>
                         <div class="table-wrapper">
                             <table>
                                 <thead>
                                     <tr>
                                         <th>BATCH ID</th>
-                                        <th>VALUE PER CODE</th>
-                                        <th>CREDIT TYPE</th>
-                                        <th>REMAINING</th>
+                                        <th class="center-col">VALUE PER CODE</th>
+                                        <th class="center-col">TYPE</th>
+                                        <th class="center-col">QUANTITY</th>
                                         <th class="center-col">ACTIONS</th>
                                     </tr>
                                 </thead>
@@ -431,22 +397,22 @@
 
                 <div id="view-tools" class="tab-view hidden" style="flex-direction: column;">
                     <div class="panel">
-                        <div class="panel-header"><h3><i class="fas fa-wrench"></i> System Control Tools</h3></div>
+                        <div class="panel-header"><h3><i class="fas fa-wrench" style="margin-right:8px;"></i> System Control Tools</h3></div>
                         <div class="bento-grid" style="padding: 30px; grid-template-columns: repeat(2, 1fr);">
                             
                             <div class="bento-item" onclick="openModal('global-update-modal')">
                                 <div class="stat-icon" style="color: var(--ps-glow);"><i class="fas fa-bullhorn"></i></div>
                                 <div class="stat-info">
                                     <h3>Communication</h3>
-                                    <div class="value" style="font-size: 1.6rem;">Send Broadcast</div>
+                                    <div class="value" style="font-size: 1.4rem;">Global Broadcast</div>
                                 </div>
                             </div>
                             
                             <div class="bento-item" onclick="toggleMaintenanceMode()" id="maintenance-card" style="border-color: var(--danger); box-shadow: inset 0 0 15px rgba(255,51,102,0.1);">
                                 <div class="stat-icon" style="color: var(--danger);" id="maintenance-icon"><i class="fas fa-power-off"></i></div>
                                 <div class="stat-info">
-                                    <h3 style="color: var(--danger);">Deep Killswitch</h3>
-                                    <div class="value" style="font-size: 1.6rem; color: var(--danger);" id="maintenance-text">Maintenance: OFF</div>
+                                    <h3 style="color: var(--danger);">Killswitch</h3>
+                                    <div class="value" style="font-size: 1.4rem; color: var(--danger);" id="maintenance-text">Maintenance: OFF</div>
                                 </div>
                             </div>
 
@@ -456,13 +422,13 @@
 
                 <div id="view-audit" class="tab-view hidden" style="flex-direction: column;">
                     <div class="panel">
-                        <div class="panel-header"><h3 style="color: var(--danger);"><i class="fas fa-shield-alt"></i> Admin Audit Log</h3></div>
+                        <div class="panel-header"><h3 style="color: var(--danger);"><i class="fas fa-shield-alt"></i> Admin Audit Logs</h3></div>
                         <div class="table-wrapper">
                             <table>
                                 <thead>
                                     <tr>
-                                        <th>TIME</th>
-                                        <th>ADMIN</th>
+                                        <th>DATE / TIME</th>
+                                        <th>ADMIN NAME</th>
                                         <th>ACTION</th>
                                         <th>DETAILS</th>
                                     </tr>
@@ -478,50 +444,99 @@
         </div>
     </div>
 
-    <div id="player-detail-modal" class="modal-overlay hidden" onclick="if(event.target===this) closeModal('player-detail-modal')">
-        <div class="modal-content" style="width: 420px;">
-            <button class="modal-close" onclick="closeModal('player-detail-modal')"><i class="fas fa-times"></i></button>
+    <div id="player-profile-modal" class="modal-overlay hidden" onclick="if(event.target===this) closeModal('player-profile-modal')">
+        <div class="modal-content" style="width: 480px;">
+            <button class="modal-close" onclick="closeModal('player-profile-modal')"><i class="fas fa-times"></i></button>
             
-            <div class="modal-title" style="justify-content: flex-start; gap: 12px; font-size: 1.6rem;">
-                <div id="pd-status-dot" class="status-dot" style="width:14px;height:14px; margin:0;"></div>
-                <span id="pd-username">User</span>
+            <div class="modal-title" id="pp-header"></div>
+            
+            <div style="display:flex; justify-content:space-between; margin-bottom:20px; font-size:0.9rem; color:var(--text-muted); font-weight:800; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px;">
+                <span>JOINED: <span id="pp-joined" style="color:white;"></span></span>
+                <span style="display:flex; align-items:center; gap:8px;">IP: <span id="pp-ip" style="font-family:monospace; color:white;"></span> <i class="fas fa-copy" style="cursor:pointer; color:var(--ps-glow);" onclick="copyPP_IP()"></i></span>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:25px;">
+                <div class="edit-row">
+                    <div class="edit-label">Main TC</div>
+                    <div class="edit-input-wrapper">
+                        <input type="number" id="pp-main-in" step="0.1">
+                        <button class="btn-inline-save" onclick="saveInlineEdit()"><i class="fas fa-save"></i> Save</button>
+                    </div>
+                </div>
+                <div class="edit-row">
+                    <div class="edit-label" style="color:var(--playable)">Playable P</div>
+                    <div class="edit-input-wrapper">
+                        <input type="number" id="pp-play-in" step="0.1">
+                        <button class="btn-inline-save" onclick="saveInlineEdit()"><i class="fas fa-save"></i> Save</button>
+                    </div>
+                </div>
+                <div class="edit-row">
+                    <div class="edit-label">Role</div>
+                    <div class="edit-input-wrapper">
+                        <select id="pp-role-in">
+                            <option value="Player">Player</option>
+                            <option value="VIP">VIP</option>
+                            <option value="Moderator">Moderator</option>
+                            <option value="Admin">Admin</option>
+                        </select>
+                        <button class="btn-inline-save" onclick="saveInlineEdit()"><i class="fas fa-save"></i> Save</button>
+                    </div>
+                </div>
             </div>
             
-            <div class="info-grid">
-                <div class="info-box">
-                    <div class="info-label">Joined</div>
-                    <div class="info-val" id="pd-joined">-</div>
+            <div style="display:flex; gap:10px;">
+                <button class="btn-primary" style="background:rgba(255,255,255,0.1); color:white; border-color:var(--text-muted);" onclick="viewPlayerLogs()"><i class="fas fa-list"></i> Player Logs</button>
+                <button class="btn-primary" id="pp-ban-btn" style="background:rgba(255,51,102,0.1); color:var(--danger); border-color:var(--danger);" onclick="toggleBanStatus()"><i class="fas fa-ban"></i> Ban Account</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="inspector-modal" class="modal-overlay hidden" onclick="if(event.target===this) closeModal('inspector-modal')">
+        <div class="modal-content" style="width: 450px; border-top: 4px solid var(--ps-glow);">
+            <button class="modal-close" onclick="closeModal('inspector-modal')"><i class="fas fa-times"></i></button>
+            <h3 class="modal-title" style="border: none; margin-bottom: 10px;">INSPECT REQUEST</h3>
+            
+            <div style="background: rgba(0,0,0,0.4); padding: 20px; border-radius: 8px; border: 1px solid var(--glass-border); margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px; align-items:center;">
+                    <span style="color: var(--text-muted); font-weight: 800; font-size:0.8rem;">TYPE</span>
+                    <span id="inspector-type" style="font-weight: 900; color: white; font-size:1rem;"></span>
                 </div>
-                <div class="info-box">
-                    <div class="info-label">Role</div>
-                    <div class="info-val" id="pd-role">-</div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px; align-items:center;">
+                    <span style="color: var(--text-muted); font-weight: 800; font-size:0.8rem;">USER</span>
+                    <span id="inspector-user" style="font-weight: 900; color: white; font-size:1.1rem;"></span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 15px; align-items:center;">
+                    <span style="color: var(--text-muted); font-weight: 800; font-size:0.8rem;">AMOUNT</span>
+                    <span id="inspector-amt" style="font-weight: 900; color: var(--credits); font-size: 1.3rem;"></span>
+                </div>
+                
+                <div style="border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 15px;">
+                    <span style="color: var(--text-muted); font-weight: 800; margin-bottom: 10px; font-size:0.8rem; display:block;">PLAYER SUBMITTED DETAILS:</span>
+                    <div id="inspector-proof-container"></div>
                 </div>
             </div>
 
-            <div class="info-box" style="background: rgba(0,0,0,0.5); margin-bottom: 20px;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                    <span class="info-label" style="margin:0;">MAIN TC</span>
-                    <span id="pd-main-tc" style="color:var(--credits); font-weight:900; font-size:1.3rem;"></span>
-                </div>
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <span class="info-label" style="margin:0;">PLAYABLE P</span>
-                    <span id="pd-play-tc" style="color:var(--playable); font-weight:900; font-size:1.1rem;"></span>
-                </div>
+            <div class="confirm-btn-container" id="inspector-action-container">
+                <button class="btn-primary" style="background: rgba(255, 51, 102, 0.15); color: var(--danger); border-color: var(--danger);" id="btn-reject-tx">REJECT</button>
+                <button class="btn-primary" style="background: rgba(0, 230, 118, 0.15); color: var(--success); border-color: var(--success);" id="btn-approve-tx">APPROVE</button>
             </div>
-            
-            <div class="info-box" style="margin-bottom: 25px; display:flex; justify-content:space-between; align-items:center;">
-                <div style="flex:1;">
-                    <div class="info-label">IP Address / Network</div>
-                    <div id="pd-ip" style="font-family:monospace; font-size:1rem; font-weight:900; display:flex; align-items:center;">-</div>
-                </div>
-                <button class="btn-sm" style="background:rgba(255,255,255,0.1); padding:10px; font-size:0.9rem;" onclick="copyPDIP()"><i class="fas fa-copy"></i></button>
+        </div>
+    </div>
+
+    <div id="player-logs-modal" class="modal-overlay hidden" onclick="if(event.target===this) closeModal('player-logs-modal')">
+        <div class="modal-content wide">
+            <button class="modal-close" onclick="closeModal('player-logs-modal')"><i class="fas fa-times"></i></button>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom: 1px solid var(--glass-border); padding-bottom:10px;">
+                <h3 class="modal-title" id="pl-title" style="border:none; margin:0; padding:0;">PLAYER LOGS</h3>
+                <button class="btn-sm btn-reject" onclick="clearPlayerLogs()" style="padding: 8px 15px;"><i class="fas fa-trash"></i> Erase Logs</button>
             </div>
-            
-            <div style="display:flex; flex-direction:column; gap:12px;">
-                <button class="btn-primary" style="background:rgba(0,162,255,0.1); color:var(--ps-glow); border-color:var(--ps-glow); padding:12px;" onclick="openEditUserFromPD()"><i class="fas fa-pen"></i> Adjust Balances</button>
-                <button class="btn-primary" style="background:rgba(255,255,255,0.1); color:white; border-color:var(--text-muted); padding:12px;" onclick="viewPlayerLogsFromPD()"><i class="fas fa-list"></i> View Activity Logs</button>
-                <button class="btn-primary" id="pd-ban-btn" style="background:rgba(255,51,102,0.1); color:var(--danger); border-color:var(--danger); padding:12px;" onclick="toggleBanFromPD()"><i class="fas fa-ban"></i> Ban Player</button>
+            <div class="table-wrapper">
+                <table>
+                    <thead><tr><th>Time</th><th>Action</th><th class="center-col">Amount</th><th>Details</th></tr></thead>
+                    <tbody id="pl-tbody"></tbody>
+                </table>
             </div>
+            <div class="pagination" id="pag-pl"></div>
         </div>
     </div>
 
@@ -532,103 +547,23 @@
             
             <div id="stat-log-breakdown" style="display:none; flex-direction:column; gap:10px; font-size:1rem; font-weight:800; background:rgba(0,0,0,0.5); padding:20px; border-radius:8px; border:1px solid var(--glass-border); margin-bottom:15px;"></div>
             
-            <div class="table-wrapper" style="max-height: 400px;" id="stat-log-table-container">
+            <div class="table-wrapper" id="stat-log-table-container">
                 <table>
                     <thead id="stat-log-thead"></thead>
-                    <tbody id="stat-log-tbody" class="custom-scroll"></tbody>
+                    <tbody id="stat-log-tbody"></tbody>
                 </table>
             </div>
             <div class="pagination" id="pag-stat-log"></div>
         </div>
     </div>
 
-    <div id="player-logs-modal" class="modal-overlay hidden" onclick="if(event.target===this) closeModal('player-logs-modal')">
-        <div class="modal-content wide">
-            <button class="modal-close" onclick="closeModal('player-logs-modal')"><i class="fas fa-times"></i></button>
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom: 1px solid var(--glass-border); padding-bottom:10px;">
-                <h3 class="modal-title" id="pl-title" style="border:none; margin:0; padding:0;">PLAYER LOGS</h3>
-                <button class="btn-sm btn-reject" onclick="clearPlayerLogs()" style="padding: 10px 18px;"><i class="fas fa-trash"></i> Erase Logs</button>
-            </div>
-            <div class="table-wrapper" style="max-height: 400px;">
-                <table>
-                    <thead>
-                        <tr><th>Time</th><th>Action</th><th>Amount</th><th>Details</th></tr>
-                    </thead>
-                    <tbody id="pl-tbody" class="custom-scroll"></tbody>
-                </table>
-            </div>
-            <div class="pagination" id="pag-pl"></div>
-        </div>
-    </div>
-
-    <div id="inspector-modal" class="modal-overlay hidden" onclick="if(event.target===this) closeModal('inspector-modal')">
-        <div class="modal-content" style="width: 420px; border-top: 4px solid var(--ps-glow);">
-            <button class="modal-close" onclick="closeModal('inspector-modal')"><i class="fas fa-times"></i></button>
-            <h3 class="modal-title" style="border: none; margin-bottom: 10px; justify-content:center;">INSPECT REQUEST</h3>
-            
-            <div style="background: rgba(0,0,0,0.5); padding: 20px; border-radius: 8px; border: 1px solid var(--glass-border); margin-bottom: 20px;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 12px; align-items:center;">
-                    <span style="color: var(--text-muted); font-weight: 800; font-size:0.8rem;">TYPE</span>
-                    <span id="inspector-type" style="font-weight: 900; color: white;">DEPOSIT</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 12px; align-items:center;">
-                    <span style="color: var(--text-muted); font-weight: 800; font-size:0.8rem;">USER</span>
-                    <span id="inspector-user" style="font-weight: 900; color: white;"></span>
-                </div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 15px; align-items:center;">
-                    <span style="color: var(--text-muted); font-weight: 800; font-size:0.8rem;">AMOUNT</span>
-                    <span id="inspector-amt" style="font-weight: 900; color: var(--credits); font-size: 1.3rem;">0 TC</span>
-                </div>
-                <div style="display: flex; flex-direction: column; margin-top: 20px; padding-top: 15px; border-top: 1px dashed rgba(255,255,255,0.2);">
-                    <span style="color: var(--text-muted); font-weight: 800; margin-bottom: 15px; font-size:0.8rem;">PLAYER DETAILS</span>
-                    <div id="inspector-proof-container"></div>
-                </div>
-            </div>
-
-            <div class="confirm-btn-container" id="inspector-action-container">
-                <button class="btn-primary" style="background: rgba(255, 51, 102, 0.15); color: var(--danger); border-color: var(--danger); padding:12px;" id="btn-reject-tx">REJECT</button>
-                <button class="btn-primary" style="background: rgba(0, 230, 118, 0.15); color: var(--success); border-color: var(--success); padding:12px;" id="btn-approve-tx">APPROVE</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="edit-user-modal" class="modal-overlay hidden" onclick="if(event.target===this) closeModal('edit-user-modal')">
-        <div class="modal-content">
-            <button class="modal-close" onclick="closeModal('edit-user-modal')"><i class="fas fa-times"></i></button>
-            <h3 class="modal-title" style="justify-content:center;">Edit Balances</h3>
-            <div id="edit-user-err" class="modal-error-text"></div>
-            <input type="hidden" id="edit-u-id">
-            
-            <div class="input-group">
-                <label>Username (Read Only)</label>
-                <input type="text" id="edit-u-name" class="input-control" disabled style="opacity: 0.5;">
-            </div>
-            <div class="input-group">
-                <label>Main TC (Withdrawable)</label>
-                <input type="number" id="edit-u-credits" class="input-control" step="0.1">
-            </div>
-            <div class="input-group">
-                <label>Playable Bonus P</label>
-                <input type="number" id="edit-u-playable" class="input-control" step="0.1">
-            </div>
-            <div class="input-group" style="margin-bottom: 25px;">
-                <label>Account Role</label>
-                <select id="edit-u-role" class="input-control">
-                    <option value="Player">Player</option>
-                    <option value="Admin">Admin</option>
-                </select>
-            </div>
-            <button class="btn-primary" onclick="saveUserEdit()">SAVE CHANGES</button>
-        </div>
-    </div>
-
     <div id="snt-confirm-modal" class="modal-overlay hidden" onclick="if(event.target===this) closeConfirmModal()">
         <div class="modal-content" style="width: 350px; text-align: center;">
-            <h3 class="modal-title" id="confirm-title" style="color: var(--danger); font-size: 1.3rem; border:none; padding:0; margin-bottom:10px; justify-content:center;">WARNING</h3>
+            <h3 class="modal-title" id="confirm-title" style="color: var(--danger); justify-content:center; border:none; padding:0;">WARNING</h3>
             <p id="confirm-msg" style="font-size: 1rem; color: white; margin-bottom: 25px;">Are you sure?</p>
             <div class="confirm-btn-container" style="margin-top:0;">
-                <button class="btn-primary" style="background: transparent; color: white; border-color: var(--text-muted); padding:12px;" onclick="closeConfirmModal()">CANCEL</button>
-                <button class="btn-primary" id="confirm-action-btn" style="background: var(--danger); border-color: var(--danger); color: white; padding:12px;">PROCEED</button>
+                <button class="btn-primary" style="background: transparent; color: white; border-color: var(--text-muted);" onclick="closeConfirmModal()">CANCEL</button>
+                <button class="btn-primary" id="confirm-action-btn" style="background: var(--danger); border-color: var(--danger); color: white;">PROCEED</button>
             </div>
         </div>
     </div>
@@ -636,7 +571,7 @@
     <div id="global-update-modal" class="modal-overlay hidden" onclick="if(event.target===this) closeModal('global-update-modal')">
         <div class="modal-content">
             <button class="modal-close" onclick="closeModal('global-update-modal')"><i class="fas fa-times"></i></button>
-            <h3 class="modal-title" style="justify-content:center;">Global Broadcast</h3>
+            <h3 class="modal-title">Global Broadcast</h3>
             <div class="input-group" style="margin-bottom: 25px;">
                 <label>Message (Notifies all online players)</label>
                 <input type="text" id="tool-msg" class="input-control" placeholder="Maintenance in 5 minutes...">
@@ -648,7 +583,7 @@
     <div id="direct-gift-modal" class="modal-overlay hidden" onclick="if(event.target===this) closeModal('direct-gift-modal')">
         <div class="modal-content">
             <button class="modal-close" onclick="closeModal('direct-gift-modal')"><i class="fas fa-times"></i></button>
-            <h3 class="modal-title" style="color:var(--credits); justify-content:center;"><i class="fas fa-gift"></i> Direct Gift</h3>
+            <h3 class="modal-title" style="color:var(--credits)"><i class="fas fa-gift"></i> Direct Gift</h3>
             <div class="input-group">
                 <label>Target Group</label>
                 <select id="tool-target-type" class="input-control" onchange="toggleGiftTarget()">
@@ -682,7 +617,7 @@
     <div id="create-promo-modal" class="modal-overlay hidden" onclick="if(event.target===this) closeModal('create-promo-modal')">
         <div class="modal-content">
             <button class="modal-close" onclick="closeModal('create-promo-modal')"><i class="fas fa-times"></i></button>
-            <h3 class="modal-title" style="justify-content:center;">Generate Codes</h3>
+            <h3 class="modal-title">Generate Codes</h3>
             <div id="promo-err" class="modal-error-text"></div>
             <div class="input-group">
                 <label>Value Per Code</label>
@@ -708,14 +643,12 @@
             <button class="modal-close" onclick="closeModal('view-batch-modal')"><i class="fas fa-times"></i></button>
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom: 1px solid var(--glass-border); padding-bottom:10px;">
                 <h3 class="modal-title" id="vb-title" style="border:none; margin:0; padding:0;">BATCH DETAILS</h3>
-                <button class="btn-sm btn-edit" onclick="copyAllCodes()" style="padding: 10px 18px;"><i class="fas fa-copy"></i> Copy All Codes</button>
+                <button class="btn-sm btn-edit" onclick="copyAllCodes()" style="padding: 8px 15px;"><i class="fas fa-copy"></i> Copy All</button>
             </div>
-            <div class="table-wrapper" style="max-height: 400px;">
+            <div class="table-wrapper">
                 <table>
-                    <thead>
-                        <tr><th class="center-col">Code</th><th class="center-col">Status</th><th class="center-col">Copy</th></tr>
-                    </thead>
-                    <tbody id="vb-tbody" class="custom-scroll"></tbody>
+                    <thead><tr><th class="center-col">Code</th><th class="center-col">Status</th><th class="center-col">Copy</th></tr></thead>
+                    <tbody id="vb-tbody"></tbody>
                 </table>
             </div>
             <div class="pagination" id="pag-vb"></div>
@@ -728,7 +661,6 @@
 
     <script>
         const socket = io();
-        
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         let lastPendingCount = 0;
 
@@ -752,7 +684,7 @@
             setTimeout(() => { if(t.parentElement) t.remove(); }, 3500);
         }
 
-        // Decimal formatting: removes .0
+        // Decimal formatting: strictly removes .0 universally
         const formatNum = (amount) => { 
             let num = Math.round((amount || 0) * 10) / 10; 
             return num % 1 === 0 ? num.toLocaleString('en-US') : num.toLocaleString('en-US', {minimumFractionDigits: 1, maximumFractionDigits: 1}); 
@@ -764,7 +696,7 @@
         socket.on('adminPulse', data => {
             let fc = document.getElementById('live-pulse-container');
             if(!fc) return;
-            if(fc.innerHTML.includes('Waiting for events')) fc.innerHTML = '';
+            if(fc.innerHTML.includes('Listening for events')) fc.innerHTML = '';
             
             let dStr = new Date(data.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
             let item = document.createElement('div');
@@ -785,17 +717,16 @@
         
         let activePlayerLogs = []; let pgPL = 1;
         let activeBatchCodes = []; let pgVB = 1;
-        
         let statData = []; let pgStat = 1; let currentStatType = '';
         
         let currentLogUsername = '';
         let currentEditingUserId = '';
         let sysMaintenance = false;
         
-        // Strict Lock
+        // Strict pagination lock
         const limit = 10; 
 
-        // Centralized Pagination Logic
+        // Unified Pagination
         function renderPagination(totalItems, currentPage, elementId, updateVarStr) {
             const totalPages = Math.max(1, Math.ceil(totalItems / limit));
             const c = document.getElementById(elementId);
@@ -850,7 +781,7 @@
             document.querySelectorAll('.tab-view').forEach(el => el.classList.add('hidden'));
             document.getElementById('view-' + tabId).classList.remove('hidden');
 
-            const titles = { 'dashboard': 'Dashboard Overview', 'users': 'Player Database', 'cashier': 'Economy & Cashier', 'promos': 'Promos & Rewards', 'tools': 'System Tools', 'audit': 'Security Audit' };
+            const titles = { 'dashboard': 'Dashboard Overview', 'users': 'Player Database', 'cashier': 'Economy & Cashier', 'promos': 'Promos & Rewards', 'tools': 'System Tools', 'audit': 'Security & Audit Logs' };
             document.getElementById('page-title').innerText = titles[tabId];
         }
 
@@ -931,7 +862,6 @@
             renderUsers(); renderTransactions(); renderPromos(); renderAuditLogs();
             if(!document.getElementById('stat-log-modal').classList.contains('hidden')) renderStatLog();
             
-            // Sync Datalist for Searchable Gifting
             let dl = document.getElementById('player-datalist');
             if(dl) {
                 dl.innerHTML = '';
@@ -940,7 +870,7 @@
         });
 
         // ==========================================
-        // UI & RENDER FUNCTIONS
+        // UI RENDER FUNCTIONS
         // ==========================================
 
         function renderUsers() {
@@ -967,22 +897,23 @@
             let paginated = filtered.slice((pgUsers - 1) * limit, pgUsers * limit);
             renderPagination(filtered.length, pgUsers, 'pag-users', 'pgUsers');
 
-            if(paginated.length === 0) { tbody.innerHTML = `<tr><td colspan="4" class="center-col" style="color:var(--text-muted); font-style:italic; padding:30px;">No players found.</td></tr>`; return; }
+            if(paginated.length === 0) { tbody.innerHTML = `<tr><td colspan="3" class="center-col" style="color:var(--text-muted); font-style:italic; padding:30px;">No players found.</td></tr>`; return; }
 
             paginated.forEach(u => {
                 let statClass = u.status === 'Active' ? 'active' : (u.status === 'Banned' ? 'banned' : 'offline');
-                let displayCredits = `<span style="font-weight: 900; color: var(--credits); font-size:1.1rem;">${formatNum(u.credits)}</span><span style="font-size: 0.8rem; color: var(--playable); font-weight:800; margin-left:8px;">+ ${formatNum(u.playableCredits)} P</span>`;
+                let displayCredits = `<div style="font-weight: 900; color: var(--credits); font-size:1rem; line-height:1.2;">${formatNum(u.credits)}</div><div style="font-size: 0.75rem; color: var(--playable); font-weight:800;">${formatNum(u.playableCredits)} P</div>`;
+                let roleClass = u.role.toLowerCase();
 
                 tbody.innerHTML += `
                     <tr class="clickable-row" onclick="openPlayerModal('${u._id}')">
                         <td>
-                            <div style="display:flex; align-items:center; gap:12px;">
+                            <div style="display:flex; align-items:center; gap:8px;">
                                 <div class="status-dot ${statClass}"></div>
-                                <span style="font-weight:900; font-size:1.1rem; color: white;">${u.username}</span>
+                                <span style="font-weight:900; font-size:1.05rem; color: white;">${u.username}</span>
                             </div>
                         </td>
-                        <td>${displayCredits}</td>
-                        <td style="color:var(--text-muted); font-size:0.95rem; text-transform:uppercase;">${u.role}</td>
+                        <td class="center-col">${displayCredits}</td>
+                        <td class="center-col"><span class="role-pill ${roleClass}">${u.role}</span></td>
                     </tr>`;
             });
         }
@@ -995,55 +926,56 @@
             currentEditingUserId = user._id;
 
             let statClass = user.status === 'Active' ? 'active' : (user.status === 'Banned' ? 'banned' : 'offline');
-            let actionBanText = user.status === 'Banned' ? 'UNBAN PLAYER' : 'BAN PLAYER';
+            let actionBanText = user.status === 'Banned' ? 'UNBAN ACCOUNT' : 'BAN ACCOUNT';
             let actionBanColor = user.status === 'Banned' ? 'var(--success)' : 'var(--danger)';
             let actionBanCode = user.status === 'Banned' ? 'unban' : 'ban';
 
-            // Find Smurfs
-            let linkedAccs = gUsers.filter(u => u.ipAddress === user.ipAddress && u.username !== user.username).map(u => u.username);
-            let smurfHtml = linkedAccs.length > 0 ? `<div style="color:var(--danger); font-size:0.8rem; margin-top:5px;"><i class="fas fa-exclamation-triangle"></i> Linked: ${linkedAccs.join(', ')}</div>` : '';
+            document.getElementById('pp-header').innerHTML = `<div class="status-dot ${statClass}" style="width:14px; height:14px; margin:0;"></div> ${user.username}`;
+            document.getElementById('pp-joined').innerText = new Date(user.joinDate).toLocaleDateString([], {year:'numeric', month:'short', day:'numeric'});
+            document.getElementById('pp-ip').innerText = user.ipAddress || 'Hidden';
 
-            document.getElementById('pd-status-dot').className = `status-dot ${statClass}`;
-            document.getElementById('pd-username').innerText = user.username;
-            document.getElementById('pd-joined').innerText = new Date(user.joinDate).toLocaleDateString([], {year:'numeric', month:'short', day:'numeric'});
-            document.getElementById('pd-role').innerHTML = user.role;
-            document.getElementById('pd-main-tc').innerText = formatNum(user.credits);
-            document.getElementById('pd-play-tc').innerText = formatNum(user.playableCredits);
-            
-            document.getElementById('pd-ip').innerHTML = `${user.ipAddress || 'Hidden'} ${smurfHtml}`;
+            // Set inputs
+            document.getElementById('pp-main-in').value = user.credits || 0;
+            document.getElementById('pp-play-in').value = user.playableCredits || 0;
+            document.getElementById('pp-role-in').value = user.role;
 
-            let banBtn = document.getElementById('pd-ban-btn');
+            let banBtn = document.getElementById('pp-ban-btn');
             banBtn.innerHTML = `<i class="fas fa-ban"></i> ${actionBanText}`;
             banBtn.style.color = actionBanColor;
             banBtn.style.borderColor = actionBanColor;
-            banBtn.onclick = () => { actionUser(actionBanCode, user._id, user.username); };
+            banBtn.onclick = () => { toggleBanStatus(actionBanCode, user._id, user.username); };
 
-            openModal('player-detail-modal');
+            openModal('player-profile-modal');
         }
 
-        function copyPDIP() {
-            let txt = document.getElementById('pd-ip').innerText.split('\n')[0].trim();
+        function copyPP_IP() {
+            let txt = document.getElementById('pp-ip').innerText;
             navigator.clipboard.writeText(txt);
             showToast("IP Copied to Clipboard");
         }
 
-        function openEditUserFromPD() {
-            closeModal('player-detail-modal');
-            const u = gUsers.find(x => x._id === currentEditingUserId); if(!u) return;
-            document.getElementById('edit-u-id').value = u._id;
-            document.getElementById('edit-u-name').value = u.username;
-            document.getElementById('edit-u-credits').value = u.credits || 0;
-            document.getElementById('edit-u-playable').value = u.playableCredits || 0;
-            document.getElementById('edit-u-role').value = u.role;
-            openModal('edit-user-modal');
+        function saveInlineEdit() {
+            let cr = parseFloat(document.getElementById('pp-main-in').value);
+            let pcr = parseFloat(document.getElementById('pp-play-in').value);
+            let role = document.getElementById('pp-role-in').value;
+            
+            if(isNaN(cr) || isNaN(pcr)) return showToast("Invalid number format", "error");
+            
+            socket.emit('adminAction', { type: 'editUser', id: currentEditingUserId, credits: cr, playableCredits: pcr, role: role });
         }
 
-        function viewPlayerLogsFromPD() {
-            closeModal('player-detail-modal');
+        function viewPlayerLogs() {
+            closeModal('player-profile-modal');
             document.getElementById('pl-title').innerText = `${currentLogUsername} LOGS`;
             pgPL = 1;
             socket.emit('fetchUserLogs', currentLogUsername);
             openModal('player-logs-modal');
+        }
+
+        function toggleBanStatus(code, id, username) {
+            closeModal('player-profile-modal');
+            let msg = code === 'ban' ? `Are you sure you want to BAN ${username}?` : `Are you sure you want to UNBAN ${username}?`;
+            showSNTConfirm("MODIFY ACCOUNT", msg, () => { socket.emit('adminAction', { type: code, id: id }); });
         }
 
         // BENTO STAT LOGS MODAL
@@ -1071,7 +1003,7 @@
                 thead.innerHTML = `<tr><th class="center-col" style="width:30px;">#</th><th>USERNAME</th><th class="center-col">MAIN TC</th></tr>`;
                 statData = [...gUsers].sort((a,b) => (b.credits||0) - (a.credits||0)).filter(u => (u.credits||0) > 0);
                 let paginated = statData.slice((pgStat - 1) * limit, pgStat * limit);
-                tbody.innerHTML = paginated.map((u, i) => `<tr class="clickable-row" onclick="openPlayerModal('${u._id}')"><td class="center-col" style="color:var(--text-muted); font-size:0.8rem;">${(pgStat-1)*limit + i + 1}</td><td style="font-weight:900;">${u.username}</td><td class="center-col" style="color:var(--credits); font-weight:bold; font-size:1rem;">${formatNum(u.credits)}</td></tr>`).join('');
+                tbody.innerHTML = paginated.map((u, i) => `<tr><td class="center-col" style="color:var(--text-muted); font-size:0.8rem;">${(pgStat-1)*limit + i + 1}</td><td style="font-weight:900;">${u.username}</td><td class="center-col" style="color:var(--credits); font-weight:bold; font-size:1rem;">${formatNum(u.credits)}</td></tr>`).join('');
             }
             else if (currentStatType === 'deposits') {
                 title = '<i class="fas fa-arrow-down" style="color:var(--success)"></i> APPROVED DEPOSITS';
@@ -1106,17 +1038,7 @@
                 let paginated = statData.slice((pgStat - 1) * limit, pgStat * limit);
                 tbody.innerHTML = paginated.map(u => {
                     let statClass = u.status === 'Active' ? 'active' : (u.status === 'Banned' ? 'banned' : 'offline');
-                    return `<tr class="clickable-row" onclick="openPlayerModal('${u._id}')"><td style="color:var(--text-muted); font-size:0.8rem;">${new Date(u.joinDate).toLocaleDateString([],{month:'short',day:'numeric'})}</td><td style="font-weight:900;">${u.username}</td><td class="center-col"><div class="status-dot ${statClass}" style="margin:0;"></div></td></tr>`;
-                }).join('');
-            }
-            else if (currentStatType === 'pending') {
-                title = '<i class="fas fa-clock" style="color:var(--credits)"></i> PENDING REQUESTS';
-                thead.innerHTML = `<tr><th>DATE</th><th>TYPE</th><th class="center-col">AMOUNT</th><th>USER</th></tr>`;
-                statData = gTxs.filter(t => t.status === 'Pending').sort((a,b) => new Date(b.date) - new Date(a.date));
-                let paginated = statData.slice((pgStat - 1) * limit, pgStat * limit);
-                tbody.innerHTML = paginated.map(t => {
-                    let color = t.type === 'Deposit' ? 'var(--success)' : 'var(--danger)';
-                    return `<tr><td style="color:var(--text-muted); font-size:0.8rem;">${new Date(t.date).toLocaleDateString([],{month:'short',day:'numeric'})}</td><td style="text-transform:uppercase; font-weight:800; font-size:0.75rem;">${t.type}</td><td class="center-col" style="color:${color}; font-weight:bold;">${formatNum(t.amount)}</td><td style="font-weight:900;">${t.username}</td></tr>`;
+                    return `<tr><td style="color:var(--text-muted); font-size:0.8rem;">${new Date(u.joinDate).toLocaleDateString([],{month:'short',day:'numeric'})}</td><td style="font-weight:900;">${u.username}</td><td class="center-col"><div class="status-dot ${statClass}" style="margin:0;"></div></td></tr>`;
                 }).join('');
             }
             else if (currentStatType === 'vault') {
@@ -1328,9 +1250,9 @@
                 tbody.innerHTML += `
                     <tr>
                         <td style="font-weight:900; color:white; font-size:1rem;">${b.id}</td>
-                        <td style="color:var(--ps-glow); font-weight: 800; font-size:0.95rem;">${formatNum(b.amount)}</td>
-                        <td style="font-weight:800; color:${tColor}; font-size:0.9rem;">${tName}</td>
-                        <td style="font-weight:800; font-size:1rem;">${b.codes.length}</td>
+                        <td class="center-col" style="color:var(--ps-glow); font-weight: 800; font-size:0.95rem;">${formatNum(b.amount)}</td>
+                        <td class="center-col" style="font-weight:800; color:${tColor}; font-size:0.9rem;">${tName}</td>
+                        <td class="center-col" style="font-weight:800; font-size:1rem;">${b.codes.length}</td>
                         <td class="center-col">
                             <div class="action-btns" style="justify-content:center;">
                                 <button class="btn-sm btn-edit" onclick="openBatchView('${b.id}')"><i class="fas fa-eye"></i> View</button>
@@ -1381,24 +1303,6 @@
             let codes = activeBatchCodes.map(c => c.code);
             navigator.clipboard.writeText(codes.join('\n'));
             showSNTAlert("SUCCESS", `Copied ${codes.length} codes to your clipboard!`);
-        }
-
-        function actionUser(type, id, username) {
-            closeModal('player-detail-modal');
-            let msg = type === 'ban' ? `Are you sure you want to BAN ${username}?` : `Are you sure you want to UNBAN ${username}?`;
-            showSNTConfirm("MODIFY ACCOUNT", msg, () => { socket.emit('adminAction', { type: type, id: id }); });
-        }
-
-        function saveUserEdit() {
-            let cr = parseFloat(document.getElementById('edit-u-credits').value);
-            let pcr = parseFloat(document.getElementById('edit-u-playable').value);
-            if(isNaN(cr) || isNaN(pcr)) return document.getElementById('edit-user-err').innerText = 'Please enter valid numbers.';
-            
-            socket.emit('adminAction', { type: 'editUser', id: document.getElementById('edit-u-id').value, credits: cr, playableCredits: pcr, role: document.getElementById('edit-u-role').value });
-            closeModal('edit-user-modal');
-            
-            // Re-open ID card to show updated numbers if needed
-            setTimeout(() => { openPlayerModal(document.getElementById('edit-u-id').value); }, 200);
         }
 
         function generatePromo() {
