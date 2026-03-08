@@ -43,10 +43,11 @@ const adminLogSchema = new mongoose.Schema({
     adminName: String, action: String, details: String, date: { type: Date, default: Date.now }
 });
 
-const User = mongoose.model('User', userSchema);
-const Transaction = mongoose.model('Transaction', txSchema);
-const GiftCode = mongoose.model('GiftCode', codeSchema);
-const CreditLog = mongoose.model('CreditLog', creditLogSchema);
-const AdminLog = mongoose.model('AdminLog', adminLogSchema);
+// BULLETPROOF EXPORTS: Prevents OverwriteModelError
+const User = mongoose.models.User || mongoose.model('User', userSchema);
+const Transaction = mongoose.models.Transaction || mongoose.model('Transaction', txSchema);
+const GiftCode = mongoose.models.GiftCode || mongoose.model('GiftCode', codeSchema);
+const CreditLog = mongoose.models.CreditLog || mongoose.model('CreditLog', creditLogSchema);
+const AdminLog = mongoose.models.AdminLog || mongoose.model('AdminLog', adminLogSchema);
 
 module.exports = { connectDB, User, Transaction, GiftCode, CreditLog, AdminLog };

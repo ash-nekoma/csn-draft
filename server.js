@@ -62,7 +62,6 @@ io.on('connection', (socket) => {
     socket.emit('timerUpdate', globalState.sharedTables.time);
     socket.emit('maintenanceToggle', globalState.isMaintenanceMode);
 
-    // Default socket states
     socket.isBetting = false;
     socket.isSharedBetting = false;
     socket.isCashier = false;
@@ -75,7 +74,6 @@ io.on('connection', (socket) => {
     registerSharedGames(io, socket, globalState, sendPulse);
     registerAdminTools(io, socket, globalState, sendPulse);
 
-    // Disconnect cleanup
     socket.on('disconnect', async () => {
         if (socket.user) { 
             await User.findByIdAndUpdate(socket.user._id, { status: 'Offline' }); 
@@ -85,9 +83,11 @@ io.on('connection', (socket) => {
             globalState.rooms[socket.currentRoom]--; 
             io.emit('playerCount', globalState.rooms);
         }
-        // Admin data sync trigger could go here if exported from adminTools
     });
 });
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`🚀 Modular Master Backend running on port ${PORT}`));
+
+// Start Shared Games Timer
+registerSharedGames.startSharedTimer(io, globalState);
